@@ -1,15 +1,4 @@
-RewriteEngine On
-
-# Serve static files directly via Apache (bypass Passenger)
-RewriteCond %{REQUEST_URI} ^/static/
-RewriteRule ^static/(.*) - [L,NS]
-
-# Serve media files directly via Apache (bypass Passenger)
-RewriteCond %{REQUEST_URI} ^/media/
-RewriteRule ^media/(.*) - [L,NS]
-
-# Passenger config for all other requests
 PassengerAppType wsgi
-PassengerAppRoot "/home/wlsihszp/public_html"
+PassengerAppRoot "/home/wlsihszp/greenlight"
 PassengerAppEntry passenger_wsgi.py
 PassengerPython "/home/wlsihszp/virtualenv/greenlight/3.12/bin/python3"
