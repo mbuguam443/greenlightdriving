@@ -24,6 +24,13 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    from django.views.static import serve as static_serve
+    import os
+    urlpatterns += [
+        path('static/<path:path>', static_serve, {'document_root': os.path.join(settings.BASE_DIR, 'static')}),
+        path('media/<path:path>', static_serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 admin.site.site_header = 'Greenlight Driving School Admin'
 admin.site.site_title = 'Greenlight Admin'
