@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Blog - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Read the latest articles, tips, and news from Greenlight Driving School. Stay informed about driving in Kenya.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(46,125,50,0.92) 0%, rgba(38,50,56,0.88) 100%);
+        color: #fff; padding: 100px 0 50px;
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.5rem; }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+    .breadcrumb-item a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .breadcrumb-item a:hover { color: #fff; }
+    .breadcrumb-item.active { color: var(--light-green); }
+
+    .blog-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .blog-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+    .blog-card-img {
+        height: 220px; overflow: hidden;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .blog-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .blog-card-body { padding: 1.5rem; }
+    .blog-card-body h5 {
+        font-weight: 700; color: var(--primary-green);
+        font-size: 1.05rem; margin-bottom: 0.5rem;
+    }
+    .blog-card-body h5 a { color: inherit; text-decoration: none; }
+    .blog-card-body h5 a:hover { color: var(--primary-green); }
+    .blog-card-body p { color: #666; font-size: 0.9rem; }
+    .blog-meta {
+        font-size: 0.82rem; color: #999; margin-bottom: 0.8rem;
+    }
+    .btn-read-more {
+        color: var(--primary-green); font-weight: 600; text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .btn-read-more:hover { color: #1b5e20; }
+
+    .sidebar-widget {
+        background: #fff;
+        border-radius: 14px;
+        padding: 1.5rem;
+        border: 1px solid #eee;
+        margin-bottom: 1.5rem;
+    }
+    .sidebar-widget h5 {
+        font-weight: 700; color: var(--primary-green);
+        font-size: 1.05rem; margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-green);
+    }
+    .recent-post-item {
+        display: flex; gap: 0.8rem; padding: 0.6rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .recent-post-item:last-child { border-bottom: none; }
+    .recent-post-thumb {
+        width: 70px; height: 60px; border-radius: 8px;
+        overflow: hidden; min-width: 70px;
+        background: #e8f5e9;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .recent-post-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .recent-post-info h6 {
+        font-weight: 600; font-size: 0.85rem; color: var(--primary-green);
+        margin-bottom: 0.2rem; line-height: 1.3;
+    }
+    .recent-post-info h6 a { color: inherit; text-decoration: none; }
+    .recent-post-info h6 a:hover { color: var(--primary-green); }
+    .recent-post-info small { color: #999; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'website:home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Blog</li>
+            </ol>
+        </nav>
+        <h1 class="text-center">Our Blog</h1>
+        <p class="text-center mb-0" style="opacity:0.85;">Tips, news, and insights from the world of driving.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                {% if posts %}
+                <div class="row g-4">
+                    {% for post in posts %}
+                    <div class="col-md-6">
+                        <div class="blog-card">
+                            <div class="blog-card-img">
+                                {% if post.featured_image %}
+                                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">
+                                {% else %}
+                                <i class="bi bi-newspaper" style="font-size:3rem;color:var(--primary-green);opacity:0.3;"></i>
+                                {% endif %}
+                            </div>
+                            <div class="blog-card-body">
+                                <div class="blog-meta">
+                                    <i class="bi bi-calendar3 me-1"></i>{{ post.created_at|date:"M d, Y" }}
+                                    <span class="ms-2"><i class="bi bi-person me-1"></i>{{ post.author|default:"Admin" }}</span>
+                                    <span class="ms-2"><i class="bi bi-eye me-1"></i>{{ post.views_count }}</span>
+                                </div>
+                                <h5><a href="{% url 'website:blog_detail' post.slug %}">{{ post.title }}</a></h5>
+                                <p>{{ post.excerpt|default:post.short_content|truncatewords:18 }}</p>
+                                <a href="{% url 'website:blog_detail' post.slug %}" class="btn-read-more">
+                                    Read More <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if is_paginated %}
+                <nav class="mt-5 d-flex justify-content-center">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" style="color:var(--primary-green);">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}"
+                               style="{% if page_obj.number == num %}background:var(--primary-green);border-color:var(--primary-green);{% else %}color:var(--primary-green);{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" style="color:var(--primary-green);">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-journal" style="font-size:4rem;color:#ddd;"></i>
+                    <h4 class="mt-3" style="color:#999;">No Posts Yet</h4>
+                    <p class="text-muted">Blog posts will appear here soon. Stay tuned!</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sidebar-widget">
+                    <h5><i class="bi bi-clock-history me-2" style="color:var(--primary-green);"></i>Recent Posts</h5>
+                    {% for rp in recent_posts %}
+                    <div class="recent-post-item">
+                        <div class="recent-post-thumb">
+                            {% if rp.featured_image %}
+                            <img src="{{ rp.featured_image.url }}" alt="{{ rp.title }}" loading="lazy">
+                            {% else %}
+                            <i class="bi bi-newspaper" style="color:var(--primary-green);opacity:0.4;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="recent-post-info">
+                            <h6><a href="{% url 'website:blog_detail' rp.slug %}">{{ rp.title|truncatewords:8 }}</a></h6>
+                            <small><i class="bi bi-calendar3 me-1"></i>{{ rp.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted" style="font-size:0.9rem;">No recent posts.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="sidebar-widget">
+                    <h5><i class="bi bi-tag me-2" style="color:var(--primary-green);"></i>Categories</h5>
+                    <ul style="list-style:none;padding:0;margin:0;">
+                        <li style="padding:0.4rem 0;border-bottom:1px solid #f5f5f5;">
+                            <a href="{% url 'website:courses' %}" style="color:#555;text-decoration:none;font-size:0.9rem;">
+                                <i class="bi bi-chevron-right me-1" style="font-size:0.7rem;color:var(--primary-green);"></i> All Courses
+                            </a>
+                        </li>
+                        <li style="padding:0.4rem 0;border-bottom:1px solid #f5f5f5;">
+                            <a href="{% url 'website:faq' %}" style="color:#555;text-decoration:none;font-size:0.9rem;">
+                                <i class="bi bi-chevron-right me-1" style="font-size:0.7rem;color:var(--primary-green);"></i> FAQ
+                            </a>
+                        </li>
+                        <li style="padding:0.4rem 0;">
+                            <a href="{% url 'website:contact' %}" style="color:#555;text-decoration:none;font-size:0.9rem;">
+                                <i class="bi bi-chevron-right me-1" style="font-size:0.7rem;color:var(--primary-green);"></i> Contact Us
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Payments - Green Light Driving School{% endblock %}
+
+{% block page_title %}Payment Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Track and manage all student payments</p>
+    </div>
+    <a href="{% url 'payments:create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>Record Payment
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                         style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                        <i class="bi bi-cash-stack" style="color: #2E7D32;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-green);">KES {{ total_amount|default:"0"|floatformat:0 }}</h5>
+                        <small class="text-muted">Total Payments</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                         style="width: 48px; height: 48px; background-color: rgba(102,187,106,0.15);">
+                        <i class="bi bi-check-circle" style="color: #66BB6A;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-green);">{{ completed_count|default:"0" }}</h5>
+                        <small class="text-muted">Completed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                         style="width: 48px; height: 48px; background-color: rgba(251,192,45,0.15);">
+                        <i class="bi bi-clock" style="color: var(--primary-green);"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-green);">{{ pending_count|default:"0" }}</h5>
+                        <small class="text-muted">Pending</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                         style="width: 48px; height: 48px; background-color: rgba(211,47,47,0.1);">
+                        <i class="bi bi-x-circle" style="color: var(--primary-green);"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-green);">{{ failed_count|default:"0" }}</h5>
+                        <small class="text-muted">Failed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search receipt or student..."
+                           value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="method" class="form-select">
+                    <option value="">All Methods</option>
+                    <option value="cash" {% if method_filter == 'cash' %}selected{% endif %}>Cash</option>
+                    <option value="mpesa" {% if method_filter == 'mpesa' %}selected{% endif %}>M-Pesa</option>
+                    <option value="bank" {% if method_filter == 'bank' %}selected{% endif %}>Bank Transfer</option>
+                    <option value="card" {% if method_filter == 'card' %}selected{% endif %}>Card</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_from" class="form-control" value="{{ date_from|default:'' }}" placeholder="From">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_to" class="form-control" value="{{ date_to|default:'' }}" placeholder="To">
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Receipt No.</th>
+                        <th>Student</th>
+                        <th>Amount (KES)</th>
+                        <th>Method</th>
+                        <th>Reference</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td class="ps-3">
+                            <a href="{% url 'payments:detail' payment.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                                {{ payment.receipt_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="fw-semibold">{{ payment.student.get_full_name }}</span>
+                            <br><small class="text-muted">{{ payment.student.student_number }}</small>
+                        </td>
+                        <td class="fw-semibold">{{ payment.amount|floatformat:0 }}</td>
+                        <td>
+                            <span class="badge" style="background-color: {% if payment.method == 'mpesa' %}#2E7D32{% elif payment.method == 'cash' %}var(--primary-green){% elif payment.method == 'bank' %}#66BB6A{% else %}var(--primary-green){% endif %};">
+                                {{ payment.get_method_display }}
+                            </span>
+                        </td>
+                        <td><code>{{ payment.reference_number|default:"-" }}</code></td>
+                        <td>
+                            {% if payment.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                            {% elif payment.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}
+                            <span class="badge bg-danger">Failed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.date|date:"d M Y" }}</td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'payments:detail' payment.pk %}" class="btn btn-sm btn-outline-success" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'payments:receipt' payment.pk %}" class="btn btn-sm btn-outline-primary" title="Receipt" target="_blank">
+                                <i class="bi bi-receipt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-cash" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No payments found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if payments.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ payments.start_index }} to {{ payments.end_index }} of {{ payments.paginator.count }} payments
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if payments.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ payments.previous_page_number }}&search={{ search_query|default:'' }}&method={{ method_filter|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in payments.paginator.page_range %}
+                <li class="page-item {% if payments.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&method={{ method_filter|default:'' }}&status={{ status_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if payments.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ payments.next_page_number }}&search={{ search_query|default:'' }}&method={{ method_filter|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Vehicle Utilization - Green Light School{% endblock %}
+
+{% block page_title %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
+        <li class="breadcrumb-item active">Vehicle Utilization</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-0">Vehicle Utilization</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: #2E7D32;">{{ total_vehicles|default:"0" }}</div>
+                <div class="small text-muted">Total Vehicles</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold text-white">{{ available_vehicles|default:"0" }}</div>
+                <div class="small text-white">Available</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)10;">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: var(--primary-green);">{{ unavailable_vehicles|default:"0" }}</div>
+                <div class="small text-muted">In Use / Maintenance</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)20;">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: var(--primary-green);">{{ total_lessons|default:"0" }}</div>
+                <div class="small text-muted">Total Lessons</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-car-front me-2" style="color: #2E7D32;"></i>
+            Vehicle Utilization Details
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Category</th>
+                        <th>Instructor</th>
+                        <th>Total Lessons</th>
+                        <th>This Week</th>
+                        <th>Availability</th>
+                        <th>Utilization</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehicle in vehicles %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-car-front text-success"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ vehicle.make }} {{ vehicle.model }}</div>
+                                    <small class="text-muted">{{ vehicle.reg_number }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ vehicle.get_category_display }}</span>
+                        </td>
+                        <td>
+                            {% if vehicle.instructor %}
+                                {{ vehicle.instructor.user.get_full_name }}
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="fw-bold" style="color: #2E7D32;">{{ vehicle.total_lessons|default:"0" }}</span>
+                        </td>
+                        <td>{{ vehicle.weekly_lessons|default:"0" }}</td>
+                        <td>
+                            {% if vehicle.is_available %}
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-check-circle me-1"></i> Available
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">
+                                    <i class="bi bi-x-circle me-1"></i> In Use
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px; width: 80px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ vehicle.utilization_rate|default:0 }}%;"></div>
+                                </div>
+                                <span class="small">{{ vehicle.utilization_rate|default:0 }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-car-front display-4 d-block mb-3"></i>
+                                <p class="mb-0">No vehicle data available</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

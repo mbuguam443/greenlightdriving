@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Receipt {{ payment.receipt_number }} - Green Light Driving School{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-print-none mb-3">
+        <button onclick="window.print()" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+            <i class="bi bi-printer me-2"></i>Print Receipt
+        </button>
+        <a href="{% url 'payments:detail' payment.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Payment
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm" id="receipt">
+        <div class="card-body p-5">
+            <div class="row mb-4">
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        {% if school_logo %}
+                        <img src="{{ school_logo }}" alt="Logo" style="max-height: 50px;" class="me-3">
+                        {% else %}
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                             style="width: 50px; height: 50px; background-color: #2E7D32;">
+                            <i class="bi bi-car-front-fill text-white"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: var(--primary-green);">Green Light</h5>
+                            <small class="text-muted">Driving School</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 text-end">
+                    <h4 class="fw-bold" style="color: #2E7D32;">PAYMENT RECEIPT</h4>
+                    <small class="text-muted">Receipt No: {{ payment.receipt_number }}</small>
+                </div>
+            </div>
+
+            <hr style="border-color: #2E7D32; border-width: 2px;">
+
+            <div class="row mb-4">
+                <div class="col-6">
+                    <small class="text-muted d-block">Date:</small>
+                    <span class="fw-semibold">{{ payment.date|date:"d M Y H:i" }}</span>
+                </div>
+                <div class="col-6 text-end">
+                    <span class="badge fs-6" style="background-color: {% if payment.status == 'completed' %}#2E7D32{% elif payment.status == 'pending' %}var(--primary-green){% else %}var(--primary-green){% endif %};">
+                        {{ payment.get_status_display|upper }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="p-3 rounded mb-4" style="background-color: #f8f9fa;">
+                <h6 class="fw-bold mb-2" style="color: var(--primary-green);">Student Information</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Name</small>
+                        <span class="fw-semibold">{{ payment.student.get_full_name }}</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Student Number</small>
+                        <span class="fw-semibold">{{ payment.student.student_number }}</span>
+                    </div>
+                    <div class="col-6 mt-2">
+                        <small class="text-muted d-block">Course</small>
+                        <span class="fw-semibold">{{ payment.student.course.name }}</span>
+                    </div>
+                    <div class="col-6 mt-2">
+                        <small class="text-muted d-block">Phone</small>
+                        <span class="fw-semibold">{{ payment.student.phone_number }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table mb-4">
+                <thead>
+                    <tr style="background-color: #2E7D32; color: white;">
+                        <th>Description</th>
+                        <th class="text-end">Amount (KES)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="fw-semibold">{{ payment.student.course.name }}</span>
+                            <br><small class="text-muted">Payment via {{ payment.get_method_display }}</small>
+                            {% if payment.reference_number %}
+                            <br><small class="text-muted">Ref: {{ payment.reference_number }}</small>
+                            {% endif %}
+                        </td>
+                        <td class="text-end fw-bold" style="font-size: 1.1rem;">{{ payment.amount|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: rgba(46,125,50,0.05);">
+                        <td class="fw-bold" style="font-size: 1.1rem;">TOTAL PAID</td>
+                        <td class="text-end fw-bold" style="font-size: 1.2rem; color: #2E7D32;">
+                            KES {{ payment.amount|floatformat:2 }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            {% if payment.description %}
+            <div class="mb-4">
+                <small class="text-muted d-block">Notes:</small>
+                <span>{{ payment.description }}</span>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <div class="text-center">
+                <small class="text-muted">
+                    This is a computer-generated receipt. For any queries, contact us at
+                    {{ school_phone|default:"+254 700 000 000" }} or {{ school_email|default:"info@greenlight.co.ke" }}
+                </small>
+                <br>
+                <small class="text-muted">Thank you for choosing Green Light Driving School!</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+    @media print {
+        .d-print-none { display: none !important; }
+        body { background: white !important; }
+        .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    }
+</style>
+{% endblock %}

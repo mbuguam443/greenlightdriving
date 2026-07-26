@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Learn about Greenlight Defensive Driving School - our mission, vision, and commitment to producing safe, confident drivers across Kenya.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(46,125,50,0.92) 0%, rgba(38,50,56,0.88) 100%);
+        color: #fff;
+        padding: 100px 0 50px;
+    }
+    .page-header h1 {
+        font-weight: 800;
+        font-size: 2.5rem;
+    }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+    .breadcrumb-item a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .breadcrumb-item a:hover { color: #fff; }
+    .breadcrumb-item.active { color: var(--light-green); }
+    .breadcrumb { margin-bottom: 0; }
+
+    .mission-card, .vision-card {
+        border-radius: 16px;
+        padding: 2.5rem;
+        height: 100%;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .mission-card { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); }
+    .vision-card { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); }
+    .mission-card:hover, .vision-card:hover { transform: translateY(-4px); }
+    .mission-card .icon-box, .vision-card .icon-box {
+        width: 65px; height: 65px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; margin-bottom: 1.2rem;
+    }
+    .mission-card .icon-box { background: var(--primary-green); color: #fff; }
+    .vision-card .icon-box { background: #1565c0; color: #fff; }
+
+    .why-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 2rem;
+        border: 1px solid #e8f5e9;
+        transition: all 0.3s ease;
+        height: 100%;
+        text-align: center;
+    }
+    .why-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(46,125,50,0.1);
+        border-color: var(--light-green);
+    }
+    .why-card .why-icon {
+        width: 60px; height: 60px; border-radius: 50%;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; color: var(--primary-green); margin-bottom: 1rem;
+    }
+
+    .team-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    .team-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .team-card img {
+        width: 100%; height: 280px; object-fit: cover;
+    }
+    .team-card .team-info { padding: 1.4rem; }
+    .team-card h5 { font-weight: 700; color: var(--primary-green); margin-bottom: 0.3rem; }
+    .team-card p { color: var(--primary-green); font-size: 0.88rem; font-weight: 500; }
+
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        color: #fff; padding: 80px 0;
+    }
+    .btn-hero-primary {
+        background: var(--primary-green); color: #fff; font-weight: 600;
+        padding: 0.85rem 2rem; border-radius: 50px; border: none; font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-hero-primary:hover { background: var(--primary-green); color: #fff; transform: translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'website:home' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">About Us</li>
+            </ol>
+        </nav>
+        <h1 class="text-center">About Us</h1>
+        <p class="text-center mb-0" style="opacity:0.85;">Learn more about our journey and commitment to road safety.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                {% if content %}
+                <h2 class="section-title" style="text-align:left;">{{ content.title }}</h2>
+                <div class="mt-3" style="line-height:1.8;color:#555;">
+                    {{ content.content|linebreaksbr }}
+                </div>
+                {% else %}
+                <h2 class="section-title" style="text-align:left;">About Greenlight Driving School</h2>
+                <p style="line-height:1.8;color:#555;">
+                    Greenlight Defensive Driving School is a leading NTSA-certified institution dedicated to producing safe, confident, and responsible drivers. Established with a vision to reduce road accidents through quality driver education, we have trained thousands of students across Kenya.
+                </p>
+                <p style="line-height:1.8;color:#555;">
+                    Our team of certified instructors brings decades of combined experience, utilizing modern training vehicles and proven teaching methodologies. We believe that every driver deserves the best possible education to navigate Kenya's roads safely.
+                </p>
+                <p style="line-height:1.8;color:#555;">
+                    With multiple branches across the country, we make quality driving education accessible to everyone. From beginner courses to advanced defensive driving, Greenlight is your trusted partner on the road to becoming a skilled, responsible driver.
+                </p>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="mission-card">
+                            <div class="icon-box"><i class="bi bi-bullseye"></i></div>
+                            <h4 style="font-weight:700;color:var(--primary-green);">Our Mission</h4>
+                            <p class="mb-0" style="line-height:1.7;color:#555;">To provide world-class driving education that empowers individuals with the skills, knowledge, and confidence to be safe and responsible drivers on Kenyan roads.</p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="vision-card">
+                            <div class="icon-box"><i class="bi bi-eye"></i></div>
+                            <h4 style="font-weight:700;color:var(--primary-green);">Our Vision</h4>
+                            <p class="mb-0" style="line-height:1.7;color:#555;">To be Kenya's most trusted and preferred driving school, recognized for excellence in driver training and committed to creating a generation of zero-accident drivers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-padding" style="background:#f1f8e9;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Why Choose <span style="color:var(--primary-green);">Greenlight</span></h2>
+            <p class="text-muted mx-auto" style="max-width:600px;">We stand out for our commitment to quality, safety, and student satisfaction.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="why-card">
+                    <div class="why-icon"><i class="bi bi-award"></i></div>
+                    <h5 style="font-weight:700;color:var(--primary-green);">NTSA Certified</h5>
+                    <p style="color:#666;font-size:0.9rem;" class="mb-0">Fully licensed and approved by the National Transport and Safety Authority.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="why-card">
+                    <div class="why-icon"><i class="bi bi-people"></i></div>
+                    <h5 style="font-weight:700;color:var(--primary-green);">Expert Instructors</h5>
+                    <p style="color:#666;font-size:0.9rem;" class="mb-0">Professional, patient, and certified instructors with years of experience.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="why-card">
+                    <div class="why-icon"><i class="bi bi-car-front"></i></div>
+                    <h5 style="font-weight:700;color:var(--primary-green);">Modern Fleet</h5>
+                    <p style="color:#666;font-size:0.9rem;" class="mb-0">Well-maintained, dual-control vehicles equipped with the latest safety features.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="why-card">
+                    <div class="why-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h5 style="font-weight:700;color:var(--primary-green);">High Pass Rate</h5>
+                    <p style="color:#666;font-size:0.9rem;" class="mb-0">Over 98% first-attempt pass rate thanks to our proven training methods.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if instructors %}
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Meet Our <span style="color:var(--primary-green);">Instructors</span></h2>
+            <p class="text-muted">Our team of certified professionals dedicated to your success.</p>
+        </div>
+        <div class="row g-4">
+            {% for instructor in instructors %}
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card">
+                    {% if instructor.user.profile_photo %}
+                    <img src="{{ instructor.user.profile_photo.url }}" alt="{{ instructor.user.full_name }}" loading="lazy">
+                    {% else %}
+                    <div style="height:280px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);display:flex;align-items:center;justify-content:center;">
+                        <i class="bi bi-person-circle" style="font-size:5rem;color:var(--primary-green);opacity:0.3;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="team-info">
+                        <h5>{{ instructor.user.full_name }}</h5>
+                        <p>{{ instructor.specialization|default:"Driving Instructor" }}</p>
+                        <small style="color:#999;">{{ instructor.experience_years }} Years Experience</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="cta-section">
+    <div class="container text-center">
+        <h2 style="font-weight:800;font-size:2.2rem;margin-bottom:1rem;">Ready to Begin Your Driving Journey?</h2>
+        <p style="font-size:1.1rem;opacity:0.85;max-width:500px;margin:0 auto 2rem;">Enroll with Greenlight today and take the first step toward becoming a confident, safe driver.</p>
+        <a href="{% url 'admissions:online_admission' %}" class="btn btn-hero-primary btn-lg">
+            <i class="bi bi-arrow-right-circle me-2"></i>Apply Now
+        </a>
+    </div>
+</section>
+{% endblock %}

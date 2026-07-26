@@ -1,0 +1,104 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Manage Events - Green Light Driving School{% endblock %}
+
+{% block nav_portal_events %}active{% endblock %}
+
+{% block page_title %}Event Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage events, NTSA dates, and school activities</p>
+    </div>
+    <a href="{% url 'student_portal:manage_event_add' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>New Event
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search events..."
+                           value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for value, label in categories %}
+                    <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Event</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td class="ps-3">
+                            <div>
+                                <span class="fw-semibold">{{ event.title }}</span>
+                                {% if event.is_important %}
+                                <i class="bi bi-exclamation-triangle text-danger ms-1" title="Important"></i>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td><span class="badge {{ event.category_badge_class }}">{{ event.get_category_display }}</span></td>
+                        <td>{{ event.event_date|date:"d M Y" }}</td>
+                        <td>{{ event.event_time|time:"g:i A"|default:"-" }}</td>
+                        <td>{{ event.location|default:"-" }}</td>
+                        <td>
+                            {% if event.is_active %}
+                            <span class="badge" style="background-color: #2E7D32;">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'student_portal:manage_event_edit' event.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'student_portal:manage_event_delete' event.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No events found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

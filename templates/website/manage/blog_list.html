@@ -1,0 +1,119 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Blog Posts - Website Management - Green Light Driving School{% endblock %}
+
+{% block page_title %}Blog Management{% endblock %}
+{% block breadcrumb_active %}Blog{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage blog posts and articles</p>
+    </div>
+    <a href="{% url 'website:manage_blog_add' %}" class="btn fw-semibold text-white" style="background-color: var(--primary-green);">
+        <i class="bi bi-plus-lg me-1"></i>Add Post
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search posts..." value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="published" {% if status_filter == 'published' %}selected{% endif %}>Published</option>
+                    <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: var(--primary-green); color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Title</th>
+                        <th>Author</th>
+                        <th>Published</th>
+                        <th>Views</th>
+                        <th>Date</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td class="ps-3 fw-semibold" style="color: var(--primary-green);">{{ post.title|truncatewords:10 }}</td>
+                        <td>{{ post.author.get_full_name|default:post.author.username|default:"-" }}</td>
+                        <td>
+                            {% if post.is_published %}
+                            <span class="badge" style="background-color: var(--primary-green);">Yes</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ post.views|default:"0" }}</td>
+                        <td><small class="text-muted">{{ post.created_at|date:"M d, Y" }}</small></td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'website:manage_blog_edit' post.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'website:manage_blog_delete' post.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-journal-richtext" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No blog posts found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if posts.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ posts.start_index }} to {{ posts.end_index }} of {{ posts.paginator.count }} posts
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if posts.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.previous_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in posts.paginator.page_range %}
+                <li class="page-item {% if posts.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if posts.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.next_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

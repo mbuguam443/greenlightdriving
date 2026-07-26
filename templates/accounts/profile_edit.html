@@ -1,0 +1,112 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Green Light Driving School{% endblock %}
+
+{% block page_title %}Edit Profile{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-person-gear me-2" style="color: #2E7D32;"></i>Personal Information
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_first_name" class="form-label fw-semibold">First Name</label>
+                            <input type="text" name="first_name" id="id_first_name" class="form-control"
+                                   value="{{ form.first_name.value|default:'' }}" required>
+                            {% if form.first_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_last_name" class="form-label fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" id="id_last_name" class="form-control"
+                                   value="{{ form.last_name.value|default:'' }}" required>
+                            {% if form.last_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_email" class="form-label fw-semibold">Email Address</label>
+                            <input type="email" name="email" id="id_email" class="form-control"
+                                   value="{{ form.email.value|default:'' }}" required>
+                            {% if form.email.errors %}
+                            <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_phone_number" class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" name="phone_number" id="id_phone_number" class="form-control"
+                                   value="{{ form.phone_number.value|default:'' }}">
+                            {% if form.phone_number.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_profile_photo" class="form-label fw-semibold">Profile Photo</label>
+                            <input type="file" name="profile_photo" id="id_profile_photo" class="form-control"
+                                   accept="image/*">
+                            {% if form.profile_photo.errors %}
+                            <div class="text-danger small mt-1">{{ form.profile_photo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_branch" class="form-label fw-semibold">Branch</label>
+                            <select name="branch" id="id_branch" class="form-select">
+                                <option value="">Select Branch</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if form.branch.value == branch.id %}selected{% endif %}>
+                                    {{ branch.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-semibold mb-3" style="color: var(--primary-green);">
+                        <i class="bi bi-shield-lock me-2" style="color: #2E7D32;"></i>Change Password (Optional)
+                    </h6>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_new_password1" class="form-label fw-semibold">New Password</label>
+                            <input type="password" name="new_password1" id="id_new_password1" class="form-control">
+                            <div class="form-text">Leave blank to keep current password.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_new_password2" class="form-label fw-semibold">Confirm New Password</label>
+                            <input type="password" name="new_password2" id="id_new_password2" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                            <i class="bi bi-check-lg me-1"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

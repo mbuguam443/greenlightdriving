@@ -1,0 +1,118 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Testimonials - Website Management - Green Light Driving School{% endblock %}
+
+{% block page_title %}Testimonial Management{% endblock %}
+{% block breadcrumb_active %}Testimonials{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage student testimonials</p>
+    </div>
+    <a href="{% url 'website:manage_testimonial_add' %}" class="btn fw-semibold text-white" style="background-color: var(--primary-green);">
+        <i class="bi bi-plus-lg me-1"></i>Add Testimonial
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search testimonials..." value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: var(--primary-green); color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Name</th>
+                        <th>Rating</th>
+                        <th>Course</th>
+                        <th>Active</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for testimonial in testimonials %}
+                    <tr>
+                        <td class="ps-3 fw-semibold">{{ testimonial.name }}</td>
+                        <td>
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= testimonial.rating %}
+                                <i class="bi bi-star-fill" style="color: var(--primary-green); font-size: 0.85rem;"></i>
+                                {% else %}
+                                <i class="bi bi-star" style="color: #ccc; font-size: 0.85rem;"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ testimonial.course|default:"-" }}</td>
+                        <td>
+                            {% if testimonial.is_active %}
+                            <span class="badge" style="background-color: var(--primary-green);">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'website:manage_testimonial_edit' testimonial.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'website:manage_testimonial_delete' testimonial.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="bi bi-chat-quote" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No testimonials found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if testimonials.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ testimonials.start_index }} to {{ testimonials.end_index }} of {{ testimonials.paginator.count }} testimonials
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if testimonials.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ testimonials.previous_page_number }}&search={{ search_query|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in testimonials.paginator.page_range %}
+                <li class="page-item {% if testimonials.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if testimonials.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ testimonials.next_page_number }}&search={{ search_query|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

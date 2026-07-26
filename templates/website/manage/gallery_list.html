@@ -1,0 +1,127 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Gallery - Website Management - Green Light Driving School{% endblock %}
+
+{% block page_title %}Gallery Management{% endblock %}
+{% block breadcrumb_active %}Gallery{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage gallery images</p>
+    </div>
+    <a href="{% url 'website:manage_gallery_add' %}" class="btn fw-semibold text-white" style="background-color: var(--primary-green);">
+        <i class="bi bi-plus-lg me-1"></i>Add Image
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search gallery..." value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in gallery_categories %}
+                    <option value="{{ category.id }}" {% if category_filter == category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: var(--primary-green); color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Title</th>
+                        <th>Category</th>
+                        <th>Active</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in gallery_items %}
+                    <tr>
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center">
+                                {% if item.image %}
+                                <img src="{{ item.image.url }}" class="rounded me-2" width="40" height="40" style="object-fit: cover;" alt="{{ item.title }}">
+                                {% else %}
+                                <div class="rounded d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background-color: rgba(46,125,50,0.1);">
+                                    <i class="bi bi-image" style="color: var(--primary-green);"></i>
+                                </div>
+                                {% endif %}
+                                <span class="fw-semibold">{{ item.title }}</span>
+                            </div>
+                        </td>
+                        <td>{{ item.category|default:"-" }}</td>
+                        <td>
+                            {% if item.is_active %}
+                            <span class="badge" style="background-color: var(--primary-green);">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'website:manage_gallery_edit' item.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'website:manage_gallery_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="bi bi-images" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No gallery items found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if gallery_items.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ gallery_items.start_index }} to {{ gallery_items.end_index }} of {{ gallery_items.paginator.count }} items
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if gallery_items.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ gallery_items.previous_page_number }}&search={{ search_query|default:'' }}&category={{ category_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in gallery_items.paginator.page_range %}
+                <li class="page-item {% if gallery_items.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&category={{ category_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if gallery_items.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ gallery_items.next_page_number }}&search={{ search_query|default:'' }}&category={{ category_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

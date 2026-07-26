@@ -1,0 +1,102 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Categories - Website Management - Green Light Driving School{% endblock %}
+
+{% block page_title %}Category Management{% endblock %}
+{% block breadcrumb_active %}Categories{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage course categories</p>
+    </div>
+    <a href="{% url 'website:manage_category_add' %}" class="btn fw-semibold text-white" style="background-color: var(--primary-green);">
+        <i class="bi bi-plus-lg me-1"></i>Add Category
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search categories..." value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: var(--primary-green); color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Name</th>
+                        <th>Slug</th>
+                        <th>Order</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="ps-3 fw-semibold" style="color: var(--primary-green);">{{ category.name }}</td>
+                        <td><code>{{ category.slug }}</code></td>
+                        <td>{{ category.order|default:"0" }}</td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'website:manage_category_edit' category.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'website:manage_category_delete' category.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="bi bi-tag" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No categories found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if categories.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ categories.start_index }} to {{ categories.end_index }} of {{ categories.paginator.count }} categories
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if categories.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ categories.previous_page_number }}&search={{ search_query|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in categories.paginator.page_range %}
+                <li class="page-item {% if categories.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if categories.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ categories.next_page_number }}&search={{ search_query|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

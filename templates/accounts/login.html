@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Green Light Driving School{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%); padding-top: 70px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <img src="{% static 'images/logo.png' %}" alt="Green Light Driving School" class="mb-3" style="max-height: 80px;">
+                            <h3 class="fw-bold" style="color: var(--primary-green);">Green Light Driving School</h3>
+                            <p class="text-muted mb-0">Sign in to your account</p>
+                        </div>
+
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Invalid email or password. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endif %}
+
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label fw-semibold">
+                                    <i class="bi bi-envelope me-1"></i>Email Address
+                                </label>
+                                <input type="email" name="email" id="id_email" class="form-control form-control-lg"
+                                       placeholder="Enter your email" required autofocus
+                                       value="{{ form.email.value|default:'' }}">
+                                {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_password" class="form-label fw-semibold">
+                                    <i class="bi bi-lock me-1"></i>Password
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="id_password"
+                                           class="form-control form-control-lg" placeholder="Enter your password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-lg fw-semibold text-white" style="background-color: #2E7D32;">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <a href="{% url 'admissions:online_admission' %}" class="text-decoration-none" style="color: #2E7D32;">
+                                <i class="bi bi-person-plus me-1"></i>New Student? Apply Online
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-white-50">&copy; {% now "Y" %} Green Light Driving School. All rights reserved.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const password = document.getElementById('id_password');
+    const icon = this.querySelector('i');
+    if (password.type === 'password') {
+        password.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        password.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+});
+</script>
+{% endblock %}

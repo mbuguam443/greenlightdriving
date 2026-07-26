@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School.{{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Course",
+    "name": "{{ course.name }}",
+    "description": "{{ course.description|truncatewords:50|escapejs }}",
+    "provider": {
+        "@type": "DrivingSchool",
+        "name": "Greenlight Defensive Driving School"
+    },
+    "offers": {
+        "@type": "Offer",
+        "price": "{{ course.price|floatformat:0 }}",
+        "priceCurrency": "KES",
+        "availability": "https://schema.org/InStock"
+    },
+    "duration": "{{ course.duration }}",
+    "category": "{{ course.category.name }}"
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-hero {
+        position: relative;
+        height: 400px;
+        overflow: hidden;
+    }
+    .course-hero img {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .course-hero-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(38,50,56,0.85) 0%, transparent 60%);
+    }
+    .course-hero-content {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 2rem 0;
+        color: #fff;
+    }
+    .course-badge {
+        display: inline-block;
+        background: var(--primary-green);
+        color: #fff;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+    .course-hero-content h1 {
+        font-weight: 800; font-size: 2.2rem;
+    }
+
+    .info-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 2rem;
+        border: 1px solid #e8f5e9;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .info-item {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-item .info-icon {
+        width: 45px; height: 45px; border-radius: 50%;
+        background: #e8f5e9; display: flex; align-items: center;
+        justify-content: center; color: var(--primary-green); font-size: 1.1rem;
+        min-width: 45px;
+    }
+    .info-item .info-label { font-size: 0.82rem; color: #999; }
+    .info-item .info-value { font-weight: 700; color: var(--primary-green); }
+
+    .feature-check {
+        display: flex; align-items: flex-start; gap: 0.75rem;
+        padding: 0.6rem 0;
+    }
+    .feature-check i {
+        color: var(--primary-green); font-size: 1.1rem; margin-top: 2px;
+    }
+    .feature-check span { color: #555; }
+
+    .btn-apply {
+        background: var(--primary-green); color: #fff; font-weight: 600;
+        padding: 0.85rem 2.5rem; border-radius: 50px; border: none;
+        font-size: 1rem; transition: all 0.3s ease; width: 100%;
+    }
+    .btn-apply:hover { background: var(--primary-green); color: #fff; transform: translateY(-2px); }
+
+    .related-card {
+        background: #fff; border-radius: 12px; overflow: hidden;
+        border: 1px solid #eee; transition: all 0.3s ease; height: 100%;
+    }
+    .related-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+    .related-card img { width: 100%; height: 160px; object-fit: cover; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-hero">
+    {% if course.image %}
+    <img src="{{ course.image.url }}" alt="{{ course.name }}">
+    {% else %}
+    <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--primary-green),#1b5e20);"></div>
+    {% endif %}
+    <div class="course-hero-overlay"></div>
+    <div class="course-hero-content">
+        <div class="container">
+            <span class="course-badge">{{ course.category.name }}</span>
+            <h1>{{ course.name }}</h1>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <h2 class="section-title" style="text-align:left;">About This Course</h2>
+                <div style="line-height:1.8;color:#555;">
+                    {{ course.description|linebreaksbr }}
+                </div>
+
+                {% if course.feature_list %}
+                <h4 class="mt-5 mb-3" style="font-weight:700;color:var(--primary-green);">What You'll Learn</h4>
+                <div class="row g-2">
+                    {% for feature in course.feature_list %}
+                    <div class="col-md-6">
+                        <div class="feature-check">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>{{ feature }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="info-card sticky-lg-top" style="top:100px;">
+                    <div class="info-item">
+                        <div class="info-icon"><i class="bi bi-tag"></i></div>
+                        <div>
+                            <div class="info-label">Price</div>
+                            <div class="info-value" style="color:var(--primary-green);font-size:1.4rem;">KSh {{ course.price|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="bi bi-clock"></i></div>
+                        <div>
+                            <div class="info-label">Duration</div>
+                            <div class="info-value">{{ course.duration }}</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="bi bi-book"></i></div>
+                        <div>
+                            <div class="info-label">Category</div>
+                            <div class="info-value">{{ course.category.name }}</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="bi bi-calendar-check"></i></div>
+                        <div>
+                            <div class="info-label">Started</div>
+                            <div class="info-value">{{ course.created_at|date:"M Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'admissions:online_admission' %}" class="btn btn-apply">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Apply Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if related_courses %}
+<section class="section-padding" style="background:#f1f8e9;">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Related <span style="color:var(--primary-green);">Courses</span></h2>
+        </div>
+        <div class="row g-4">
+            {% for rc in related_courses %}
+            <div class="col-lg-4 col-md-6">
+                <div class="related-card">
+                    {% if rc.image %}
+                    <img src="{{ rc.image.url }}" alt="{{ rc.name }}" loading="lazy">
+                    {% else %}
+                    <div style="height:160px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);display:flex;align-items:center;justify-content:center;">
+                        <i class="bi bi-car-front" style="font-size:2.5rem;color:var(--primary-green);opacity:0.3;"></i>
+                    </div>
+                    {% endif %}
+                    <div style="padding:1.2rem;">
+                        <span class="course-badge" style="font-size:0.72rem;">{{ rc.category.name }}</span>
+                        <h6 style="font-weight:700;color:var(--primary-green);margin-top:0.5rem;">{{ rc.name }}</h6>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span style="font-weight:800;color:var(--primary-green);">KSh {{ rc.price|floatformat:0 }}</span>
+                            <a href="{% url 'website:course_detail' rc.slug %}" style="color:var(--primary-green);font-weight:600;font-size:0.85rem;text-decoration:none;">
+                                Details <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section style="background:linear-gradient(135deg,var(--primary-green),var(--primary-green-dark));color:#fff;padding:60px 0;">
+    <div class="container text-center">
+        <h2 style="font-weight:800;margin-bottom:1rem;">Ready to Start {{ course.name }}?</h2>
+        <p style="opacity:0.85;max-width:500px;margin:0 auto 2rem;">Enroll today and take the first step toward your driving license.</p>
+        <a href="{% url 'admissions:online_admission' %}" class="btn btn-apply btn-lg" style="width:auto;padding:0.85rem 3rem;">
+            <i class="bi bi-arrow-right-circle me-2"></i>Apply Now
+        </a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Delete NTSA Record - Green Light School{% endblock %}
+
+{% block page_title %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'ntsa:list' %}">NTSA Records</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'ntsa:detail' record.pk %}">{{ record.student.user.get_full_name }}</a></li>
+        <li class="breadcrumb-item active">Delete</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-0">Delete NTSA Record</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm border-top border-3 border-danger">
+            <div class="card-body text-center p-5">
+                <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                    <i class="bi bi-exclamation-triangle text-danger display-4"></i>
+                </div>
+                <h4 class="mb-3">Are you sure?</h4>
+                <p class="text-muted mb-4">
+                    You are about to delete the NTSA record for <strong>{{ record.student.user.get_full_name }}</strong> 
+                    ({{ record.student.admission_number }}). This action cannot be undone.
+                </p>
+
+                <div class="alert alert-warning d-flex align-items-center mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <small>This will remove all NTSA certification tracking data for this student.</small>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'ntsa:detail' record.pk %}" class="btn btn-light px-4">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash me-1"></i> Delete Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

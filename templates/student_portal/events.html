@@ -1,0 +1,170 @@
+{% extends "student_portal_base.html" %}
+{% load static %}
+
+{% block title %}Events & Reports - Green Light School{% endblock %}
+
+{% block nav_portal_events %}active{% endblock %}
+
+{% block page_title %}Events & Reports{% endblock %}
+{% block breadcrumb_active %}Events{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+    <h4 class="mb-1">Events & Reports</h4>
+    <p class="text-muted mb-0">View upcoming events, NTSA test dates, and download your personal reports</p>
+</div>
+
+<!-- Downloadable Reports Section -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 fw-semibold" style="color: #2E7D32;">
+            <i class="bi bi-download me-2"></i>Download Reports
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card border h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-graph-up fs-3" style="color: #2E7D32;"></i>
+                        </div>
+                        <h6 class="fw-semibold">Progress Report</h6>
+                        <p class="text-muted small mb-3">Lessons completed, hours trained, and overall progress</p>
+                        <a href="{% url 'student_portal:report_progress' %}" class="btn btn-sm text-white w-100" style="background-color: #2E7D32; border-radius: 8px;">
+                            <i class="bi bi-download me-1"></i>Download PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-cash-stack fs-3" style="color: #2E7D32;"></i>
+                        </div>
+                        <h6 class="fw-semibold">Payment Report</h6>
+                        <p class="text-muted small mb-3">Payment history, amounts paid, and balance summary</p>
+                        <a href="{% url 'student_portal:report_payment' %}" class="btn btn-sm text-white w-100" style="background-color: #2E7D32; border-radius: 8px;">
+                            <i class="bi bi-download me-1"></i>Download PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-person-badge fs-3" style="color: #2E7D32;"></i>
+                        </div>
+                        <h6 class="fw-semibold">Enrollment Report</h6>
+                        <p class="text-muted small mb-3">Full enrollment details, course info, and NTSA status</p>
+                        <a href="{% url 'student_portal:report_enrollment' %}" class="btn btn-sm text-white w-100" style="background-color: #2E7D32; border-radius: 8px;">
+                            <i class="bi bi-download me-1"></i>Download PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Filter -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{% url 'student_portal:events' %}" class="btn btn-sm {% if not current_category %}text-white{% else %}btn-outline-success{% endif %}" style="{% if not current_category %}background-color: #2E7D32;{% endif %} border-radius: 20px;">
+        <i class="bi bi-calendar3 me-1"></i>All Events
+    </a>
+    {% for value, label in categories %}
+    <a href="?category={{ value }}" class="btn btn-sm {% if current_category == value %}text-white{% else %}btn-outline-success{% endif %}" style="{% if current_category == value %}background-color: #2E7D32;{% endif %} border-radius: 20px;">
+        {{ label }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- Upcoming Events -->
+<h5 class="fw-semibold mb-3" style="color: #2E7D32;">
+    <i class="bi bi-calendar-event me-2"></i>Upcoming Events
+</h5>
+<div class="row g-3 mb-4">
+    {% for event in upcoming_events %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100 {% if event.is_important %}border-start border-3 border-danger{% endif %}">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <span class="badge {{ event.category_badge_class }}">{{ event.get_category_display }}</span>
+                    {% if event.is_important %}
+                    <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i>Important</span>
+                    {% endif %}
+                </div>
+                <h6 class="fw-semibold mb-2">{{ event.title }}</h6>
+                <div class="d-flex align-items-center text-muted small mb-1">
+                    <i class="bi bi-calendar3 me-2" style="color: #2E7D32;"></i>
+                    {{ event.event_date|date:"l, d M Y" }}
+                    {% if event.event_time %}
+                    at {{ event.event_time|time:"g:i A" }}
+                    {% endif %}
+                </div>
+                {% if event.location %}
+                <div class="d-flex align-items-center text-muted small mb-1">
+                    <i class="bi bi-geo-alt me-2" style="color: #2E7D32;"></i>{{ event.location }}
+                </div>
+                {% endif %}
+                {% if event.branch %}
+                <div class="d-flex align-items-center text-muted small mb-2">
+                    <i class="bi bi-building me-2" style="color: #2E7D32;"></i>{{ event.branch.name }}
+                </div>
+                {% endif %}
+                {% if event.description %}
+                <p class="text-muted small mb-0">{{ event.description|truncatewords:20 }}</p>
+                {% endif %}
+                {% if event.days_until <= 7 and event.days_until > 0 %}
+                <div class="mt-2">
+                    <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                        <i class="bi bi-clock me-1"></i>In {{ event.days_until }} day{{ event.days_until|pluralize }}
+                    </span>
+                </div>
+                {% elif event.days_until == 0 %}
+                <div class="mt-2">
+                    <span class="badge bg-danger">Today!</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-calendar-x display-4 d-block mb-2" style="color: #ddd;"></i>
+                <p class="text-muted mb-0">No upcoming events at this time.</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Past Events -->
+{% if past_events %}
+<h5 class="fw-semibold mb-3" style="color: #666;">
+    <i class="bi bi-calendar-check me-2"></i>Past Events
+</h5>
+<div class="row g-3">
+    {% for event in past_events %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100 opacity-75">
+            <div class="card-body">
+                <span class="badge {{ event.category_badge_class }} mb-2">{{ event.get_category_display }}</span>
+                <h6 class="fw-semibold mb-1">{{ event.title }}</h6>
+                <div class="d-flex align-items-center text-muted small">
+                    <i class="bi bi-calendar3 me-2"></i>{{ event.event_date|date:"d M Y" }}
+                </div>
+                {% if event.description %}
+                <p class="text-muted small mb-0 mt-1">{{ event.description|truncatewords:15 }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

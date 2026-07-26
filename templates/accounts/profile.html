@@ -1,0 +1,138 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Green Light Driving School{% endblock %}
+
+{% block page_title %}My Profile{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" alt="{{ user.get_full_name }}"
+                     class="rounded-circle mb-3 shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                {% else %}
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow"
+                     style="width: 120px; height: 120px; background-color: #66BB6A;">
+                    <span class="text-white fw-bold" style="font-size: 2.5rem;">
+                        {{ user.first_name.0 }}{{ user.last_name.0 }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <h4 class="fw-bold mb-1" style="color: var(--primary-green);">{{ user.get_full_name }}</h4>
+                <span class="badge mb-3" style="background-color: #2E7D32;">{{ user.get_role_display }}</span>
+
+                <div class="text-start mt-3">
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <i class="bi bi-envelope me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Email</small>
+                            <span>{{ user.email }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <i class="bi bi-phone me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Phone</small>
+                            <span>{{ user.phone_number|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <i class="bi bi-building me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Branch</small>
+                            <span>{{ user.branch|default:"Head Office" }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center py-2">
+                        <i class="bi bi-calendar-check me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Joined</small>
+                            <span>{{ user.date_joined|date:"d M Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'accounts:profile_edit' %}" class="btn mt-3 w-100 fw-semibold text-white" style="background-color: #2E7D32;">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                             style="width: 50px; height: 50px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-people" style="color: #2E7D32; font-size: 1.3rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0" style="color: var(--primary-green);">{{ total_students|default:"0" }}</h4>
+                        <small class="text-muted">Students Managed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                             style="width: 50px; height: 50px; background-color: rgba(251,192,45,0.15);">
+                            <i class="bi bi-calendar-check" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0" style="color: var(--primary-green);">{{ today_lessons|default:"0" }}</h4>
+                        <small class="text-muted">Today's Lessons</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                             style="width: 50px; height: 50px; background-color: rgba(211,47,47,0.1);">
+                            <i class="bi bi-cash-stack" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0" style="color: var(--primary-green);">KES {{ total_collections|default:"0"|floatformat:0 }}</h4>
+                        <small class="text-muted">Collections</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-clock-history me-2" style="color: #2E7D32;"></i>Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item d-flex align-items-start px-0">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
+                             style="width: 36px; height: 36px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-circle-fill" style="color: #66BB6A; font-size: 0.5rem;"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1">{{ activity.description }}</p>
+                            <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2">No recent activity</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

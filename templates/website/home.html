@@ -1,0 +1,517 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Greenlight Defensive Driving School - Learn to Drive Safe{% endblock %}
+{% block meta_description %}Kenya's leading NTSA-certified driving school. Professional instructors, modern vehicles, and affordable fees. Start your driving journey today!{% endblock %}
+{% block meta_keywords %}driving school Kenya, NTSA driving test, driving lessons Nairobi, defensive driving, driving school near me, Green Light driving school, driving licence Kenya{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "DrivingSchool",
+    "name": "Greenlight Defensive Driving School",
+    "description": "Kenya's leading NTSA-certified driving school offering professional driving courses with a 98% pass rate.",
+    "url": "{{ request.build_absolute_uri }}",
+    "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}",
+    "telephone": "+254700000000",
+    "email": "info@greenlightschool.co.ke",
+    "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Nairobi",
+        "addressCountry": "KE"
+    },
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -1.1736,
+        "longitude": 36.834
+    },
+    "priceRange": "KES 15000 - KES 35000",
+    "openingHoursSpecification": [
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+            "opens": "07:00",
+            "closes": "18:00"
+        },
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Saturday",
+            "opens": "08:00",
+            "closes": "16:00"
+        }
+    ],
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "320"
+    },
+    "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Driving Courses",
+        "itemListElement": [
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class B1 - Saloon Cars"}},
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class A2 - Motorcycles"}},
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class B2 - Commercial Vehicles"}}
+        ]
+    },
+    "sameAs": [],
+    "areaServed": {
+        "@type": "Country",
+        "name": "Kenya"
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        position: relative;
+        min-height: 92vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(46,125,50,0.92) 0%, rgba(38,50,56,0.88) 100%), url('/static/images/hero-bg.jpg') center/cover no-repeat;
+        color: #fff;
+        overflow: hidden;
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: rgba(102,187,106,0.15);
+        border-radius: 50%;
+    }
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(251,192,45,0.1);
+        border-radius: 50%;
+    }
+    .hero-content { position: relative; z-index: 2; }
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(4px);
+    }
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+    }
+    .hero-title span { color: var(--light-green); }
+    .hero-subtitle {
+        font-size: 1.15rem;
+        opacity: 0.9;
+        max-width: 560px;
+        margin-bottom: 2rem;
+        line-height: 1.7;
+    }
+    .btn-hero-primary {
+        background: var(--primary-green);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.85rem 2rem;
+        border-radius: 50px;
+        border: none;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-hero-primary:hover {
+        background: var(--primary-green);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(46,125,50,0.35);
+    }
+    .btn-hero-secondary {
+        border: 2px solid rgba(255,255,255,0.6);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    .btn-hero-secondary:hover {
+        background: #fff;
+        color: var(--primary-green);
+        border-color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .feature-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 2.2rem 1.5rem;
+        text-align: center;
+        border: 1px solid #e8f5e9;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 35px rgba(46,125,50,0.12);
+        border-color: var(--light-green);
+    }
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        color: var(--primary-green);
+        margin-bottom: 1.2rem;
+    }
+    .feature-card h5 {
+        font-weight: 700;
+        color: var(--primary-green);
+        margin-bottom: 0.6rem;
+    }
+    .feature-card p {
+        color: #666;
+        font-size: 0.92rem;
+        margin: 0;
+    }
+
+    .branch-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e8f5e9;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .branch-card:hover {
+        border-color: var(--light-green);
+        box-shadow: 0 8px 25px rgba(46,125,50,0.1);
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--white);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+    .stat-label {
+        font-size: 0.95rem;
+        color: rgba(255,255,255,0.85);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .news-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .news-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+    .news-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .news-card .card-body { padding: 1.4rem; }
+    .news-card .card-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--primary-green);
+    }
+    .news-card .card-text {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .news-meta {
+        font-size: 0.82rem;
+        color: #999;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        color: #fff;
+        padding: 80px 0;
+    }
+    .cta-section h2 {
+        font-weight: 800;
+        font-size: 2.4rem;
+        margin-bottom: 1rem;
+    }
+    .cta-section p {
+        font-size: 1.1rem;
+        opacity: 0.85;
+        max-width: 500px;
+    }
+
+    .stats-bar {
+        background: linear-gradient(135deg, var(--primary-green), #1b5e20);
+        color: #fff;
+        padding: 60px 0;
+    }
+
+    @media (max-width: 767.98px) {
+        .hero-title { font-size: 2.2rem; }
+        .stat-number { font-size: 2.2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="bi bi-patch-check-fill me-1"></i> NTSA Certified
+                    </div>
+                    <h1 class="hero-title">
+                        Learn Defensive Driving <span>Like A Pro</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Join Kenya's most trusted driving school. Get trained by certified professionals with modern vehicles and proven methods that ensure you pass with confidence.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'admissions:online_admission' %}" class="btn btn-hero-primary">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Apply Now
+                        </a>
+                        <a href="{% url 'website:courses' %}" class="btn btn-hero-secondary">
+                            <i class="bi bi-book me-2"></i>View Courses
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Why Choose <span style="color: var(--primary-green);">Greenlight</span></h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">We provide the best driving education experience with industry-leading standards.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-person-badge"></i></div>
+                    <h5>Professional Instructors</h5>
+                    <p>Certified and experienced instructors dedicated to making you a confident, safe driver.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-patch-check"></i></div>
+                    <h5>NTSA Approved</h5>
+                    <p>Fully licensed by NTSA with a curriculum that meets national standards for driver training.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-truck"></i></div>
+                    <h5>Modern Vehicles</h5>
+                    <p>Well-maintained, dual-control training vehicles equipped with the latest safety features.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-cash-stack"></i></div>
+                    <h5>Affordable Fees</h5>
+                    <p>Competitive pricing with flexible payment plans. Quality education that fits your budget.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if branches %}
+<section class="section-padding" style="background: #f1f8e9;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Our <span style="color: var(--primary-green);">Branches</span></h2>
+            <p class="text-muted">Conveniently located across the country for your accessibility.</p>
+        </div>
+        <div class="row g-4">
+            {% for branch in branches %}
+            <div class="col-lg-4 col-md-6">
+                <div class="branch-card">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="feature-icon" style="width:50px;height:50px;min-width:50px;font-size:1.2rem;">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1" style="font-weight:700;color:var(--primary-green);">{{ branch.name }}</h5>
+                            <p class="mb-1 text-muted" style="font-size:0.9rem;"><i class="bi bi-pin-map me-1"></i> {{ branch.town }}</p>
+                            <p class="mb-0 text-muted" style="font-size:0.88rem;"><i class="bi bi-telephone me-1"></i> {{ branch.phone }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'website:branch_detail' branch.slug %}" class="btn btn-sm btn-outline-success mt-3" style="border-radius:20px;">
+                        View Details <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="stats-bar">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ stats.students_trained }}">0</div>
+                    <div class="stat-label">Students Trained</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ stats.vehicles }}">0</div>
+                    <div class="stat-label">Training Vehicles</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ stats.years_experience }}">0</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ stats.pass_rate }}">0</div>
+                    <div class="stat-label">Pass Rate %</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if latest_posts %}
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Latest <span style="color: var(--primary-green);">News</span></h2>
+            <p class="text-muted">Stay updated with the latest from Greenlight Driving School.</p>
+        </div>
+        <div class="row g-4">
+            {% for post in latest_posts %}
+            <div class="col-lg-4 col-md-6">
+                <div class="news-card">
+                    {% if post.featured_image %}
+                    <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">
+                    {% else %}
+                    <div style="height:200px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);display:flex;align-items:center;justify-content:center;">
+                        <i class="bi bi-newspaper" style="font-size:3rem;color:var(--primary-green);opacity:0.4;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="news-meta mb-2">
+                            <i class="bi bi-calendar3 me-1"></i>{{ post.created_at|date:"M d, Y" }}
+                            <span class="ms-2"><i class="bi bi-person me-1"></i>{{ post.author|default:"Admin" }}</span>
+                        </div>
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">{{ post.excerpt|default:post.short_content }}</p>
+                        <a href="{% url 'website:blog_detail' post.slug %}" class="btn btn-sm" style="color:var(--primary-green);font-weight:600;padding-left:0;">
+                            Read More <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'website:blog' %}" class="btn btn-outline-success" style="border-radius:25px;padding:0.6rem 1.8rem;">
+                View All News <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="cta-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2>Ready to Start Your Driving Journey?</h2>
+                <p>Join thousands of confident drivers who started their journey with Greenlight. Enroll today and hit the road with skills that last a lifetime.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <a href="{% url 'admissions:online_admission' %}" class="btn btn-hero-primary btn-lg">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Apply Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.stat-number');
+        const speed = 80;
+
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const increment = target / speed;
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.textContent = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target.toLocaleString() + (target === 98 ? '%' : '+');
+                    }
+                };
+                updateCounter();
+            });
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        const statsSection = document.querySelector('.stats-bar');
+        if (statsSection) observer.observe(statsSection);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Outstanding Balances - Green Light School{% endblock %}
+
+{% block page_title %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
+        <li class="breadcrumb-item active">Outstanding Balances</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-0">Outstanding Balances</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)10;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px; background-color: var(--primary-green);">
+                        <i class="bi bi-exclamation-circle text-white fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Total Outstanding</div>
+                        <div class="h3 mb-0" style="color: var(--primary-green);">KES {{ total_outstanding|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)10;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px; background-color: var(--primary-green);">
+                        <i class="bi bi-people text-white fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Students with Balance</div>
+                        <div class="h3 mb-0" style="color: var(--primary-green);">{{ students_with_balance|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded bg-success d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px;">
+                        <i class="bi bi-check-circle text-white fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Fully Paid</div>
+                        <div class="h3 mb-0" style="color: #2E7D32;">{{ fully_paid_count|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-list-check me-2" style="color: #2E7D32;"></i>
+            Outstanding Balances Detail
+        </h5>
+        <span class="badge bg-danger bg-opacity-10 text-danger">{{ outstanding_list|length }} students</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Total Fees</th>
+                        <th>Amount Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in outstanding_list %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                                    <i class="bi bi-person text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ item.student.user.get_full_name }}</div>
+                                    <small class="text-muted">{{ item.student.admission_number }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ item.student.course.name|default:"N/A" }}</td>
+                        <td>KES {{ item.total_fees|default:"0" }}</td>
+                        <td class="text-success">KES {{ item.amount_paid|default:"0" }}</td>
+                        <td class="fw-bold" style="color: var(--primary-green);">KES {{ item.balance|default:"0" }}</td>
+                        <td>
+                            {% if item.balance_percentage > 50 %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">Critical</span>
+                            {% elif item.balance_percentage > 25 %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning">Moderate</span>
+                            {% else %}
+                                <span class="badge bg-info bg-opacity-10 text-info">Low</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-check-circle display-4 d-block mb-3" style="color: #2E7D32;"></i>
+                                <p class="mb-0">No outstanding balances. All students are fully paid!</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

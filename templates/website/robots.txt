@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /portal/
+Disallow: /accounts/
+Disallow: /admissions/apply/
+Disallow: /students/
+Disallow: /payments/
+Disallow: /lessons/
+Disallow: /vehicles/
+Disallow: /instructors/
+Disallow: /ntsa/
+Disallow: /reports/
+
+Sitemap: {{ scheme }}://{{ domain }}/sitemap.xml

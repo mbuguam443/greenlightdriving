@@ -1,0 +1,214 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}NTSA Records - Green Light School{% endblock %}
+
+{% block page_title %}NTSA Records{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Track student progress through NTSA certification stages</p>
+    </div>
+    <a href="{% url 'ntsa:create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>Add Record
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search by student name or admission number..."
+                           value="{{ request.GET.q|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="pdl_status" class="form-select">
+                    <option value="">All PDL Status</option>
+                    <option value="approved" {% if request.GET.pdl_status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="pending" {% if request.GET.pdl_status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="rejected" {% if request.GET.pdl_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="not_started" {% if request.GET.pdl_status == 'not_started' %}selected{% endif %}>Not Started</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="licence" class="form-select">
+                    <option value="">All Licence</option>
+                    <option value="issued" {% if request.GET.licence == 'issued' %}selected{% endif %}>Issued</option>
+                    <option value="not_issued" {% if request.GET.licence == 'not_issued' %}selected{% endif %}>Not Issued</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Student</th>
+                        <th>PDL Status</th>
+                        <th>Theory Test</th>
+                        <th>Practical Test</th>
+                        <th>Driving Test</th>
+                        <th>Licence</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in ntsa_records %}
+                    <tr>
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; background-color: rgba(46,125,50,0.1);">
+                                    <i class="bi bi-person" style="color: #2E7D32;"></i>
+                                </div>
+                                <div>
+                                    <a href="{% url 'ntsa:detail' record.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                                        {{ record.student.user.get_full_name }}
+                                    </a>
+                                    <div><small class="text-muted">{{ record.student.admission_number }}</small></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if record.pdl_status == 'approved' %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-check-circle me-1"></i> Approved
+                                </span>
+                            {% elif record.pdl_status == 'pending' %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-clock me-1"></i> Pending
+                                </span>
+                            {% elif record.pdl_status == 'rejected' %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-x-circle me-1"></i> Rejected
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-dash-circle me-1"></i> Not Started
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.theory_test_passed %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-check-circle me-1"></i> Passed
+                                </span>
+                            {% elif record.theory_test_date %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-clock me-1"></i> {{ record.theory_test_date|date:"d M Y" }}
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-dash-circle me-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.practical_test_passed %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-check-circle me-1"></i> Passed
+                                </span>
+                            {% elif record.practical_test_date %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-clock me-1"></i> {{ record.practical_test_date|date:"d M Y" }}
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-dash-circle me-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.driving_test_passed %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-check-circle me-1"></i> Passed
+                                </span>
+                            {% elif record.driving_test_date %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-clock me-1"></i> {{ record.driving_test_date|date:"d M Y" }}
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-dash-circle me-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.licence_issued %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-patch-check me-1"></i> Issued
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-dash-circle me-1"></i> Not Issued
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'ntsa:detail' record.pk %}" class="btn btn-sm btn-outline-success" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'ntsa:update' record.pk %}" class="btn btn-sm" style="border-color: #2E7D32; color: #2E7D32;" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'ntsa:delete' record.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-clipboard-check display-4 d-block mb-3"></i>
+                                <p class="mb-2">No NTSA records found</p>
+                                <a href="{% url 'ntsa:create' %}" class="btn btn-primary btn-sm" style="background-color: #2E7D32;">
+                                    <i class="bi bi-plus-circle me-1"></i> Add First Record
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Page {{ ntsa_records.number }} of {{ ntsa_records.paginator.num_pages }}
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if ntsa_records.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ ntsa_records.previous_page_number }}&q={{ request.GET.q|default:'' }}&pdl_status={{ request.GET.pdl_status|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in ntsa_records.paginator.page_range %}
+                <li class="page-item {% if ntsa_records.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&q={{ request.GET.q|default:'' }}&pdl_status={{ request.GET.pdl_status|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if ntsa_records.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ ntsa_records.next_page_number }}&q={{ request.GET.q|default:'' }}&pdl_status={{ request.GET.pdl_status|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

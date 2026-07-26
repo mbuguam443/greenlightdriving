@@ -1,0 +1,119 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Courses - Website Management - Green Light Driving School{% endblock %}
+
+{% block page_title %}Course Management{% endblock %}
+{% block breadcrumb_active %}Courses{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage website courses</p>
+    </div>
+    <a href="{% url 'website:manage_course_add' %}" class="btn fw-semibold text-white" style="background-color: var(--primary-green);">
+        <i class="bi bi-plus-lg me-1"></i>Add Course
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search courses..." value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: var(--primary-green); color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Name</th>
+                        <th>Category</th>
+                        <th>Duration</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                    <tr>
+                        <td class="ps-3 fw-semibold" style="color: var(--primary-green);">{{ course.name }}</td>
+                        <td>{{ course.category|default:"-" }}</td>
+                        <td>{{ course.duration|default:"-" }}</td>
+                        <td>{% if course.price %}KES {{ course.price|floatformat:0 }}{% else %}-{% endif %}</td>
+                        <td>
+                            {% if course.is_active %}
+                            <span class="badge" style="background-color: var(--primary-green);">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'website:manage_course_edit' course.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'website:manage_course_delete' course.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-book" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No courses found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if courses.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ courses.start_index }} to {{ courses.end_index }} of {{ courses.paginator.count }} courses
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if courses.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ courses.previous_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in courses.paginator.page_range %}
+                <li class="page-item {% if courses.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if courses.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ courses.next_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

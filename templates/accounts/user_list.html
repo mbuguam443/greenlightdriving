@@ -1,0 +1,141 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Users - Green Light Driving School{% endblock %}
+
+{% block page_title %}User Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage system users and their roles</p>
+    </div>
+    <a href="{% url 'accounts:user_create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>Add User
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
+                           value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="role" class="form-select">
+                    <option value="">All Roles</option>
+                    {% for value, label in role_choices %}
+                    <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Email</th>
+                        <th>Full Name</th>
+                        <th>Role</th>
+                        <th>Branch</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center">
+                                {% if u.profile_photo %}
+                                <img src="{{ u.profile_photo.url }}" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2"
+                                     style="width: 32px; height: 32px; background-color: #66BB6A; color: white; font-size: 0.75rem; font-weight: 600;">
+                                    {{ u.first_name.0 }}{{ u.last_name.0 }}
+                                </div>
+                                {% endif %}
+                                <span>{{ u.email }}</span>
+                            </div>
+                        </td>
+                        <td>{{ u.get_full_name }}</td>
+                        <td><span class="badge" style="background-color: #2E7D32;">{{ u.get_role_display }}</span></td>
+                        <td>{{ u.branch|default:"-" }}</td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'accounts:user_update' u.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if u != request.user %}
+                            <a href="{% url 'accounts:user_delete' u.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-people" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No users found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if users.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ users.start_index }} to {{ users.end_index }} of {{ users.paginator.count }} users
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if users.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ users.previous_page_number }}&search={{ search_query|default:'' }}&role={{ role_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in users.paginator.page_range %}
+                <li class="page-item {% if users.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&role={{ role_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if users.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ users.next_page_number }}&search={{ search_query|default:'' }}&role={{ role_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

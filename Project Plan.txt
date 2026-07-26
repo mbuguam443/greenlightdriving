@@ -1,0 +1,646 @@
+You are a Senior Django Full-Stack Engineer and UI/UX Designer.
+
+Your task is to build a complete production-ready Driving School Management System and Marketing Website for Greenlight Defensive Driving School.
+
+====================================
+TECHNOLOGY STACK
+====================================
+
+Backend:
+- Python
+- Django
+- SQLite
+
+Frontend:
+- HTML5
+- Bootstrap 5
+- JavaScript
+- Bootstrap Icons
+
+Charts
+- Chart.js
+
+Authentication
+- Django Authentication
+- Role Based Access Control
+
+PDF
+- ReportLab
+
+Image Processing
+- Pillow
+
+SEO
+- Django SEO friendly architecture
+
+====================================
+PROJECT NAME
+====================================
+
+Greenlight Defensive Driving School Management System
+
+Theme Colors
+
+Primary Green      #2E7D32
+Light Green        #66BB6A
+White              #FFFFFF
+Dark Gray          #263238
+Traffic Red        #D32F2F
+Traffic Yellow     #FBC02D
+
+Design Style
+
+Modern
+Professional
+Corporate
+Minimal
+Responsive
+Fast
+
+====================================
+PROJECT STRUCTURE
+====================================
+
+Landing Website
+
+Management System
+
+Student Portal
+
+====================================
+PART 1
+PUBLIC WEBSITE
+====================================
+
+Create a beautiful responsive marketing website.
+
+Pages
+
+Home
+
+About Us
+
+Courses
+
+Pricing
+
+Branches
+
+Gallery
+
+Testimonials
+
+Frequently Asked Questions
+
+Blog
+
+Contact
+
+Online Admission
+
+Student Login
+
+Staff Login
+
+====================================
+HOME PAGE
+====================================
+
+Hero Section
+
+Large driving background
+
+Green overlay
+
+Company logo
+
+Heading
+
+Learn Defensive Driving Like A Pro
+
+Buttons
+
+Apply Now
+
+View Courses
+
+Features
+
+Professional Instructors
+
+NTSA Approved
+
+Modern Vehicles
+
+Affordable Fees
+
+Branches
+
+Display
+
+Kimbo
+
+Ruiru
+
+Waithaka
+
+Statistics
+
+Students Trained
+
+Vehicles
+
+Years Experience
+
+Pass Rate
+
+Latest News
+
+Call To Action
+
+Footer
+
+====================================
+SEO
+====================================
+
+Implement complete SEO.
+
+Every page must include
+
+Title
+
+Meta Description
+
+Meta Keywords
+
+Canonical URL
+
+Open Graph Tags
+
+Twitter Cards
+
+Structured Data (Schema.org)
+
+XML Sitemap
+
+Robots.txt
+
+Breadcrumbs
+
+SEO friendly URLs
+
+Image Alt Text
+
+Lazy Loading
+
+Automatic slug generation
+
+Clean semantic HTML
+
+PageSpeed optimization
+
+Blog SEO
+
+Course SEO
+
+Local SEO
+
+Google Maps integration
+
+====================================
+ONLINE ADMISSION
+====================================
+
+Students can register online.
+
+Upload
+
+Passport Photo
+
+National ID
+
+Choose
+
+Category
+
+Course
+
+Branch
+
+Preferred Schedule
+
+Generate Admission Number automatically.
+
+====================================
+COURSES
+====================================
+
+Categories
+
+A1
+
+A2
+
+A3
+
+B1
+
+B2
+
+B Light/C1
+
+C1
+
+C2
+
+D1
+
+D2
+
+CE
+
+Pricing configurable from admin.
+
+====================================
+PART 2
+MANAGEMENT SYSTEM
+====================================
+
+Modules
+
+Dashboard
+
+Students
+
+Admissions
+
+Payments
+
+Receipts
+
+Lesson Scheduling
+
+Practical Lessons
+
+Theory Lessons
+
+Vehicles
+
+Instructors
+
+NTSA
+
+Certificates
+
+Reports
+
+Branches
+
+Settings
+
+Users
+
+====================================
+DASHBOARD
+====================================
+
+Show
+
+Today's Admissions
+
+Today's Revenue
+
+Students
+
+Vehicles
+
+Instructors
+
+Today's Lessons
+
+Pending Balances
+
+Upcoming Exams
+
+Charts
+
+Monthly Revenue
+
+Admissions
+
+Course Distribution
+
+====================================
+STUDENT PROFILE
+====================================
+
+Personal Details
+
+Passport
+
+ID
+
+Contacts
+
+Next of Kin
+
+Course
+
+Branch
+
+Instructor
+
+Vehicle
+
+Lesson Progress
+
+Payment History
+
+Exam Status
+
+Certificates
+
+Documents
+
+====================================
+PAYMENTS
+====================================
+
+Support
+
+Cash
+
+Mpesa
+
+Bank
+
+Cheque
+
+Installments
+
+Generate Receipt
+
+Outstanding Balance
+
+Receipt Printing
+
+Payment History
+
+====================================
+LESSON MANAGEMENT
+====================================
+
+Digital lesson checklist
+
+Introduction
+
+Theory Board Lanes
+
+Theory Model Town
+
+Road Signs
+
+Starting Drill
+
+Gear Change
+
+Road Position
+
+Turning Left
+
+Turning Right
+
+Hand Signals
+
+Clutch Control
+
+Three Point Turn
+
+Steering
+
+Reversing
+
+Hill Start
+
+Angle Parking
+
+Reverse Parking
+
+Basic Mechanical
+
+First Aid
+
+Assessment
+
+Every lesson records
+
+Instructor
+
+Date
+
+Vehicle
+
+Remarks
+
+Status
+
+Completed
+
+Needs Practice
+
+Not Started
+
+====================================
+VEHICLES
+====================================
+
+Registration Number
+
+Category
+
+Insurance
+
+Service Due
+
+Instructor
+
+Availability
+
+====================================
+INSTRUCTORS
+====================================
+
+Photo
+
+License Number
+
+Experience
+
+Assigned Students
+
+Assigned Vehicle
+
+Performance
+
+====================================
+NTSA
+====================================
+
+PDL
+
+Theory Exam
+
+Practical Exam
+
+Driving Test
+
+Licence Issued
+
+====================================
+REPORTS
+====================================
+
+Revenue
+
+Admissions
+
+Outstanding Balances
+
+Instructor Performance
+
+Vehicle Utilization
+
+Branch Performance
+
+Student Progress
+
+====================================
+STUDENT PORTAL
+====================================
+
+Students can
+
+View Schedule
+
+View Lessons
+
+View Payments
+
+Download Receipts
+
+Track Progress
+
+Download Certificates
+
+====================================
+USER ROLES
+====================================
+
+Super Admin
+
+Manager
+
+Receptionist
+
+Instructor
+
+Accountant
+
+Student
+
+====================================
+UI REQUIREMENTS
+====================================
+
+Professional animations
+
+Responsive layout
+
+Modern cards
+
+Rounded corners
+
+Minimal shadows
+
+Bootstrap components only
+
+No inline CSS
+
+Reusable templates
+
+====================================
+DJANGO REQUIREMENTS
+====================================
+
+Follow Django best practices.
+
+Use apps for each module.
+
+Use Class Based Views where appropriate.
+
+Keep business logic out of templates.
+
+Use Django Forms and ModelForms.
+
+Use Django Messages Framework.
+
+Use CSRF protection.
+
+Use pagination.
+
+Use filtering.
+
+Use search.
+
+Use reusable mixins.
+
+====================================
+CODE QUALITY
+====================================
+
+Generate production-quality code.
+
+Well documented.
+
+PEP8 compliant.
+
+No placeholder code.
+
+No TODO comments.
+
+Fully working.
+
+====================================
+IMPORTANT
+====================================
+
+Build the project incrementally.
+
+Do NOT generate everything at once.
+
+Finish one module completely before starting the next.
+
+Every module must include:
+
+Models
+
+Views
+
+URLs
+
+Forms
+
+Templates
+
+Admin
+
+Tests
+
+Migrations
+
+Navigation
+
+Permissions
+
+Only proceed to the next module after the current one is complete and functional.

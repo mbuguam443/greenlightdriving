@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Online Admission - Green Light Driving School{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background-color: #f8f9fa;">
+    <div class="container">
+        <div class="text-center mb-5">
+            {% if school_logo %}
+            <img src="{{ school_logo }}" alt="Green Light Driving School" class="mb-3" style="max-height: 60px;">
+            {% else %}
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                 style="width: 60px; height: 60px; background-color: #2E7D32;">
+                <i class="bi bi-car-front-fill text-white" style="font-size: 1.5rem;"></i>
+            </div>
+            {% endif %}
+            <h2 class="fw-bold" style="color: var(--primary-green);">Online Admission</h2>
+            <p class="text-muted">Start your driving journey with Green Light Driving School</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form method="post" enctype="multipart/form-data" novalidate id="admissionForm">
+                    {% csrf_token %}
+
+                    <!-- Honeypot — hidden from humans, visible to bots -->
+                    <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                        <label for="id_website">Website</label>
+                        <input type="text" name="website" id="id_website" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header text-white" style="background-color: #2E7D32;">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="bi bi-person me-2"></i>Step 1: Personal Details
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="id_first_name" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="first_name" id="id_first_name" class="form-control"
+                                           value="{{ form.first_name.value|default:'' }}" required>
+                                    {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="id_last_name" class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="last_name" id="id_last_name" class="form-control"
+                                           value="{{ form.last_name.value|default:'' }}" required>
+                                    {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="id_other_names" class="form-label fw-semibold">Other Names</label>
+                                    <input type="text" name="other_names" id="id_other_names" class="form-control"
+                                           value="{{ form.other_names.value|default:'' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" name="email" id="id_email" class="form-control"
+                                           value="{{ form.email.value|default:'' }}" required>
+                                    {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_phone_number" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phone_number" id="id_phone_number" class="form-control"
+                                           value="{{ form.phone_number.value|default:'' }}" required>
+                                    {% if form.phone_number.errors %}
+                                    <div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="id_date_of_birth" class="form-label fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                                    <input type="date" name="date_of_birth" id="id_date_of_birth" class="form-control"
+                                           value="{{ form.date_of_birth.value|default:'' }}" required>
+                                    {% if form.date_of_birth.errors %}
+                                    <div class="text-danger small mt-1">{{ form.date_of_birth.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="id_gender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                                    <select name="gender" id="id_gender" class="form-select" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="M" {% if form.gender.value == 'M' %}selected{% endif %}>Male</option>
+                                        <option value="F" {% if form.gender.value == 'F' %}selected{% endif %}>Female</option>
+                                    </select>
+                                    {% if form.gender.errors %}
+                                    <div class="text-danger small mt-1">{{ form.gender.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="id_national_id" class="form-label fw-semibold">National ID / Passport No. <span class="text-danger">*</span></label>
+                                    <input type="text" name="national_id" id="id_national_id" class="form-control"
+                                           value="{{ form.national_id.value|default:'' }}" required>
+                                    {% if form.national_id.errors %}
+                                    <div class="text-danger small mt-1">{{ form.national_id.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12">
+                                    <label for="id_address" class="form-label fw-semibold">Physical Address</label>
+                                    <input type="text" name="address" id="id_address" class="form-control"
+                                           value="{{ form.address.value|default:'' }}" placeholder="Town, County">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header text-white" style="background-color: #2E7D32;">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="bi bi-file-earmark me-2"></i>Step 2: Documents
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="id_passport_photo" class="form-label fw-semibold">Passport Photo <span class="text-danger">*</span></label>
+                                    <input type="file" name="passport_photo" id="id_passport_photo" class="form-control"
+                                           accept="image/*" required>
+                                    <div class="form-text">Upload a recent passport-size photo (JPG, PNG)</div>
+                                    {% if form.passport_photo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.passport_photo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_id_image" class="form-label fw-semibold">ID Card / Passport Image <span class="text-danger">*</span></label>
+                                    <input type="file" name="id_image" id="id_id_image" class="form-control"
+                                           accept="image/*" required>
+                                    <div class="form-text">Upload a clear copy of your ID or passport</div>
+                                    {% if form.id_image.errors %}
+                                    <div class="text-danger small mt-1">{{ form.id_image.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header text-white" style="background-color: #2E7D32;">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="bi bi-book me-2"></i>Step 3: Course Selection
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="id_course_category" class="form-label fw-semibold">Course Category <span class="text-danger">*</span></label>
+                                    <select name="course_category" id="id_course_category" class="form-select" required>
+                                        <option value="">Select Category</option>
+                                        {% for category in course_categories %}
+                                        <option value="{{ category.id }}" {% if form.course_category.value == category.id %}selected{% endif %}>
+                                            {{ category.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.course_category.errors %}
+                                    <div class="text-danger small mt-1">{{ form.course_category.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_course" class="form-label fw-semibold">Course <span class="text-danger">*</span></label>
+                                    <select name="course" id="id_course" class="form-select" required>
+                                        <option value="">Select course category first</option>
+                                    </select>
+                                    {% if form.course.errors %}
+                                    <div class="text-danger small mt-1">{{ form.course.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_branch" class="form-label fw-semibold">Preferred Branch <span class="text-danger">*</span></label>
+                                    <select name="branch" id="id_branch" class="form-select" required>
+                                        <option value="">Select Branch</option>
+                                        {% for branch in branches %}
+                                        <option value="{{ branch.id }}" {% if form.branch.value == branch.id %}selected{% endif %}>
+                                            {{ branch.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.branch.errors %}
+                                    <div class="text-danger small mt-1">{{ form.branch.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_schedule" class="form-label fw-semibold">Preferred Schedule <span class="text-danger">*</span></label>
+                                    <select name="schedule" id="id_schedule" class="form-select" required>
+                                        <option value="">Select Schedule</option>
+                                        <option value="morning" {% if form.schedule.value == 'morning' %}selected{% endif %}>Morning (8AM - 12PM)</option>
+                                        <option value="afternoon" {% if form.schedule.value == 'afternoon' %}selected{% endif %}>Afternoon (1PM - 5PM)</option>
+                                        <option value="evening" {% if form.schedule.value == 'evening' %}selected{% endif %}>Evening (5PM - 8PM)</option>
+                                        <option value="weekend" {% if form.schedule.value == 'weekend' %}selected{% endif %}>Weekend (Sat & Sun)</option>
+                                    </select>
+                                    {% if form.schedule.errors %}
+                                    <div class="text-danger small mt-1">{{ form.schedule.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header text-white" style="background-color: #2E7D32;">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="bi bi-shield-lock me-2"></i>Security Check
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="id_captcha_question" class="form-label fw-semibold">{{ captcha_question }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="captcha_question" id="id_captcha_question" class="form-control"
+                                           placeholder="Enter your answer" required autocomplete="off">
+                                    <input type="hidden" name="captcha_hash" value="{{ captcha_hash }}">
+                                    <input type="hidden" name="captcha_answer" value="{{ captcha_answer }}">
+                                    {% if form.captcha_question.errors %}
+                                    <div class="text-danger small mt-1">{{ form.captcha_question.errors.0 }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Please solve this simple math question to prove you're human.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-lg fw-semibold text-white px-5" id="submitBtn"
+                                style="background-color: #2E7D32;">
+                            <span id="submitText">
+                                <i class="bi bi-send me-2"></i>Submit Application
+                            </span>
+                            <span id="submitSpinner" class="d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('id_course_category').addEventListener('change', function() {
+    const categoryId = this.value;
+    const courseSelect = document.getElementById('id_course');
+
+    if (!categoryId) {
+        courseSelect.innerHTML = '<option value="">Select course category first</option>';
+        return;
+    }
+
+    courseSelect.innerHTML = '<option value="">Loading courses...</option>';
+
+    fetch(`/api/courses/?category=${categoryId}`)
+        .then(response => response.json())
+        .then(data => {
+            let options = '<option value="">Select Course</option>';
+            data.forEach(course => {
+                options += `<option value="${course.id}">${course.name} - KES ${parseInt(course.fee).toLocaleString()}</option>`;
+            });
+            courseSelect.innerHTML = options;
+        })
+        .catch(error => {
+            courseSelect.innerHTML = '<option value="">Error loading courses</option>';
+        });
+});
+
+document.getElementById('admissionForm').addEventListener('submit', function() {
+    document.getElementById('submitText').classList.add('d-none');
+    document.getElementById('submitSpinner').classList.remove('d-none');
+    document.getElementById('submitBtn').disabled = true;
+});
+</script>
+{% endblock %}

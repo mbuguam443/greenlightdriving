@@ -1,0 +1,166 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Admissions - Green Light Driving School{% endblock %}
+
+{% block nav_admissions %}active{% endblock %}
+
+{% block page_title %}Admission Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage online and walk-in admissions</p>
+    </div>
+    <a href="{% url 'admissions:internal_create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>New Admission
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or admission number..."
+                           value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>Approved</option>
+                    <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                    <option value="ENROLLED" {% if status_filter == 'ENROLLED' %}selected{% endif %}>Enrolled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="branch" class="form-select">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="course" class="form-select">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" {% if course_filter == course.id %}selected{% endif %}>{{ course.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Admission No.</th>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>Branch</th>
+                        <th>Schedule</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admission in admissions %}
+                    <tr>
+                        <td class="ps-3">
+                            <a href="{% url 'admissions:detail' admission.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                                {{ admission.admission_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if admission.passport_photo %}
+                                <img src="{{ admission.passport_photo.url }}" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2"
+                                     style="width: 32px; height: 32px; background-color: #66BB6A; color: white; font-size: 0.75rem; font-weight: 600;">
+                                    {{ admission.first_name.0 }}{{ admission.last_name.0 }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <span class="fw-semibold">{{ admission.full_name }}</span>
+                                    <br><small class="text-muted">{{ admission.phone }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ admission.course.name }}</td>
+                        <td>{{ admission.branch.name }}</td>
+                        <td>{{ admission.get_schedule_display }}</td>
+                        <td>
+                            {% if admission.status == 'PENDING' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif admission.status == 'APPROVED' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif admission.status == 'REJECTED' %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% elif admission.status == 'ENROLLED' %}
+                            <span class="badge" style="background-color: #2E7D32;">Enrolled</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ admission.created_at|date:"d M Y" }}</td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'admissions:detail' admission.pk %}" class="btn btn-sm btn-outline-success" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'admissions:update' admission.pk %}" class="btn btn-sm btn-outline-primary" title="Update">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No admissions found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if admissions.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ admissions.start_index }} to {{ admissions.end_index }} of {{ admissions.paginator.count }} admissions
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if admissions.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ admissions.previous_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in admissions.paginator.page_range %}
+                <li class="page-item {% if admissions.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if admissions.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ admissions.next_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

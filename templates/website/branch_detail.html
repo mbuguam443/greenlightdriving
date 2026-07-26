@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ branch.name }} - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Visit {{ branch.name }} branch in {{ branch.town }}. Contact us at {{ branch.phone }} or {{ branch.email }}.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(46,125,50,0.92) 0%, rgba(38,50,56,0.88) 100%);
+        color: #fff; padding: 100px 0 50px;
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.5rem; }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+    .breadcrumb-item a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .breadcrumb-item a:hover { color: #fff; }
+    .breadcrumb-item.active { color: var(--light-green); }
+
+    .branch-detail-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 2.5rem;
+        border: 1px solid #e8f5e9;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .branch-detail-card h2 {
+        font-weight: 800; color: var(--primary-green); margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid var(--primary-green);
+        display: inline-block;
+    }
+    .branch-info-row {
+        display: flex; align-items: flex-start; gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .branch-info-row:last-child { border-bottom: none; }
+    .branch-info-icon {
+        width: 55px; height: 55px; border-radius: 50%;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary-green); font-size: 1.3rem; min-width: 55px;
+    }
+    .branch-info-label { font-size: 0.82rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+    .branch-info-value { font-weight: 600; color: var(--primary-green); font-size: 1.05rem; }
+
+    .map-container {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #e8f5e9;
+        background: #f5f5f5;
+    }
+    .map-placeholder {
+        height: 400px;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    }
+    .map-placeholder i { font-size: 4rem; color: var(--primary-green); opacity: 0.3; }
+
+    .btn-action {
+        border-radius: 50px; font-weight: 600; padding: 0.7rem 1.8rem;
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'website:home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'website:branches' %}">Branches</a></li>
+                <li class="breadcrumb-item active">{{ branch.name }}</li>
+            </ol>
+        </nav>
+        <h1 class="text-center">{{ branch.name }}</h1>
+        <p class="text-center mb-0" style="opacity:0.85;">{{ branch.town }}</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="branch-detail-card">
+                    <h2>Branch Information</h2>
+
+                    <div class="branch-info-row">
+                        <div class="branch-info-icon"><i class="bi bi-building"></i></div>
+                        <div>
+                            <div class="branch-info-label">Branch Name</div>
+                            <div class="branch-info-value">{{ branch.name }}</div>
+                        </div>
+                    </div>
+
+                    <div class="branch-info-row">
+                        <div class="branch-info-icon"><i class="bi bi-pin-map"></i></div>
+                        <div>
+                            <div class="branch-info-label">Town / City</div>
+                            <div class="branch-info-value">{{ branch.town }}</div>
+                        </div>
+                    </div>
+
+                    <div class="branch-info-row">
+                        <div class="branch-info-icon"><i class="bi bi-geo-alt"></i></div>
+                        <div>
+                            <div class="branch-info-label">Address</div>
+                            <div class="branch-info-value">{{ branch.address }}</div>
+                        </div>
+                    </div>
+
+                    <div class="branch-info-row">
+                        <div class="branch-info-icon"><i class="bi bi-telephone"></i></div>
+                        <div>
+                            <div class="branch-info-label">Phone</div>
+                            <div class="branch-info-value">
+                                <a href="tel:{{ branch.phone }}" style="color:var(--primary-green);text-decoration:none;">{{ branch.phone }}</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if branch.email %}
+                    <div class="branch-info-row">
+                        <div class="branch-info-icon"><i class="bi bi-envelope"></i></div>
+                        <div>
+                            <div class="branch-info-label">Email</div>
+                            <div class="branch-info-value">
+                                <a href="mailto:{{ branch.email }}" style="color:var(--primary-green);text-decoration:none;">{{ branch.email }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a href="tel:{{ branch.phone }}" class="btn btn-success btn-action">
+                            <i class="bi bi-telephone me-2"></i>Call Now
+                        </a>
+                        {% if branch.latitude and branch.longitude %}
+                        <a href="https://www.google.com/maps?q={{ branch.latitude }},{{ branch.longitude }}" target="_blank" class="btn btn-outline-success btn-action">
+                            <i class="bi bi-map me-2"></i>Get Directions
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'website:contact' %}" class="btn btn-outline-secondary btn-action">
+                            <i class="bi bi-envelope me-2"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="map-container">
+                    {% if branch.latitude and branch.longitude %}
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3191.0!2d{{ branch.longitude }}!3d{{ branch.latitude }}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z{{ branch.latitude }}%2C{{ branch.longitude }}!5e0!3m2!1sen!2ske!4v1!5m2!1sen!2ske"
+                        width="100%"
+                        height="400"
+                        style="border:0;border-radius:16px;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                    {% else %}
+                    <div class="map-placeholder">
+                        <div class="text-center">
+                            <i class="bi bi-map"></i>
+                            <p class="text-muted mt-2 mb-0">Map location not available for this branch.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if branch.image %}
+                <div class="mt-4">
+                    <img src="{{ branch.image.url }}" alt="{{ branch.name }}"
+                         style="width:100%;border-radius:16px;object-fit:cover;max-height:300px;" loading="lazy">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="background:linear-gradient(135deg,var(--primary-green),var(--primary-green-dark));color:#fff;padding:60px 0;">
+    <div class="container text-center">
+        <h2 style="font-weight:800;margin-bottom:1rem;">Ready to Enroll at {{ branch.name }}?</h2>
+        <p style="opacity:0.85;max-width:500px;margin:0 auto 2rem;">Start your driving journey with Greenlight today. Our {{ branch.town }} branch is ready to welcome you.</p>
+        <a href="{% url 'admissions:online_admission' %}" class="btn btn-lg" style="background:var(--primary-green);color:#fff;font-weight:600;padding:0.85rem 3rem;border-radius:50px;">
+            <i class="bi bi-arrow-right-circle me-2"></i>Apply Now
+        </a>
+    </div>
+</section>
+{% endblock %}

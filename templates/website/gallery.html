@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Gallery - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Browse photos from Greenlight Driving School - our vehicles, training sessions, events, and student activities.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(46,125,50,0.92) 0%, rgba(38,50,56,0.88) 100%);
+        color: #fff; padding: 100px 0 50px;
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.5rem; }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+    .breadcrumb-item a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .breadcrumb-item a:hover { color: #fff; }
+    .breadcrumb-item.active { color: var(--light-green); }
+
+    .filter-btn {
+        padding: 0.5rem 1.4rem; border-radius: 50px; font-weight: 500;
+        font-size: 0.9rem; border: 2px solid #e0e0e0; background: #fff;
+        color: #555; transition: all 0.3s ease;
+    }
+    .filter-btn:hover { border-color: var(--primary-green); color: var(--primary-green); }
+    .filter-btn.active { background: var(--primary-green); border-color: var(--primary-green); color: #fff; }
+
+    .gallery-grid {
+        columns: 3;
+        column-gap: 1.2rem;
+    }
+    .gallery-item {
+        break-inside: avoid;
+        margin-bottom: 1.2rem;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+    }
+    .gallery-item img {
+        width: 100%;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .gallery-item:hover img { transform: scale(1.05); }
+    .gallery-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(46,125,50,0.8) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex; align-items: flex-end; padding: 1rem;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay span { color: #fff; font-weight: 600; font-size: 0.9rem; }
+
+    @media (max-width: 991.98px) { .gallery-grid { columns: 2; } }
+    @media (max-width: 575.98px) { .gallery-grid { columns: 1; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'website:home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Gallery</li>
+            </ol>
+        </nav>
+        <h1 class="text-center">Photo Gallery</h1>
+        <p class="text-center mb-0" style="opacity:0.85;">A glimpse into life at Greenlight Driving School.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-4">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="{% url 'website:gallery' %}" class="filter-btn {% if not current_category %}active{% endif %}">All</a>
+                {% for cat in gallery_categories %}
+                {% if cat %}
+                <a href="?category={{ cat }}" class="filter-btn {% if current_category == cat %}active{% endif %}">{{ cat }}</a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if images %}
+        <div class="gallery-grid mt-4">
+            {% for image in images %}
+            <div class="gallery-item">
+                <a href="{{ image.image.url }}" data-lightbox="gallery" data-title="{{ image.title }}">
+                    <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span><i class="bi bi-expand me-1"></i>{{ image.title }}</span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <nav class="mt-5 d-flex justify-content-center">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}" style="color:var(--primary-green);">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}"
+                       style="{% if page_obj.number == num %}background:var(--primary-green);border-color:var(--primary-green);{% else %}color:var(--primary-green);{% endif %}">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}" style="color:var(--primary-green);">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-images" style="font-size:4rem;color:#ddd;"></i>
+            <h4 class="mt-3" style="color:#999;">No Photos Found</h4>
+            <p class="text-muted">Check back later for new photos.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+<script>
+    lightbox.option({
+        'resizeDuration': 200,
+        'wrapAround': true,
+        'fadeDuration': 300
+    });
+</script>
+{% endblock %}

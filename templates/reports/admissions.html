@@ -1,0 +1,135 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Admission Report - Green Light School{% endblock %}
+
+{% block page_title %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
+        <li class="breadcrumb-item active">Admission Report</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-0">Admission Report</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: #2E7D32;">{{ total_admissions|default:"0" }}</div>
+                <div class="small text-muted">Total Admissions</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold text-white">{{ active_admissions|default:"0" }}</div>
+                <div class="small text-white">Active Students</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)20;">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: var(--primary-green);">{{ pending_admissions|default:"0" }}</div>
+                <div class="small text-muted">Pending</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)20;">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: var(--primary-green);">{{ completed_admissions|default:"0" }}</div>
+                <div class="small text-muted">Completed</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pie-chart me-2" style="color: #2E7D32;"></i>
+                    Admissions by Category
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for category in category_stats %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-semibold">{{ category.name }}</span>
+                        <span class="small text-muted">{{ category.count }} students</span>
+                    </div>
+                    <div class="progress" style="height: 24px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ category.percentage }}%; background-color: #2E7D32;"
+                             aria-valuenow="{{ category.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ category.percentage }}%
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">No category data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-building me-2" style="color: #2E7D32;"></i>
+                    Admissions by Branch
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for branch in branch_stats %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-semibold">{{ branch.name }}</span>
+                        <span class="small text-muted">{{ branch.count }} students</span>
+                    </div>
+                    <div class="progress" style="height: 24px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ branch.percentage }}%; background-color: #66BB6A;"
+                             aria-valuenow="{{ branch.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ branch.percentage }}%
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">No branch data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-calendar-month me-2" style="color: #2E7D32;"></i>
+            Monthly Admissions
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-end g-2">
+            {% for month in monthly_admissions %}
+            <div class="col text-center">
+                <div class="bg-success bg-opacity-10 rounded mx-auto mb-2" style="height: {{ month.height }}px; width: 100%; max-width: 40px;"></div>
+                <div class="small text-muted">{{ month.label }}</div>
+                <div class="small fw-bold" style="color: #2E7D32;">{{ month.count }}</div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted py-3">No monthly data available</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+PassengerAppType wsgi
+PassengerAppRoot "/home/wlsihszp/greenlight-driving-defensive.schones-heim-builders.co.ke"
+PassengerAppEntry passenger_wsgi.py
+PassengerPython "/home/wlsihszp/virtualenv/env/bin/python3"
+
+# Serve static files
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^/static/
+RewriteRule ^static/(.*)$ staticfiles/$1 [L]
+
+# Serve media files
+RewriteCond %{REQUEST_URI} ^/media/
+RewriteRule ^media/(.*)$ media/$1 [L]

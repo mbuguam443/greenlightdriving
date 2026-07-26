@@ -1,0 +1,115 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Payment {{ payment.receipt_number }} - Green Light Driving School{% endblock %}
+
+{% block page_title %}Payment Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Receipt: <strong style="color: #2E7D32;">{{ payment.receipt_number }}</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'payments:receipt' payment.pk %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;" target="_blank">
+            <i class="bi bi-printer me-1"></i>Print Receipt
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-receipt me-2" style="color: #2E7D32;"></i>Payment Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Receipt Number</small>
+                        <span class="fw-bold" style="color: #2E7D32; font-size: 1.1rem;">{{ payment.receipt_number }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Payment Date</small>
+                        <span class="fw-semibold">{{ payment.date|date:"d M Y H:i" }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Amount</small>
+                        <span class="fw-bold" style="font-size: 1.3rem; color: var(--primary-green);">KES {{ payment.amount|floatformat:0 }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Payment Method</small>
+                        <span class="badge fs-6" style="background-color: {% if payment.method == 'mpesa' %}#2E7D32{% elif payment.method == 'cash' %}var(--primary-green){% elif payment.method == 'bank' %}#66BB6A{% else %}var(--primary-green){% endif %};">
+                            {{ payment.get_method_display }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Reference Number</small>
+                        <span class="fw-semibold"><code>{{ payment.reference_number|default:"N/A" }}</code></span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Status</small>
+                        {% if payment.status == 'completed' %}
+                        <span class="badge bg-success fs-6">Completed</span>
+                        {% elif payment.status == 'pending' %}
+                        <span class="badge bg-warning text-dark fs-6">Pending</span>
+                        {% else %}
+                        <span class="badge bg-danger fs-6">Failed</span>
+                        {% endif %}
+                    </div>
+                    {% if payment.description %}
+                    <div class="col-12">
+                        <small class="text-muted d-block">Description</small>
+                        <span class="fw-semibold">{{ payment.description }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-person me-2" style="color: #2E7D32;"></i>Student Info
+                </h6>
+            </div>
+            <div class="card-body text-center">
+                {% if payment.student.passport_photo %}
+                <img src="{{ payment.student.passport_photo.url }}" class="rounded-circle mb-2" width="60" height="60" style="object-fit: cover;">
+                {% else %}
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                     style="width: 60px; height: 60px; background-color: #66BB6A; color: white; font-weight: 600; font-size: 1.2rem;">
+                    {{ payment.student.first_name.0 }}{{ payment.student.last_name.0 }}
+                </div>
+                {% endif %}
+                <h6 class="fw-bold mb-0">{{ payment.student.get_full_name }}</h6>
+                <small class="text-muted">{{ payment.student.student_number }}</small>
+                <hr>
+                <div class="text-start">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Course</small>
+                        <small class="fw-semibold">{{ payment.student.course.name }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Total Paid</small>
+                        <small class="fw-semibold" style="color: #2E7D32;">KES {{ total_paid|floatformat:0 }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Balance</small>
+                        <small class="fw-bold" style="color: {% if outstanding_balance > 0 %}var(--primary-green){% else %}#2E7D32{% endif %};">
+                            KES {{ outstanding_balance|floatformat:0 }}
+                        </small>
+                    </div>
+                </div>
+                <a href="{% url 'students:detail' payment.student.pk %}" class="btn btn-outline-success btn-sm w-100 mt-3">
+                    <i class="bi bi-person me-1"></i>View Student
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "student_portal_base.html" %}
+{% load static %}
+
+{% block title %}Schedule - Green Light School{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+    <h4 class="mb-1">My Schedule</h4>
+    <p class="text-muted mb-0">View your upcoming driving lessons and theory classes</p>
+</div>
+
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'practical' or not tab %}active{% endif %}" href="?tab=practical" style="{% if tab == 'practical' or not tab %}background-color: #2E7D32;{% endif %}">
+            <i class="bi bi-car-front me-1"></i> Practical Lessons
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'theory' %}active{% endif %}" href="?tab=theory" style="{% if tab == 'theory' %}background-color: #2E7D32;{% endif %}">
+            <i class="bi bi-journal-text me-1"></i> Theory Classes
+        </a>
+    </li>
+</ul>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if tab == 'practical' or not tab %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Lesson</th>
+                            <th>Instructor</th>
+                            <th>Vehicle</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in practical_lessons %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                        <div class="text-center">
+                                            <div class="small fw-bold" style="color: #2E7D32;">{{ lesson.date|date:"d" }}</div>
+                                            <div class="small text-muted">{{ lesson.date|date:"M" }}</div>
+                                        </div>
+                                    </div>
+                                    {{ lesson.date|date:"d M Y" }}
+                                </div>
+                            </td>
+                            <td>{{ lesson.lesson_item.name }}</td>
+                            <td>
+                                {% if lesson.instructor %}
+                                    {{ lesson.instructor.user.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">TBA</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if lesson.vehicle %}
+                                    {{ lesson.vehicle.reg_number }}
+                                {% else %}
+                                    <span class="text-muted">TBA</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if lesson.status == 'COMPLETED' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success">
+                                        <i class="bi bi-check-circle me-1"></i> Completed
+                                    </span>
+                                {% elif lesson.status == 'IN_PROGRESS' %}
+                                    <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                        <i class="bi bi-play-circle me-1"></i> In Progress
+                                    </span>
+                                {% elif lesson.status == 'NOT_STARTED' %}
+                                    <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                        <i class="bi bi-calendar me-1"></i> Scheduled
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                        {{ lesson.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-calendar-x display-4 d-block mb-3"></i>
+                                    <p class="mb-0">No practical lessons scheduled</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Topic</th>
+                            <th>Instructor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in theory_lessons %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                        <div class="text-center">
+                                            <div class="small fw-bold" style="color: #2E7D32;">{{ lesson.date|date:"d" }}</div>
+                                            <div class="small text-muted">{{ lesson.date|date:"M" }}</div>
+                                        </div>
+                                    </div>
+                                    {{ lesson.date|date:"d M Y" }}
+                                </div>
+                            </td>
+                            <td>{{ lesson.time_start|time:"H:i" }} - {{ lesson.time_end|time:"H:i" }}</td>
+                            <td>{{ lesson.topic|default:"General Theory" }}</td>
+                            <td>
+                                {% if lesson.instructor %}
+                                    {{ lesson.instructor.user.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">TBA</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if lesson.status == 'COMPLETED' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success">
+                                        <i class="bi bi-check-circle me-1"></i> Completed
+                                    </span>
+                                {% elif lesson.status == 'SCHEDULED' %}
+                                    <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                        <i class="bi bi-calendar me-1"></i> Scheduled
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                        {{ lesson.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-journal-x display-4 d-block mb-3"></i>
+                                    <p class="mb-0">No theory classes scheduled</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

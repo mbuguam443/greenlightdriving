@@ -1,0 +1,234 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{{ student.get_full_name }} - Green Light Driving School{% endblock %}
+
+{% block page_title %}Student Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Student Number: <strong style="color: #2E7D32;">{{ student.student_number }}</strong></p>
+    </div>
+    <a href="{% url 'students:update' student.pk %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-pencil-square me-1"></i>Edit Student
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                {% if student.passport_photo %}
+                <img src="{{ student.passport_photo.url }}" alt="{{ student.get_full_name }}"
+                     class="rounded-circle mb-3 shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                {% else %}
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow"
+                     style="width: 120px; height: 120px; background-color: #66BB6A;">
+                    <span class="text-white fw-bold" style="font-size: 2.5rem;">
+                        {{ student.first_name.0 }}{{ student.last_name.0 }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <h4 class="fw-bold mb-1" style="color: var(--primary-green);">{{ student.get_full_name }}</h4>
+                {% if student.status == 'active' %}
+                <span class="badge bg-success">Active</span>
+                {% elif student.status == 'completed' %}
+                <span class="badge bg-primary">Completed</span>
+                {% elif student.status == 'suspended' %}
+                <span class="badge bg-warning text-dark">Suspended</span>
+                {% elif student.status == 'graduated' %}
+                <span class="badge" style="background-color: #2E7D32;">Graduated</span>
+                {% else %}
+                <span class="badge bg-secondary">{{ student.get_status_display }}</span>
+                {% endif %}
+
+                <div class="text-start mt-4">
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <i class="bi bi-envelope me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Email</small>
+                            <span>{{ student.email|default:"-" }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <i class="bi bi-phone me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Phone</small>
+                            <span>{{ student.phone_number }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <i class="bi bi-calendar me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Date of Birth</small>
+                            <span>{{ student.date_of_birth|date:"d M Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center py-2">
+                        <i class="bi bi-geo-alt me-3" style="color: #2E7D32;"></i>
+                        <div>
+                            <small class="text-muted d-block">Address</small>
+                            <span>{{ student.address|default:"-" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-card-text me-2" style="color: #2E7D32;"></i>NTSA Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>NTSA Registration</span>
+                    {% if student.ntsa_registered %}
+                    <span class="badge bg-success">Registered</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Not Registered</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>License Class</span>
+                    <span class="fw-semibold">{{ student.license_class|default:"-" }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Test Status</span>
+                    {% if student.ntsa_test_passed %}
+                    <span class="badge bg-success">Passed</span>
+                    {% elif student.ntsa_test_date %}
+                    <span class="badge bg-warning text-dark">Scheduled</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Course & Branch</h6>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-green);">{{ student.course.name }}</h5>
+                        <p class="mb-0" style="color: #2E7D32;">{{ student.branch.name }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Instructor</h6>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-green);">{{ student.instructor.get_full_name|default:"Not assigned" }}</h5>
+                        <p class="mb-0 text-muted">{{ student.schedule|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-graph-up me-2" style="color: #2E7D32;"></i>Lesson Progress
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Practical Lessons</span>
+                    <span class="fw-semibold">{{ practical_completed }}/{{ practical_total }}</span>
+                </div>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ practical_percentage }}%; background-color: #2E7D32;"
+                         aria-valuenow="{{ practical_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Theory Lessons</span>
+                    <span class="fw-semibold">{{ theory_completed }}/{{ theory_total }}</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ theory_percentage }}%; background-color: var(--primary-green);"
+                         aria-valuenow="{{ theory_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-cash-stack me-2" style="color: #2E7D32;"></i>Payment History
+                </h6>
+                <a href="{% url 'payments:create' %}?student={{ student.pk }}" class="btn btn-sm fw-semibold text-white" style="background-color: #2E7D32;">
+                    <i class="bi bi-plus me-1"></i>Record Payment
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th class="ps-3">Receipt No.</th>
+                                <th>Date</th>
+                                <th>Amount (KES)</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td class="ps-3">
+                                    <a href="{% url 'payments:detail' payment.pk %}" class="text-decoration-none" style="color: #2E7D32;">
+                                        {{ payment.receipt_number }}
+                                    </a>
+                                </td>
+                                <td>{{ payment.date|date:"d M Y" }}</td>
+                                <td class="fw-semibold">{{ payment.amount|floatformat:0 }}</td>
+                                <td>{{ payment.get_method_display }}</td>
+                                <td>
+                                    {% if payment.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                    {% elif payment.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-3 text-muted">No payments recorded</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if payments %}
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Total Paid:</span>
+                    <span class="fw-bold" style="color: #2E7D32;">KES {{ total_paid|floatformat:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Balance:</span>
+                    <span class="fw-bold" style="color: {% if outstanding_balance > 0 %}var(--primary-green){% else %}#2E7D32{% endif %};">
+                        KES {{ outstanding_balance|floatformat:0 }}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

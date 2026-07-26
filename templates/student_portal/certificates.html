@@ -1,0 +1,151 @@
+{% extends "student_portal_base.html" %}
+{% load static %}
+
+{% block title %}My Certificate - Green Light School{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+    <h4 class="mb-1">My Certificate</h4>
+    <p class="text-muted mb-0">View and download your driving licence certificate</p>
+</div>
+
+{% if licence_issued %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+                        <i class="bi bi-award text-white" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="mb-2" style="color: #2E7D32;">Congratulations!</h3>
+                    <p class="text-muted">You have successfully completed your driving course</p>
+                </div>
+
+                <div class="certificate-box mx-auto mb-4" style="max-width: 500px; border: 3px double #2E7D32; border-radius: 12px; padding: 40px;">
+                    <div class="mb-3">
+                        <h5 class="text-uppercase" style="color: #2E7D32; letter-spacing: 2px;">Green Light Driving School</h5>
+                        <hr style="border-color: #2E7D32;">
+                    </div>
+                    
+                    <h6 class="text-muted mb-4">This is to certify that</h6>
+                    
+                    <h3 class="mb-3" style="color: var(--primary-green);">{{ user.get_full_name }}</h3>
+                    
+                    <p class="mb-4">has successfully completed the driving course and is hereby issued with</p>
+                    
+                    <div class="mb-4">
+                        <h4 class="fw-bold" style="color: #2E7D32;">Driving Licence</h4>
+                        <p class="text-muted mb-1">Licence Number: <strong>{{ licence_number }}</strong></p>
+                        <p class="text-muted mb-1">Date of Issue: <strong>{{ licence_issue_date|date:"d M Y" }}</strong></p>
+                        <p class="text-muted mb-0">Licence Class: <strong>{{ licence_class|default:"B" }}</strong></p>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <div class="border-top pt-3">
+                                <small class="text-muted">Student Signature</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border-top pt-3">
+                                <small class="text-muted">Authorised Signatory</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    {% if certificate_file %}
+                        <a href="{{ certificate_file.url }}" class="btn btn-primary px-4" style="background-color: #2E7D32; border-color: #2E7D32;" download>
+                            <i class="bi bi-download me-1"></i> Download Certificate
+                        </a>
+                    {% endif %}
+                    <button onclick="window.print()" class="btn btn-outline-primary px-4">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-5">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 100px; height: 100px;">
+                    <i class="bi bi-award text-muted" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="mb-3" style="color: var(--primary-green);">Certificate Pending</h4>
+                <p class="text-muted mb-4">
+                    Your certificate will appear here once you complete all requirements. 
+                    Keep working hard on your driving lessons!
+                </p>
+                
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <h6 class="mb-3">Requirements to complete:</h6>
+                        <div class="text-start">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if requirements.pdl_approved %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Provisional Driving Licence (PDL)</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if requirements.theory_passed %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Theory Test</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if requirements.practical_passed %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Practical Test</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if requirements.driving_test_passed %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Driving Test</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                {% if requirements.all_lessons_completed %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>All Lessons Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'student_portal:progress' %}" class="btn btn-primary" style="background-color: #2E7D32; border-color: #2E7D32;">
+                    <i class="bi bi-graph-up me-1"></i> View My Progress
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

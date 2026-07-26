@@ -1,0 +1,139 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Student Progress - Green Light School{% endblock %}
+
+{% block page_title %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
+        <li class="breadcrumb-item active">Student Progress</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-0">Student Progress</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: #2E7D32;">{{ total_students|default:"0" }}</div>
+                <div class="small text-muted">Total Students</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold text-white">{{ completed_count|default:"0" }}</div>
+                <div class="small text-white">Completed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="background-color: var(--primary-green)20;">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: var(--primary-green);">{{ in_progress_count|default:"0" }}</div>
+                <div class="small text-muted">In Progress</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="background-color: #66BB6A20;">
+            <div class="card-body text-center">
+                <div class="display-6 fw-bold" style="color: #66BB6A;">{{ average_progress|default:0 }}%</div>
+                <div class="small text-muted">Avg Progress</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-bar-chart me-2" style="color: #2E7D32;"></i>
+            Student Progress Overview
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Instructor</th>
+                        <th>Lessons Done</th>
+                        <th>Total Lessons</th>
+                        <th>Progress</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                                    <i class="bi bi-person text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ student.user.get_full_name }}</div>
+                                    <small class="text-muted">{{ student.admission_number }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ student.course.name|default:"N/A" }}</td>
+                        <td>
+                            {% if student.instructor %}
+                                {{ student.instructor.user.get_full_name }}
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ student.completed_lessons|default:"0" }}</td>
+                        <td>{{ student.total_lessons|default:"0" }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 8px; width: 100px;">
+                                    <div class="progress-bar {% if student.progress_percentage >= 80 %}bg-success{% elif student.progress_percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" style="width: {{ student.progress_percentage|default:0 }}%;"></div>
+                                </div>
+                                <span class="small fw-bold">{{ student.progress_percentage|default:0 }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if student.status == 'completed' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i> Completed
+                                </span>
+                            {% elif student.status == 'in_progress' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-hourglass-split me-1"></i> In Progress
+                                </span>
+                            {% elif student.status == 'not_started' %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-pause-circle me-1"></i> Not Started
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-dark border">{{ student.get_status_display|default:"N/A" }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-bar-chart display-4 d-block mb-3"></i>
+                                <p class="mb-0">No student progress data available</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

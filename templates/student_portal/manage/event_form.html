@@ -1,0 +1,110 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Event{% else %}New Event{% endif %} - Green Light Driving School{% endblock %}
+
+{% block nav_portal_events %}active{% endblock %}
+
+{% block page_title %}{% if is_edit %}Edit Event{% else %}New Event{% endif %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">{% if is_edit %}Update event details{% else %}Create a new event{% endif %}</p>
+    </div>
+    <a href="{% url 'student_portal:manage_events' %}" class="btn btn-outline-secondary fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i>Back to List
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-calendar-event me-2" style="color: #2E7D32;"></i>{% if is_edit %}Edit Event{% else %}Event Details{% endif %}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                        <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label fw-semibold">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label for="id_category" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_event_date" class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+                            {{ form.event_date }}
+                            {% if form.event_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.event_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_event_time" class="form-label fw-semibold">Time</label>
+                            {{ form.event_time }}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="id_end_date" class="form-label fw-semibold">End Date (optional)</label>
+                            {{ form.end_date }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_branch" class="form-label fw-semibold">Branch (optional)</label>
+                            {{ form.branch }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_location" class="form-label fw-semibold">Location</label>
+                        {{ form.location }}
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label fw-semibold" for="id_is_active">Active</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.is_important }}
+                                <label class="form-check-label fw-semibold" for="id_is_important">Mark as Important</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'student_portal:manage_events' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                            <i class="bi bi-check-lg me-1"></i>{% if is_edit %}Update Event{% else %}Create Event{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

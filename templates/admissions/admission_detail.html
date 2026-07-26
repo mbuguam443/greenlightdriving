@@ -1,0 +1,191 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{{ admission.admission_number }} - Green Light Driving School{% endblock %}
+
+{% block nav_admissions %}active{% endblock %}
+
+{% block page_title %}Admission Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Admission Number: <strong style="color: #2E7D32;">{{ admission.admission_number }}</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'admissions:update' admission.pk %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+            <i class="bi bi-pencil-square me-1"></i>Update Status
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-person me-2" style="color: #2E7D32;"></i>Personal Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Full Name</small>
+                        <span class="fw-semibold">{{ admission.full_name }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Email</small>
+                        <span class="fw-semibold">{{ admission.email }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Phone Number</small>
+                        <span class="fw-semibold">{{ admission.phone }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Date of Birth</small>
+                        <span class="fw-semibold">{{ admission.date_of_birth|date:"d M Y" }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Gender</small>
+                        <span class="fw-semibold">{{ admission.get_gender_display }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">National ID / Passport</small>
+                        <span class="fw-semibold">{{ admission.national_id }}</span>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted d-block">Address</small>
+                        <span class="fw-semibold">{{ admission.address|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-book me-2" style="color: #2E7D32;"></i>Course & Schedule
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Course Category</small>
+                        <span class="fw-semibold">{{ admission.course.category.name }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Course</small>
+                        <span class="fw-semibold">{{ admission.course.name }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Course Fee</small>
+                        <span class="fw-semibold" style="color: #2E7D32;">KES {{ admission.course.fee|floatformat:0 }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Branch</small>
+                        <span class="fw-semibold">{{ admission.branch.name }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Preferred Schedule</small>
+                        <span class="fw-semibold">{{ admission.get_schedule_display }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Date Applied</small>
+                        <span class="fw-semibold">{{ admission.created_at|date:"d M Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-chat-left-text me-2" style="color: #2E7D32;"></i>Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if admission.notes %}
+                <p class="mb-0">{{ admission.notes|linebreaksbr }}</p>
+                {% else %}
+                <p class="text-muted mb-0">No notes added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-3">Status</h6>
+                {% if admission.status == 'PENDING' %}
+                <span class="badge fs-6 bg-warning text-dark px-3 py-2">Pending Review</span>
+                {% elif admission.status == 'APPROVED' %}
+                <span class="badge fs-6 bg-success px-3 py-2">Approved</span>
+                {% elif admission.status == 'REJECTED' %}
+                <span class="badge fs-6 bg-danger px-3 py-2">Rejected</span>
+                {% elif admission.status == 'ENROLLED' %}
+                <span class="badge fs-6 px-3 py-2" style="background-color: #2E7D32;">Enrolled</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-file-earmark me-2" style="color: #2E7D32;"></i>Documents
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Passport Photo</small>
+                    {% if admission.passport_photo %}
+                    <a href="{{ admission.passport_photo.url }}" target="_blank" class="text-decoration-none">
+                        <img src="{{ admission.passport_photo.url }}" class="rounded border" style="width: 100%; max-height: 200px; object-fit: cover;">
+                    </a>
+                    {% else %}
+                    <div class="text-muted p-3 text-center border rounded">No passport uploaded</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <small class="text-muted d-block mb-1">ID / Passport Image</small>
+                    {% if admission.national_id_image %}
+                    <a href="{{ admission.national_id_image.url }}" target="_blank" class="text-decoration-none">
+                        <img src="{{ admission.national_id_image.url }}" class="rounded border" style="width: 100%; max-height: 200px; object-fit: cover;">
+                    </a>
+                    {% else %}
+                    <div class="text-muted p-3 text-center border rounded">No ID image uploaded</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-clock-history me-2" style="color: #2E7D32;"></i>Timeline
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
+                         style="width: 10px; height: 10px; background-color: #2E7D32; margin-top: 5px;"></div>
+                    <div>
+                        <small class="fw-semibold d-block">Application Submitted</small>
+                        <small class="text-muted">{{ admission.created_at|date:"d M Y H:i" }}</small>
+                    </div>
+                </div>
+                {% if admission.status != 'PENDING' %}
+                <div class="d-flex align-items-start">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
+                         style="width: 10px; height: 10px; background-color: #2E7D32; margin-top: 5px;"></div>
+                    <div>
+                        <small class="fw-semibold d-block">Status Updated to {{ admission.get_status_display }}</small>
+                        <small class="text-muted">{{ admission.updated_at|date:"d M Y H:i" }}</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Instructors - Green Light School{% endblock %}
+
+{% block page_title %}Instructors{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage driving school instructors</p>
+    </div>
+    <a href="{% url 'instructors:create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>Add Instructor
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search by name, license number, or phone..."
+                           value="{{ request.GET.q|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="experience" class="form-select">
+                    <option value="">All Experience</option>
+                    <option value="junior" {% if request.GET.experience == 'junior' %}selected{% endif %}>Junior (0-2 yrs)</option>
+                    <option value="mid" {% if request.GET.experience == 'mid' %}selected{% endif %}>Mid (3-5 yrs)</option>
+                    <option value="senior" {% if request.GET.experience == 'senior' %}selected{% endif %}>Senior (6+ yrs)</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Instructor</th>
+                        <th>License Number</th>
+                        <th>Phone</th>
+                        <th>Experience</th>
+                        <th>Assigned Students</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for instructor in instructors %}
+                    <tr>
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background-color: rgba(46,125,50,0.1);">
+                                    {% if instructor.photo %}
+                                        <img src="{{ instructor.photo.url }}" alt="{{ instructor.user.get_full_name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <i class="bi bi-person" style="color: #2E7D32;"></i>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'instructors:detail' instructor.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                                    {{ instructor.user.get_full_name }}
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ instructor.license_number }}</span>
+                        </td>
+                        <td>{{ instructor.phone|default:"N/A" }}</td>
+                        <td>
+                            <span class="fw-semibold" style="color: #2E7D32;">{{ instructor.experience_years|default:"0" }} yrs</span>
+                        </td>
+                        <td>{{ instructor.assigned_students_count|default:"0" }}</td>
+                        <td>
+                            {% if instructor.is_active %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-check-circle me-1"></i> Active
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-x-circle me-1"></i> Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'instructors:detail' instructor.pk %}" class="btn btn-sm btn-outline-success" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'instructors:update' instructor.pk %}" class="btn btn-sm" style="border-color: #2E7D32; color: #2E7D32;" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'instructors:delete' instructor.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-person-badge display-4 d-block mb-3"></i>
+                                <p class="mb-2">No instructors found</p>
+                                <a href="{% url 'instructors:create' %}" class="btn btn-primary btn-sm" style="background-color: #2E7D32;">
+                                    <i class="bi bi-plus-circle me-1"></i> Add First Instructor
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Page {{ instructors.number }} of {{ instructors.paginator.num_pages }}
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if instructors.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ instructors.previous_page_number }}&q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in instructors.paginator.page_range %}
+                <li class="page-item {% if instructors.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if instructors.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ instructors.next_page_number }}&q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

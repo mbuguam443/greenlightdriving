@@ -1,0 +1,173 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Students - Green Light Driving School{% endblock %}
+
+{% block page_title %}Student Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage student registrations and records</p>
+    </div>
+    <a href="{% url 'students:create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>Add Student
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name, email or student number..."
+                           value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="branch" class="form-select">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if request.GET.branch == branch.id|slugify %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Student No.</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Course</th>
+                        <th>Branch</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td class="ps-3">
+                            <a href="{% url 'students:detail' student.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                                {{ student.student_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2"
+                                     style="width: 36px; height: 36px; background-color: rgba(46,125,50,0.1); flex-shrink: 0;">
+                                    {% if student.user.passport_photo %}
+                                    <img src="{{ student.user.passport_photo.url }}" class="rounded-circle" width="36" height="36" style="object-fit: cover;">
+                                    {% else %}
+                                    <span style="color: #2E7D32; font-size: 0.75rem; font-weight: 600;">{{ student.user.first_name|first|upper }}{{ student.user.last_name|first|upper }}</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <span class="fw-semibold">{{ student.user.get_full_name }}</span>
+                                    <br><small class="text-muted">{{ student.user.phone|default:"-" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><small class="text-muted">{{ student.user.email }}</small></td>
+                        <td>{{ student.course.name|default:"-" }}</td>
+                        <td>{{ student.branch.name|default:"-" }}</td>
+                        <td>
+                            {% if student.status == 'ACTIVE' %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-check-circle me-1"></i> Active
+                                </span>
+                            {% elif student.status == 'GRADUATED' %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-mortarboard me-1"></i> Graduated
+                                </span>
+                            {% elif student.status == 'SUSPENDED' %}
+                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
+                                    <i class="bi bi-pause-circle me-1"></i> Suspended
+                                </span>
+                            {% elif student.status == 'DROPPED' %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-x-circle me-1"></i> Dropped
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                    {{ student.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'students:detail' student.pk %}" class="btn btn-sm btn-outline-success" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'students:update' student.pk %}" class="btn btn-sm" style="border-color: #2E7D32; color: #2E7D32;" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'students:delete' student.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-people display-4 d-block mb-3"></i>
+                                <p class="mb-2">No students found</p>
+                                <a href="{% url 'students:create' %}" class="btn btn-primary btn-sm" style="background-color: #2E7D32;">
+                                    <i class="bi bi-plus-circle me-1"></i> Add First Student
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if students.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ students.start_index }} to {{ students.end_index }} of {{ students.paginator.count }} students
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if students.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ students.previous_page_number }}&search={{ search_query|default:'' }}&status={{ current_status|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in students.paginator.page_range %}
+                <li class="page-item {% if students.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&status={{ current_status|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if students.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ students.next_page_number }}&search={{ search_query|default:'' }}&status={{ current_status|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

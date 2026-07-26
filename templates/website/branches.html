@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block title %}Our Branches - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Find a Greenlight Driving School branch near you. Multiple locations across Kenya for your convenience.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        color: #fff; padding: 120px 0 60px;
+        text-align: center;
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.8rem; margin-bottom: 0.5rem; }
+    .page-header p { font-size: 1.15rem; opacity: 0.9; max-width: 500px; margin: 0 auto; }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+    .breadcrumb-item a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .breadcrumb-item a:hover { color: #fff; }
+    .breadcrumb-item.active { color: var(--light-green); }
+
+    .map-wrapper {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border: 3px solid #fff;
+    }
+    #branch-map {
+        width: 100%;
+        height: 450px;
+    }
+    .map-info-bar {
+        background: #fff;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .map-info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.88rem;
+        color: #555;
+    }
+    .map-info-item i {
+        color: var(--primary-green);
+        font-size: 0.9rem;
+    }
+    .map-info-item strong {
+        color: var(--primary-green);
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    }
+    .leaflet-popup-content {
+        margin: 12px 16px !important;
+        font-family: inherit !important;
+    }
+    .popup-title {
+        font-weight: 700;
+        color: var(--primary-green);
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+    }
+    .popup-town {
+        color: #888;
+        font-size: 0.82rem;
+        margin-bottom: 2px;
+    }
+    .popup-phone {
+        color: #555;
+        font-size: 0.82rem;
+    }
+    .popup-link {
+        display: inline-block;
+        margin-top: 6px;
+        color: var(--primary-green);
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-decoration: none;
+    }
+    .popup-link:hover { text-decoration: underline; }
+
+    .branch-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #e8f5e9;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .branch-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(46,125,50,0.1);
+    }
+    .branch-card-img {
+        height: 200px; overflow: hidden;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .branch-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .branch-card-body { padding: 1.5rem; }
+    .branch-card-body h5 {
+        font-weight: 700; color: var(--primary-green); margin-bottom: 0.8rem;
+    }
+    .branch-info-item {
+        display: flex; align-items: flex-start; gap: 0.6rem;
+        padding: 0.35rem 0; font-size: 0.9rem; color: #555;
+    }
+    .branch-info-item i {
+        color: var(--primary-green); font-size: 0.95rem; margin-top: 3px; min-width: 18px;
+    }
+    .btn-details {
+        display: inline-block;
+        background: var(--primary-green);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-size: 0.88rem;
+        transition: all 0.2s ease;
+    }
+    .btn-details:hover {
+        background: var(--primary-green-dark);
+        color: #fff;
+        transform: translateY(-1px);
+    }
+    .btn-directions {
+        display: inline-block;
+        border: 2px solid #ddd;
+        color: #666;
+        font-weight: 500;
+        padding: 0.45rem 1.1rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-size: 0.88rem;
+        transition: all 0.2s ease;
+    }
+    .btn-directions:hover {
+        border-color: var(--primary-green);
+        color: var(--primary-green);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center mb-3">
+                <li class="breadcrumb-item"><a href="{% url 'website:home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Branches</li>
+            </ol>
+        </nav>
+        <h1>Our Branches</h1>
+        <p>Find a Greenlight branch near you. We're always close by.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        {% if branches %}
+        <div class="map-wrapper mb-5">
+            <div id="branch-map"></div>
+            <div class="map-info-bar">
+                <div class="map-info-item">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span><strong>{{ branches|length }}</strong> branch{{ branches|length|pluralize }} in Kenya</span>
+                </div>
+                {% for branch in branches %}
+                <div class="map-info-item">
+                    <i class="bi bi-pin-map"></i>
+                    <span>{{ branch.name }} &mdash; {{ branch.town }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <h2 class="section-title" style="color:var(--primary-green);">All Branches</h2>
+        </div>
+
+        <div class="row g-4">
+            {% for branch in branches %}
+            <div class="col-lg-4 col-md-6">
+                <div class="branch-card">
+                    <div class="branch-card-img">
+                        {% if branch.image %}
+                        <img src="{{ branch.image.url }}" alt="{{ branch.name }}" loading="lazy">
+                        {% else %}
+                        <i class="bi bi-geo-alt-fill" style="font-size:3.5rem;color:var(--primary-green);opacity:0.3;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="branch-card-body">
+                        <h5>{{ branch.name }}</h5>
+                        <div class="branch-info-item">
+                            <i class="bi bi-pin-map"></i>
+                            <span>{{ branch.town }}</span>
+                        </div>
+                        <div class="branch-info-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>{{ branch.address }}</span>
+                        </div>
+                        <div class="branch-info-item">
+                            <i class="bi bi-telephone"></i>
+                            <span>{{ branch.phone }}</span>
+                        </div>
+                        {% if branch.email %}
+                        <div class="branch-info-item">
+                            <i class="bi bi-envelope"></i>
+                            <span>{{ branch.email }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex gap-2 mt-3">
+                            <a href="{% url 'website:branch_detail' branch.slug %}" class="btn-details">
+                                <i class="bi bi-info-circle me-1"></i>Details
+                            </a>
+                            {% if branch.latitude and branch.longitude %}
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{ branch.latitude }},{{ branch.longitude }}" target="_blank" class="btn-directions">
+                                <i class="bi bi-signpost-2 me-1"></i>Directions
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-geo-alt" style="font-size:4rem;color:#ddd;"></i>
+            <h4 class="mt-3" style="color:#999;">No Branches Available</h4>
+            <p class="text-muted">Please check back later for branch information.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% if branches %}
+<script>
+(function() {
+    var map = L.map('branch-map').setView([-1.19, 36.86], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 18
+    }).addTo(map);
+
+    var branches = [
+        {% for branch in branches %}
+        {
+            name: "{{ branch.name|escapejs }}",
+            town: "{{ branch.town|escapejs }}",
+            address: "{{ branch.address|escapejs }}",
+            phone: "{{ branch.phone|escapejs }}",
+            lat: {{ branch.latitude|default:"-1.2921" }},
+            lng: {{ branch.longitude|default:"36.8219" }},
+            detailUrl: "{% url 'website:branch_detail' branch.slug %}",
+            dirUrl: "https://www.google.com/maps/dir/?api=1&destination={{ branch.latitude }},{{ branch.longitude }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    var greenIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+
+    var bounds = [];
+
+    branches.forEach(function(b) {
+        var marker = L.marker([b.lat, b.lng], { icon: greenIcon }).addTo(map);
+
+        var popup =
+            '<div class="popup-title">' + b.name + '</div>' +
+            '<div class="popup-town"><i class="bi bi-geo-alt"></i> ' + b.town + '</div>' +
+            '<div class="popup-phone"><i class="bi bi-telephone"></i> ' + b.phone + '</div>' +
+            '<a class="popup-link" href="' + b.detailUrl + '">View Details &rarr;</a><br>' +
+            '<a class="popup-link" href="' + b.dirUrl + '" target="_blank">Get Directions &rarr;</a>';
+
+        marker.bindPopup(popup);
+        bounds.push([b.lat, b.lng]);
+    });
+
+    if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+    } else if (bounds.length === 1) {
+        map.setView(bounds[0], 14);
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

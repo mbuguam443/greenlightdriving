@@ -1,0 +1,80 @@
+:root {
+    --primary-green: #2E7D32;
+    --primary-green-dark: #1B5E20;
+    --light-green: #66BB6A;
+    --white: #FFFFFF;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    --shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    --radius: 0.5rem;
+    --radius-lg: 1rem;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #333;
+    scroll-behavior: smooth;
+    background-color: var(--white);
+}
+
+a { color: var(--primary-green); text-decoration: none; }
+a:hover { color: var(--primary-green-dark); }
+
+.btn-primary { background-color: var(--primary-green); border-color: var(--primary-green); color: var(--white); }
+.btn-primary:hover { background-color: var(--primary-green-dark); border-color: var(--primary-green-dark); color: var(--white); }
+.btn-success { background-color: var(--light-green); border-color: var(--light-green); color: var(--white); }
+.btn-success:hover { background-color: var(--primary-green); border-color: var(--primary-green); color: var(--white); }
+.btn-danger { background-color: var(--primary-green); border-color: var(--primary-green); color: var(--white); }
+.btn-danger:hover { background-color: var(--primary-green-dark); border-color: var(--primary-green-dark); color: var(--white); }
+
+.section-padding { padding: 5rem 0; }
+.section-title { font-size: 2rem; font-weight: 700; color: #333; margin-bottom: 1rem; }
+.section-subtitle { color: #666; font-size: 1.1rem; margin-bottom: 3rem; }
+
+.card { border: none; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s; }
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+.hero-section {
+    background: linear-gradient(135deg, rgba(46,125,50,0.92), rgba(27,94,32,0.88));
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    color: var(--white);
+}
+.hero-section h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.2; }
+.hero-section p { font-size: 1.25rem; opacity: 0.95; }
+
+.feature-box { text-align: center; padding: 2rem; border-radius: var(--radius-lg); background: var(--white); box-shadow: var(--shadow-sm); height: 100%; border: 1px solid var(--gray-200); }
+.feature-box .icon { font-size: 3rem; color: var(--primary-green); margin-bottom: 1rem; }
+.feature-box h5 { font-weight: 600; color: #333; }
+
+.stat-card { text-align: center; padding: 2rem; border-radius: var(--radius-lg); background: var(--white); box-shadow: var(--shadow-sm); border-top: 4px solid var(--primary-green); }
+.stat-card .number { font-size: 2.5rem; font-weight: 800; color: var(--primary-green); }
+.stat-card .label { color: #666; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+
+.cta-section { background: var(--primary-green); color: var(--white); padding: 4rem 0; }
+.cta-section h2 { font-weight: 700; }
+
+.footer { background: var(--primary-green); color: var(--white); padding-top: 4rem; }
+.footer h6 { color: var(--white); font-weight: 600; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 1px; }
+.footer a { color: rgba(255,255,255,0.8); transition: color 0.2s; }
+.footer a:hover { color: var(--white); }
+.footer-bottom { background: rgba(0,0,0,0.1); padding: 1rem 0; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+
+.breadcrumb-item + .breadcrumb-item::before { content: "/"; }
+
+.badge-green { background: var(--primary-green); }
+.page-header { background: var(--primary-green); color: var(--white); padding: 3rem 0; margin-bottom: 2rem; }
+.page-header h1 { font-weight: 700; }
+.page-header .breadcrumb { background: transparent; margin-bottom: 0; }
+.page-header .breadcrumb-item a { color: rgba(255,255,255,0.8); }
+.page-header .breadcrumb-item.active { color: var(--white); }
+.page-header .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+.btn-apply { background-color: var(--primary-green); color: var(--white); border: none; padding: 0.6rem 1.5rem; border-radius: 25px; font-weight: 600; }
+.btn-apply:hover { background-color: var(--primary-green-dark); color: var(--white); }
+
+@media (max-width: 991.98px) {
+    .hero-section h1 { font-size: 2.2rem; }
+}

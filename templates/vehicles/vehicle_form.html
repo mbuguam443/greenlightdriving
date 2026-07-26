@@ -1,0 +1,177 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit Vehicle{% else %}Add Vehicle{% endif %} - Green Light School{% endblock %}
+
+{% block page_title %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'vehicles:list' %}">Vehicles</a></li>
+        <li class="breadcrumb-item active">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Vehicle</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-0">{% if form.instance.pk %}Edit Vehicle{% else %}Add New Vehicle{% endif %}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-car-front me-2" style="color: #2E7D32;"></i>
+                    Vehicle Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.reg_number.id_for_label }}" class="form-label">
+                                Registration Number <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reg_number }}
+                            {% if form.reg_number.errors %}
+                                <div class="invalid-feedback d-block">{{ form.reg_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.make.id_for_label }}" class="form-label">
+                                Make <span class="text-danger">*</span>
+                            </label>
+                            {{ form.make }}
+                            {% if form.make.errors %}
+                                <div class="invalid-feedback d-block">{{ form.make.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.model.id_for_label }}" class="form-label">
+                                Model <span class="text-danger">*</span>
+                            </label>
+                            {{ form.model }}
+                            {% if form.model.errors %}
+                                <div class="invalid-feedback d-block">{{ form.model.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.year.id_for_label }}" class="form-label">
+                                Year <span class="text-danger">*</span>
+                            </label>
+                            {{ form.year }}
+                            {% if form.year.errors %}
+                                <div class="invalid-feedback d-block">{{ form.year.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">
+                                Category <span class="text-danger">*</span>
+                            </label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">{{ form.category.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.color.id_for_label }}" class="form-label">Color</label>
+                            {{ form.color }}
+                            {% if form.color.errors %}
+                                <div class="invalid-feedback d-block">{{ form.color.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.engine_number.id_for_label }}" class="form-label">Engine Number</label>
+                            {{ form.engine_number }}
+                            {% if form.engine_number.errors %}
+                                <div class="invalid-feedback d-block">{{ form.engine_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.chassis_number.id_for_label }}" class="form-label">Chassis Number</label>
+                            {{ form.chassis_number }}
+                            {% if form.chassis_number.errors %}
+                                <div class="invalid-feedback d-block">{{ form.chassis_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.instructor.id_for_label }}" class="form-label">Assigned Instructor</label>
+                            {{ form.instructor }}
+                            {% if form.instructor.errors %}
+                                <div class="invalid-feedback d-block">{{ form.instructor.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.branch.id_for_label }}" class="form-label">Branch</label>
+                            {{ form.branch }}
+                            {% if form.branch.errors %}
+                                <div class="invalid-feedback d-block">{{ form.branch.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.insurance_expiry.id_for_label }}" class="form-label">Insurance Expiry</label>
+                            {{ form.insurance_expiry }}
+                            {% if form.insurance_expiry.errors %}
+                                <div class="invalid-feedback d-block">{{ form.insurance_expiry.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.next_service_date.id_for_label }}" class="form-label">Next Service Date</label>
+                            {{ form.next_service_date }}
+                            {% if form.next_service_date.errors %}
+                                <div class="invalid-feedback d-block">{{ form.next_service_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-check form-switch">
+                                {{ form.is_available }}
+                                <label class="form-check-label" for="{{ form.is_available.id_for_label }}">
+                                    Vehicle is available for lessons
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'vehicles:list' %}" class="btn btn-light">Cancel</a>
+                        <button type="submit" class="btn btn-primary" style="background-color: #2E7D32; border-color: #2E7D32;">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {% if form.instance.pk %}Update Vehicle{% else %}Add Vehicle{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

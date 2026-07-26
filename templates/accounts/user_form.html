@@ -1,0 +1,122 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit User{% else %}Add User{% endif %} - Green Light Driving School{% endblock %}
+
+{% block page_title %}{% if form.instance.pk %}Edit User{% else %}Add New User{% endif %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-person-{% if form.instance.pk %}gear{% else %}plus{% endif %} me-2" style="color: #2E7D32;"></i>
+                    {% if form.instance.pk %}Update User Information{% else %}New User Details{% endif %}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_first_name" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" id="id_first_name" class="form-control"
+                                   value="{{ form.first_name.value|default:'' }}" required>
+                            {% if form.first_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_last_name" class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" id="id_last_name" class="form-control"
+                                   value="{{ form.last_name.value|default:'' }}" required>
+                            {% if form.last_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" id="id_email" class="form-control"
+                                   value="{{ form.email.value|default:'' }}" required>
+                            {% if form.email.errors %}
+                            <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_phone_number" class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" name="phone_number" id="id_phone_number" class="form-control"
+                                   value="{{ form.phone_number.value|default:'' }}">
+                            {% if form.phone_number.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_role" class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
+                            <select name="role" id="id_role" class="form-select" required>
+                                <option value="">Select Role</option>
+                                {% for value, label in role_choices %}
+                                <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.role.errors %}
+                            <div class="text-danger small mt-1">{{ form.role.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_branch" class="form-label fw-semibold">Branch</label>
+                            <select name="branch" id="id_branch" class="form-select">
+                                <option value="">Select Branch</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if form.branch.value == branch.id %}selected{% endif %}>
+                                    {{ branch.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_profile_photo" class="form-label fw-semibold">Profile Photo</label>
+                            <input type="file" name="profile_photo" id="id_profile_photo" class="form-control" accept="image/*">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_is_active" class="form-label fw-semibold">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active"
+                                       {% if form.is_active.value or not form.instance.pk %}checked{% endif %}>
+                                <label class="form-check-label" for="id_is_active">Active</label>
+                            </div>
+                        </div>
+
+                        {% if not form.instance.pk %}
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                A temporary password will be generated and sent to the user's email.
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                            <i class="bi bi-check-lg me-1"></i>
+                            {% if form.instance.pk %}Update User{% else %}Create User{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

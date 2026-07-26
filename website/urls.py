@@ -1,0 +1,52 @@
+from django.urls import path
+from . import views
+
+app_name = 'website'
+
+urlpatterns = [
+    path('', views.HomeView.as_view(), name='home'),
+    path('about/', views.AboutView.as_view(), name='about'),
+    path('courses/', views.CourseListView.as_view(), name='courses'),
+    path('courses/<slug:slug>/', views.CourseDetailView.as_view(), name='course_detail'),
+    path('pricing/', views.PricingView.as_view(), name='pricing'),
+    path('branches/', views.BranchListView.as_view(), name='branches'),
+    path('branches/<slug:slug>/', views.BranchDetailView.as_view(), name='branch_detail'),
+    path('gallery/', views.GalleryView.as_view(), name='gallery'),
+    path('testimonials/', views.TestimonialListView.as_view(), name='testimonials'),
+    path('faq/', views.FAQListView.as_view(), name='faq'),
+    path('blog/', views.BlogListView.as_view(), name='blog'),
+    path('blog/<slug:slug>/', views.BlogDetailView.as_view(), name='blog_detail'),
+    path('contact/', views.ContactView.as_view(), name='contact'),
+    path('sitemap.xml', views.SitemapView.as_view(), name='sitemap'),
+    path('robots.txt', views.RobotsTxtView.as_view(), name='robots_txt'),
+
+    # Management
+    path('manage/', views.WebIndexView.as_view(), name='manage_index'),
+    path('manage/categories/', views.CategoryListView.as_view(), name='manage_categories'),
+    path('manage/categories/add/', views.CategoryCreateView.as_view(), name='manage_category_add'),
+    path('manage/categories/<int:pk>/edit/', views.CategoryUpdateView.as_view(), name='manage_category_edit'),
+    path('manage/categories/<int:pk>/delete/', views.CategoryDeleteView.as_view(), name='manage_category_delete'),
+    path('manage/courses/', views.CourseListView2.as_view(), name='manage_courses'),
+    path('manage/courses/add/', views.CourseCreateView.as_view(), name='manage_course_add'),
+    path('manage/courses/<int:pk>/edit/', views.CourseUpdateView.as_view(), name='manage_course_edit'),
+    path('manage/courses/<int:pk>/delete/', views.CourseDeleteView.as_view(), name='manage_course_delete'),
+    path('manage/blog/', views.BlogListView2.as_view(), name='manage_blog'),
+    path('manage/blog/add/', views.BlogCreateView.as_view(), name='manage_blog_add'),
+    path('manage/blog/<int:pk>/edit/', views.BlogUpdateView.as_view(), name='manage_blog_edit'),
+    path('manage/blog/<int:pk>/delete/', views.BlogDeleteView.as_view(), name='manage_blog_delete'),
+    path('manage/testimonials/', views.TestimonialListView2.as_view(), name='manage_testimonials'),
+    path('manage/testimonials/add/', views.TestimonialCreateView.as_view(), name='manage_testimonial_add'),
+    path('manage/testimonials/<int:pk>/edit/', views.TestimonialUpdateView.as_view(), name='manage_testimonial_edit'),
+    path('manage/testimonials/<int:pk>/delete/', views.TestimonialDeleteView.as_view(), name='manage_testimonial_delete'),
+    path('manage/faqs/', views.FAQListView2.as_view(), name='manage_faqs'),
+    path('manage/faqs/add/', views.FAQCreateView.as_view(), name='manage_faq_add'),
+    path('manage/faqs/<int:pk>/edit/', views.FAQUpdateView.as_view(), name='manage_faq_edit'),
+    path('manage/faqs/<int:pk>/delete/', views.FAQDeleteView.as_view(), name='manage_faq_delete'),
+    path('manage/gallery/', views.GalleryListView2.as_view(), name='manage_gallery'),
+    path('manage/gallery/add/', views.GalleryCreateView.as_view(), name='manage_gallery_add'),
+    path('manage/gallery/<int:pk>/edit/', views.GalleryUpdateView.as_view(), name='manage_gallery_edit'),
+    path('manage/gallery/<int:pk>/delete/', views.GalleryDeleteView.as_view(), name='manage_gallery_delete'),
+    path('manage/messages/', views.MessageListView.as_view(), name='manage_messages'),
+    path('manage/messages/<int:pk>/', views.MessageDetailView.as_view(), name='manage_message_detail'),
+    path('manage/messages/<int:pk>/delete/', views.MessageDeleteView.as_view(), name='manage_message_delete'),
+]

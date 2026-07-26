@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Get in touch with Greenlight Driving School. Send us a message, call us, or visit one of our branches in Kimbo, Ruiru, or Waithaka.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact Greenlight Defensive Driving School",
+    "mainEntity": {
+        "@type": "DrivingSchool",
+        "name": "Greenlight Defensive Driving School",
+        "telephone": "+254700000000",
+        "email": "info@greenlightschool.co.ke"
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(46,125,50,0.92) 0%, rgba(38,50,56,0.88) 100%);
+        color: #fff; padding: 100px 0 50px;
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.5rem; }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+    .breadcrumb-item a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .breadcrumb-item a:hover { color: #fff; }
+    .breadcrumb-item.active { color: var(--light-green); }
+
+    .contact-form-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 2.5rem;
+        border: 1px solid #e8f5e9;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #e0e0e0;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 0.2rem rgba(46,125,50,0.15);
+    }
+    .form-label {
+        font-weight: 600; color: var(--primary-green); font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+    .btn-submit {
+        background: var(--primary-green); color: #fff; font-weight: 600;
+        padding: 0.8rem 2.5rem; border-radius: 50px; border: none;
+        font-size: 1rem; transition: all 0.3s ease;
+    }
+    .btn-submit:hover { background: #1b5e20; color: #fff; transform: translateY(-2px); }
+
+    .contact-info-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid #e8f5e9;
+        height: 100%;
+    }
+    .contact-info-card h5 {
+        font-weight: 700; color: var(--primary-green); margin-bottom: 1.2rem;
+        padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-green);
+    }
+    .contact-info-item {
+        display: flex; align-items: flex-start; gap: 1rem;
+        padding: 0.8rem 0;
+    }
+    .contact-info-icon {
+        width: 48px; height: 48px; border-radius: 50%;
+        background: #e8f5e9; display: flex; align-items: center;
+        justify-content: center; color: var(--primary-green);
+        font-size: 1.1rem; min-width: 48px;
+    }
+    .contact-info-label { font-size: 0.82rem; color: #999; }
+    .contact-info-value { font-weight: 600; color: var(--primary-green); }
+
+    .branch-mini-card {
+        background: #f8fdf8;
+        border-radius: 10px;
+        padding: 1rem;
+        border: 1px solid #e8f5e9;
+        margin-bottom: 0.8rem;
+    }
+    .branch-mini-card h6 {
+        font-weight: 700; color: var(--primary-green); margin-bottom: 0.3rem; font-size: 0.92rem;
+    }
+    .branch-mini-card p { margin: 0; font-size: 0.85rem; color: #666; }
+
+    .map-placeholder {
+        background: #f5f5f5; border-radius: 12px; height: 200px;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px dashed #ddd; margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'website:home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Contact</li>
+            </ol>
+        </nav>
+        <h1 class="text-center">Contact Us</h1>
+        <p class="text-center mb-0" style="opacity:0.85;">We'd love to hear from you. Get in touch today.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="contact-form-card">
+                    <h4 style="font-weight:700;color:var(--primary-green);margin-bottom:1.5rem;">
+                        <i class="bi bi-envelope-paper me-2" style="color:var(--primary-green);"></i>Send Us a Message
+                    </h4>
+                    <form method="post" action="{% url 'website:contact' %}">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" name="name" class="form-control" placeholder="Your name"
+                                       value="{{ form_data.name|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address *</label>
+                                <input type="email" name="email" class="form-control" placeholder="your@email.com"
+                                       value="{{ form_data.email|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" name="phone" class="form-control" placeholder="+254 7XX XXX XXX"
+                                       value="{{ form_data.phone|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Subject *</label>
+                                <input type="text" name="subject" class="form-control" placeholder="How can we help?"
+                                       value="{{ form_data.subject|default:'' }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Message *</label>
+                                <textarea name="message" class="form-control" rows="5" placeholder="Write your message here..." required>{{ form_data.message|default:'' }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-submit">
+                                    <i class="bi bi-send me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="contact-info-card mb-4">
+                    <h5><i class="bi bi-info-circle me-2" style="color:var(--primary-green);"></i>Contact Information</h5>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="bi bi-telephone"></i></div>
+                        <div>
+                            <div class="contact-info-label">Phone</div>
+                            <div class="contact-info-value">{{ site_context.phone|default:"+254 700 000 000" }}</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="bi bi-envelope"></i></div>
+                        <div>
+                            <div class="contact-info-label">Email</div>
+                            <div class="contact-info-value">{{ site_context.email|default:"info@greenlightschool.co.ke" }}</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="bi bi-geo-alt"></i></div>
+                        <div>
+                            <div class="contact-info-label">Address</div>
+                            <div class="contact-info-value">{{ site_context.address|default:"Nairobi, Kenya" }}</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="bi bi-clock"></i></div>
+                        <div>
+                            <div class="contact-info-label">Working Hours</div>
+                            <div class="contact-info-value">Mon-Fri: 7AM-6PM<br>Sat: 8AM-4PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if branches %}
+                <div class="contact-info-card">
+                    <h5><i class="bi bi-geo-alt me-2" style="color:var(--primary-green);"></i>Our Branches</h5>
+                    {% for branch in branches %}
+                    <div class="branch-mini-card">
+                        <h6>{{ branch.name }}</h6>
+                        <p><i class="bi bi-pin-map me-1" style="color:var(--primary-green);"></i>{{ branch.town }} - {{ branch.address|truncatewords:8 }}</p>
+                        <p><i class="bi bi-telephone me-1" style="color:var(--primary-green);"></i>{{ branch.phone }}</p>
+                    </div>
+                    {% endfor %}
+                    <div class="map-placeholder">
+                        <div class="text-center">
+                            <i class="bi bi-map" style="font-size:2rem;color:#ccc;"></i>
+                            <p class="text-muted mt-1 mb-0" style="font-size:0.85rem;">Visit individual branch pages for maps.</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

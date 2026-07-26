@@ -1,0 +1,284 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}M-Pesa Transactions - Green Light Driving School{% endblock %}
+
+{% block nav_payments %}active{% endblock %}
+
+{% block page_title %}M-Pesa Transactions{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">All M-Pesa STK Push transactions</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                        <i class="bi bi-phone-vibrate fs-4" style="color: #2E7D32;"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Total</div>
+                        <div class="h5 mb-0 fw-bold" style="color: #2E7D32;">{{ total_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                        <i class="bi bi-check-circle fs-4" style="color: #2E7D32;"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Successful</div>
+                        <div class="h5 mb-0 fw-bold" style="color: #2E7D32;">KES {{ total_success|floatformat:0 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(255,193,7,0.1);">
+                        <i class="bi bi-hourglass-split fs-4" style="color: #FBC02D;"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Pending</div>
+                        <div class="h5 mb-0 fw-bold" style="color: #FBC02D;">{{ total_pending }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(220,53,69,0.1);">
+                        <i class="bi bi-x-circle fs-4" style="color: #dc3545;"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Failed</div>
+                        <div class="h5 mb-0 fw-bold" style="color: #dc3545;">{{ total_failed }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search phone, receipt, student..."
+                           value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="SUCCESS" {% if status_filter == 'SUCCESS' %}selected{% endif %}>Success</option>
+                    <option value="FAILED" {% if status_filter == 'FAILED' %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Student</th>
+                        <th>Phone</th>
+                        <th>Amount</th>
+                        <th>M-Pesa Receipt</th>
+                        <th>Reference</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td class="ps-3">
+                            <div class="fw-semibold">{{ tx.student.user.get_full_name }}</div>
+                            <small class="text-muted">{{ tx.student.student_number }}</small>
+                        </td>
+                        <td>{{ tx.phone_number }}</td>
+                        <td class="fw-semibold" style="color: #2E7D32;">KES {{ tx.amount|floatformat:0 }}</td>
+                        <td>
+                            {% if tx.mpesa_receipt %}
+                            <code style="color: #2E7D32;">{{ tx.mpesa_receipt }}</code>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ tx.account_reference }}</small></td>
+                        <td>
+                            {% if tx.status == 'SUCCESS' %}
+                            <span class="badge" style="background-color: #2E7D32;">Success</span>
+                            {% elif tx.status == 'PENDING' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif tx.status == 'FAILED' %}
+                            <span class="badge bg-danger">Failed</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ tx.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if tx.status == 'PENDING' and tx.checkout_request_id %}
+                            <button class="btn btn-sm btn-outline-success check-status-btn" data-pk="{{ tx.pk }}">
+                                <i class="bi bi-arrow-repeat"></i> Check
+                            </button>
+                            {% endif %}
+                        </td>
+                        <td>{{ tx.created_at|date:"d M Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-phone" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No M-Pesa transactions yet</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if transactions.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ transactions.start_index }} to {{ transactions.end_index }} of {{ transactions.paginator.count }} transactions
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if transactions.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ transactions.previous_page_number }}&status={{ status_filter|default:'' }}&search={{ search_query|default:'' }}">Prev</a>
+                </li>
+                {% endif %}
+                {% for num in transactions.paginator.page_range %}
+                <li class="page-item {% if transactions.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&status={{ status_filter|default:'' }}&search={{ search_query|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if transactions.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ transactions.next_page_number }}&status={{ status_filter|default:'' }}&search={{ search_query|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Query Result Modal -->
+<div class="modal fade" id="queryResultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0" id="queryModalHeader">
+                <h5 class="modal-title" id="queryModalTitle">
+                    <i class="bi bi-phone-vibrate me-2" style="color: #2E7D32;"></i>M-Pesa Query Result
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="queryAlertBox" class="alert border-0 mb-0" role="alert"></div>
+                <div id="queryDetails" class="mt-3" style="display:none;">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr><td class="text-muted" style="width:140px;">Result Code</td><td class="fw-bold" id="qrCode"></td></tr>
+                        <tr><td class="text-muted">Description</td><td id="qrDesc"></td></tr>
+                        <tr><td class="text-muted">New Status</td><td id="qrStatus"></td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-sm" style="background-color: #2E7D32; color: white;" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showQueryModal(type, title, message, code, desc, status) {
+    var alertBox = document.getElementById('queryAlertBox');
+    var details = document.getElementById('queryDetails');
+    alertBox.className = 'alert border-0 mb-0 alert-' + type;
+    alertBox.innerHTML = '<strong>' + title + '</strong><br>' + message;
+    if (code !== undefined) {
+        details.style.display = 'block';
+        document.getElementById('qrCode').textContent = code;
+        document.getElementById('qrDesc').textContent = desc;
+        document.getElementById('qrStatus').innerHTML = status === 'SUCCESS'
+            ? '<span class="badge" style="background-color:#2E7D32;">Success</span>'
+            : status === 'FAILED'
+            ? '<span class="badge bg-danger">Failed</span>'
+            : '<span class="badge bg-warning text-dark">' + status + '</span>';
+    } else {
+        details.style.display = 'none';
+    }
+    var modal = new bootstrap.Modal(document.getElementById('queryResultModal'));
+    modal.show();
+}
+
+document.querySelectorAll('.check-status-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var pk = this.dataset.pk;
+        var self = this;
+        self.disabled = true;
+        self.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        fetch('/payments/mpesa/query/' + pk + '/')
+            .then(function(r) {
+                if (!r.ok) {
+                    return r.text().then(function(t) { throw new Error(t); });
+                }
+                return r.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    var type = data.new_status === 'SUCCESS' ? 'success' : data.new_status === 'FAILED' ? 'danger' : 'warning';
+                    var title = data.new_status === 'SUCCESS' ? 'Payment Confirmed' : data.new_status === 'FAILED' ? 'Payment Failed' : 'Still Pending';
+                    showQueryModal(type, title, data.result_desc, data.result_code, data.result_desc, data.new_status);
+                    setTimeout(function() { location.reload(); }, 3000);
+                } else {
+                    showQueryModal('danger', 'Query Error', data.message);
+                    self.disabled = false;
+                    self.innerHTML = '<i class="bi bi-arrow-repeat"></i> Check';
+                }
+            })
+            .catch(function(e) {
+                showQueryModal('danger', 'Error', e.message);
+                self.disabled = false;
+                self.innerHTML = '<i class="bi bi-arrow-repeat"></i> Check';
+            });
+    });
+});
+</script>
+{% endblock %}

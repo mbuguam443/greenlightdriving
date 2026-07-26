@@ -1,0 +1,117 @@
+{% extends "student_portal_base.html" %}
+{% load static %}
+
+{% block title %}M-Pesa Payment - Green Light School{% endblock %}
+
+{% block nav_portal_payments %}active{% endblock %}
+
+{% block page_title %}Pay with M-Pesa{% endblock %}
+{% block breadcrumb_active %}M-Pesa Payment{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+    <h4 class="mb-1">Pay with M-Pesa</h4>
+    <p class="text-muted mb-0">Use M-Pesa STK Push to pay your school fees securely</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <!-- Balance Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body text-center py-4">
+                <div class="rounded d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(46,125,50,0.1);">
+                    <i class="bi bi-wallet2 fs-2" style="color: #2E7D32;"></i>
+                </div>
+                <h6 class="text-muted mb-1">Outstanding Balance</h6>
+                <h2 class="fw-bold mb-0" style="color: #2E7D32;">KES {{ balance|floatformat:0 }}</h2>
+            </div>
+        </div>
+
+        {% if errors %}
+        <div class="alert alert-danger border-0 shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {% for error in errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Payment Form -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header text-white py-3" style="background-color: #2E7D32;">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="bi bi-phone me-2"></i>M-Pesa STK Push
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate id="mpesaForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-semibold">M-Pesa Phone Number <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background-color: #f8f9fa; border-color: #dee2e6;">
+                                <i class="bi bi-phone" style="color: #2E7D32;"></i>
+                            </span>
+                            <input type="tel" name="phone" id="phone" class="form-control"
+                                   value="{{ phone|default:'' }}"
+                                   placeholder="0712345678" required
+                                   pattern="^(254|0)[0-9]{9}$">
+                        </div>
+                        <div class="form-text">Safaricom M-Pesa registered number</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="amount" class="form-label fw-semibold">Amount (KES) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background-color: #f8f9fa; border-color: #dee2e6;">
+                                <i class="bi bi-cash" style="color: #2E7D32;"></i>
+                            </span>
+                            <input type="number" name="amount" id="amount" class="form-control"
+                                   value="{{ balance|floatformat:0 }}"
+                                   min="1" max="{{ balance|floatformat:0 }}" step="1" required>
+                        </div>
+                        <div class="form-text">Minimum KES 1 | Maximum KES {{ balance|floatformat:0 }}</div>
+                    </div>
+
+                    <div class="p-3 rounded mb-4" style="background-color: #f8f9fa; border-left: 4px solid #2E7D32;">
+                        <h6 class="fw-semibold mb-2" style="color: #2E7D32;">How it works:</h6>
+                        <ol class="mb-0 small text-muted" style="padding-left: 1.2rem;">
+                            <li>Enter your M-Pesa phone number and amount</li>
+                            <li>Click "Pay Now" — an STK Push prompt will be sent to your phone</li>
+                            <li>Enter your M-Pesa PIN on your phone to authorize</li>
+                            <li>Payment is confirmed automatically</li>
+                        </ol>
+                    </div>
+
+                    <button type="submit" class="btn btn-lg w-100 fw-semibold text-white" id="payBtn"
+                            style="background-color: #2E7D32; border-radius: 10px;">
+                        <span id="payText">
+                            <i class="bi bi-phone-vibrate me-2"></i>Pay Now
+                        </span>
+                        <span id="paySpinner" class="d-none">
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>Sending STK Push...
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'student_portal:payments' %}" class="text-decoration-none" style="color: #2E7D32;">
+                <i class="bi bi-arrow-left me-1"></i>Back to Payments
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('mpesaForm').addEventListener('submit', function() {
+    document.getElementById('payText').classList.add('d-none');
+    document.getElementById('paySpinner').classList.remove('d-none');
+    document.getElementById('payBtn').disabled = true;
+});
+</script>
+{% endblock %}

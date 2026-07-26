@@ -1,0 +1,179 @@
+from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views import View
+from django.db.models import Sum, Count, Q
+from datetime import date, timedelta
+
+
+class StaffTestMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'ACCOUNTANT')
+
+
+class ReportIndexView(StaffTestMixin, View):
+    def get(self, request):
+        from payments.models import Payment
+        from students.models import Student
+        from admissions.models import Admission
+        from instructors.models import Instructor
+        from vehicles.models import Vehicle
+        from datetime import date
+        
+        today = date.today()
+        month_start = today.replace(day=1)
+        
+        context = {
+            'total_students': Student.objects.filter(status='ACTIVE').count(),
+            'total_revenue': Payment.objects.filter(status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0,
+            'month_revenue': Payment.objects.filter(status='COMPLETED', created_at__date__gte=month_start).aggregate(total=Sum('amount'))['total'] or 0,
+            'total_admissions': Admission.objects.count(),
+            'pending_admissions': Admission.objects.filter(status='PENDING').count(),
+            'total_instructors': Instructor.objects.count(),
+            'total_vehicles': Vehicle.objects.count(),
+        }
+        return render(request, 'reports/index.html', context)
+
+
+class RevenueReportView(StaffTestMixin, View):
+    def get(self, request):
+        from payments.models import Payment
+        from django.db.models import Sum
+        from datetime import date
+        
+        period = request.GET.get('period', 'month')
+        today = date.today()
+        
+        if period == 'today':
+            payments = Payment.objects.filter(created_at__date=today, status='COMPLETED')
+        elif period == 'week':
+            week_start = today - timedelta(days=today.weekday())
+            payments = Payment.objects.filter(created_at__date__gte=week_start, status='COMPLETED')
+        elif period == 'year':
+            year_start = today.replace(month=1, day=1)
+            payments = Payment.objects.filter(created_at__date__gte=year_start, status='COMPLETED')
+        else:
+            month_start = today.replace(day=1)
+            payments = Payment.objects.filter(created_at__date__gte=month_start, status='COMPLETED')
+        
+        total = payments.aggregate(total=Sum('amount'))['total'] or 0
+        by_method = payments.values('method').annotate(total=Sum('amount')).order_by('-total')
+        
+        context = {
+            'payments': payments[:100],
+            'total': total,
+            'by_method': by_method,
+            'current_period': period,
+        }
+        return render(request, 'reports/revenue.html', context)
+
+
+class AdmissionReportView(StaffTestMixin, View):
+    def get(self, request):
+        from admissions.models import Admission
+        from students.models import Student
+        from django.db.models import Count
+        
+        by_status = Admission.objects.values('status').annotate(count=Count('id')).order_by('status')
+        by_category = Admission.objects.values('category__name').annotate(count=Count('id')).order_by('-count')
+        by_branch = Admission.objects.values('branch__name').annotate(count=Count('id')).order_by('-count')
+        
+        context = {
+            'by_status': by_status,
+            'by_category': by_category,
+            'by_branch': by_branch,
+            'total': Admission.objects.count(),
+        }
+        return render(request, 'reports/admissions.html', context)
+
+
+class OutstandingBalanceView(StaffTestMixin, View):
+    def get(self, request):
+        from students.models import Student
+        
+        active_students = Student.objects.filter(
+            status='ACTIVE'
+        ).select_related('user', 'course')
+        
+        students_with_balance = [s for s in active_students if s.balance > 0]
+        students_with_balance.sort(key=lambda s: s.balance, reverse=True)
+        
+        total_outstanding = sum(s.balance for s in students_with_balance)
+        
+        context = {
+            'students': students_with_balance,
+            'total_outstanding': total_outstanding,
+        }
+        return render(request, 'reports/outstanding.html', context)
+
+
+class InstructorPerformanceView(StaffTestMixin, View):
+    def get(self, request):
+        from instructors.models import Instructor
+        from students.models import Student
+        from lessons.models import PracticalLesson
+        
+        instructors = Instructor.objects.all()
+        data = []
+        for inst in instructors:
+            students = Student.objects.filter(instructor=inst, status='ACTIVE')
+            completed = PracticalLesson.objects.filter(instructor=inst, status='COMPLETED').count()
+            data.append({
+                'instructor': inst,
+                'active_students': students.count(),
+                'lessons_completed': completed,
+            })
+        
+        return render(request, 'reports/instructor_performance.html', {'data': data})
+
+
+class VehicleUtilizationView(StaffTestMixin, View):
+    def get(self, request):
+        from vehicles.models import Vehicle
+        from lessons.models import PracticalLesson
+        
+        vehicles = Vehicle.objects.all()
+        data = []
+        for v in vehicles:
+            lessons = PracticalLesson.objects.filter(vehicle=v).count()
+            data.append({
+                'vehicle': v,
+                'total_lessons': lessons,
+            })
+        
+        return render(request, 'reports/vehicle_utilization.html', {'data': data})
+
+
+class BranchPerformanceView(StaffTestMixin, View):
+    def get(self, request):
+        from core.models import Branch
+        from students.models import Student
+        from admissions.models import Admission
+        from payments.models import Payment
+        from django.db.models import Sum, Count
+        
+        branches = Branch.objects.filter(is_active=True)
+        data = []
+        for b in branches:
+            students = Student.objects.filter(branch=b, status='ACTIVE').count()
+            admissions = Admission.objects.filter(branch=b).count()
+            revenue = Payment.objects.filter(student__branch=b, status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0
+            data.append({
+                'branch': b,
+                'students': students,
+                'admissions': admissions,
+                'revenue': revenue,
+            })
+        
+        return render(request, 'reports/branch_performance.html', {'data': data})
+
+
+class StudentProgressReportView(StaffTestMixin, View):
+    def get(self, request):
+        from students.models import Student
+        
+        students = Student.objects.filter(status='ACTIVE').select_related('user', 'course', 'instructor')
+        
+        context = {
+            'students': students,
+        }
+        return render(request, 'reports/student_progress.html', context)

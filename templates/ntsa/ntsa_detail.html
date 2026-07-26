@@ -1,0 +1,223 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}NTSA Record - Green Light School{% endblock %}
+
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'ntsa:list' %}">NTSA Records</a></li>
+                <li class="breadcrumb-item active">{{ record.student.user.get_full_name }}</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0">NTSA Progress - {{ record.student.user.get_full_name }}</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'ntsa:update' record.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i> Update
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-check me-2" style="color: #2E7D32;"></i>
+                    NTSA Certification Timeline
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-4" style="height: 8px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress_percentage }}%; background-color: #2E7D32;"></div>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item {% if record.pdl_status == 'approved' %}completed{% elif record.pdl_status == 'pending' %}active{% endif %}">
+                        <div class="timeline-marker {% if record.pdl_status == 'approved' %}bg-success{% elif record.pdl_status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Provisional Driving Licence (PDL)</h6>
+                                    <p class="text-muted small mb-1">Application and approval of provisional driving licence</p>
+                                    {% if record.pdl_application_date %}
+                                        <small class="text-muted">Applied: {{ record.pdl_application_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                    {% if record.pdl_approval_date %}
+                                        <small class="text-muted d-block">Approved: {{ record.pdl_approval_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if record.pdl_status == 'approved' %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Approved</span>
+                                    {% elif record.pdl_status == 'pending' %}
+                                        <span class="badge bg-warning"><i class="bi bi-clock me-1"></i> Pending</span>
+                                    {% elif record.pdl_status == 'rejected' %}
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Not Started</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item {% if record.theory_test_passed %}completed{% elif record.theory_test_date %}active{% endif %}">
+                        <div class="timeline-marker {% if record.theory_test_passed %}bg-success{% elif record.theory_test_date %}bg-warning{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Theory Test</h6>
+                                    <p class="text-muted small mb-1">Written examination on traffic rules and regulations</p>
+                                    {% if record.theory_test_date %}
+                                        <small class="text-muted">Date: {{ record.theory_test_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                    {% if record.theory_test_score %}
+                                        <small class="text-muted d-block">Score: {{ record.theory_test_score }}%</small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if record.theory_test_passed %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Passed</span>
+                                    {% elif record.theory_test_date %}
+                                        <span class="badge bg-warning"><i class="bi bi-clock me-1"></i> Scheduled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item {% if record.practical_test_passed %}completed{% elif record.practical_test_date %}active{% endif %}">
+                        <div class="timeline-marker {% if record.practical_test_passed %}bg-success{% elif record.practical_test_date %}bg-warning{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Practical Test</h6>
+                                    <p class="text-muted small mb-1">Practical driving assessment on closed course</p>
+                                    {% if record.practical_test_date %}
+                                        <small class="text-muted">Date: {{ record.practical_test_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if record.practical_test_passed %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Passed</span>
+                                    {% elif record.practical_test_date %}
+                                        <span class="badge bg-warning"><i class="bi bi-clock me-1"></i> Scheduled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item {% if record.driving_test_passed %}completed{% elif record.driving_test_date %}active{% endif %}">
+                        <div class="timeline-marker {% if record.driving_test_passed %}bg-success{% elif record.driving_test_date %}bg-warning{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Driving Test</h6>
+                                    <p class="text-muted small mb-1">Final on-road driving examination</p>
+                                    {% if record.driving_test_date %}
+                                        <small class="text-muted">Date: {{ record.driving_test_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if record.driving_test_passed %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Passed</span>
+                                    {% elif record.driving_test_date %}
+                                        <span class="badge bg-warning"><i class="bi bi-clock me-1"></i> Scheduled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item {% if record.licence_issued %}completed{% endif %}">
+                        <div class="timeline-marker {% if record.licence_issued %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Driving Licence</h6>
+                                    <p class="text-muted small mb-1">Issuance of official driving licence</p>
+                                    {% if record.licence_issue_date %}
+                                        <small class="text-muted">Issued: {{ record.licence_issue_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                    {% if record.licence_number %}
+                                        <small class="text-muted d-block">Licence No: {{ record.licence_number }}</small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if record.licence_issued %}
+                                        <span class="badge bg-success"><i class="bi bi-patch-check me-1"></i> Issued</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Not Issued</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person me-2" style="color: #2E7D32;"></i>
+                    Student Info
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person text-primary display-4"></i>
+                    </div>
+                    <h5 class="mb-0">{{ record.student.user.get_full_name }}</h5>
+                    <small class="text-muted">{{ record.student.admission_number }}</small>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Course</span>
+                    <span class="fw-semibold">{{ record.student.course.name|default:"N/A" }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Instructor</span>
+                    <span class="fw-semibold">{{ record.student.instructor.user.get_full_name|default:"N/A" }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Overall Progress</span>
+                    <span class="fw-bold" style="color: #2E7D32;">{{ progress_percentage }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2" style="color: #2E7D32;"></i>
+                    Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if record.notes %}
+                    <p class="mb-0">{{ record.notes }}</p>
+                {% else %}
+                    <p class="text-muted mb-0">No additional notes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}{{ vehicle.reg_number }} - Green Light School{% endblock %}
+
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'vehicles:list' %}">Vehicles</a></li>
+                <li class="breadcrumb-item active">{{ vehicle.reg_number }}</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0">{{ vehicle.make }} {{ vehicle.model }}</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'vehicles:update' vehicle.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+        <a href="{% url 'vehicles:delete' vehicle.pk %}" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-1"></i> Delete
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-car-front me-2" style="color: #2E7D32;"></i>
+                    Vehicle Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Registration Number</label>
+                        <p class="fw-bold" style="color: #2E7D32;">{{ vehicle.reg_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Make</label>
+                        <p class="fw-semibold">{{ vehicle.make }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Model</label>
+                        <p class="fw-semibold">{{ vehicle.model }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Year</label>
+                        <p class="fw-semibold">{{ vehicle.year }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Category</label>
+                        <p>
+                            <span class="badge bg-light text-dark border">{{ vehicle.get_category_display }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Color</label>
+                        <p class="fw-semibold">{{ vehicle.color|default:"N/A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Engine Number</label>
+                        <p class="fw-semibold">{{ vehicle.engine_number|default:"N/A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Chassis Number</label>
+                        <p class="fw-semibold">{{ vehicle.chassis_number|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shield-check me-2" style="color: #2E7D32;"></i>
+                    Insurance & Service Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Insurance Status</label>
+                        <p>
+                            {% if vehicle.insurance_valid %}
+                                <span class="badge bg-success bg-opacity-10 text-success fs-6">
+                                    <i class="bi bi-shield-check me-1"></i> Insured
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger fs-6">
+                                    <i class="bi bi-shield-x me-1"></i> Not Insured
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Insurance Expiry</label>
+                        <p class="fw-semibold">{{ vehicle.insurance_expiry|date:"d M Y"|default:"N/A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Last Service Date</label>
+                        <p class="fw-semibold">{{ vehicle.last_service_date|date:"d M Y"|default:"Never serviced" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Next Service Due</label>
+                        <p class="fw-semibold">{{ vehicle.next_service_date|date:"d M Y"|default:"N/A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Mileage</label>
+                        <p class="fw-semibold">{{ vehicle.mileage|default:"N/A" }} km</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person-badge me-2" style="color: #2E7D32;"></i>
+                    Assigned Instructor
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                {% if vehicle.instructor %}
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                        {% if vehicle.instructor.photo %}
+                            <img src="{{ vehicle.instructor.photo.url }}" alt="Instructor Photo" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person text-success display-4"></i>
+                        {% endif %}
+                    </div>
+                    <h5 class="mb-1">{{ vehicle.instructor.user.get_full_name }}</h5>
+                    <p class="text-muted mb-3">{{ vehicle.instructor.license_number }}</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'instructors:detail' vehicle.instructor.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i> View Profile
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="py-4">
+                        <i class="bi bi-person-x display-4 text-muted d-block mb-3"></i>
+                        <p class="text-muted mb-0">No instructor assigned</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up me-2" style="color: #2E7D32;"></i>
+                    Quick Stats
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Availability</span>
+                    {% if vehicle.is_available %}
+                        <span class="badge bg-success">Available</span>
+                    {% else %}
+                        <span class="badge bg-danger">Unavailable</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Total Lessons</span>
+                    <span class="fw-bold">{{ vehicle.total_lessons|default:"0" }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Condition</span>
+                    <span class="badge bg-light text-dark border">{{ vehicle.get_condition_display|default:"N/A" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

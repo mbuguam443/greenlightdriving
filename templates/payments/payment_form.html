@@ -1,0 +1,110 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Record Payment - Green Light Driving School{% endblock %}
+
+{% block page_title %}Record Payment{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-cash-coin me-2" style="color: #2E7D32;"></i>Payment Details
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="id_student" class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
+                            <select name="student" id="id_student" class="form-select" required>
+                                <option value="">Select Student</option>
+                                {% for student in students %}
+                                <option value="{{ student.id }}" {% if form.student.value == student.id %}selected{% endif %}>
+                                    {{ student.get_full_name }} ({{ student.student_number }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.student.errors %}
+                            <div class="text-danger small mt-1">{{ form.student.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="id_amount" class="form-label fw-semibold">Amount (KES) <span class="text-danger">*</span></label>
+                            <input type="number" name="amount" id="id_amount" class="form-control"
+                                   value="{{ form.amount.value|default:'' }}" step="0.01" min="0" required>
+                            {% if form.amount.errors %}
+                            <div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_method" class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+                            <select name="method" id="id_method" class="form-select" required>
+                                <option value="">Select Method</option>
+                                <option value="cash" {% if form.method.value == 'cash' %}selected{% endif %}>Cash</option>
+                                <option value="mpesa" {% if form.method.value == 'mpesa' %}selected{% endif %}>M-Pesa</option>
+                                <option value="bank" {% if form.method.value == 'bank' %}selected{% endif %}>Bank Transfer</option>
+                                <option value="card" {% if form.method.value == 'card' %}selected{% endif %}>Card Payment</option>
+                            </select>
+                            {% if form.method.errors %}
+                            <div class="text-danger small mt-1">{{ form.method.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_reference_number" class="form-label fw-semibold">Reference / Transaction No.</label>
+                            <input type="text" name="reference_number" id="id_reference_number" class="form-control"
+                                   value="{{ form.reference_number.value|default:'' }}" placeholder="M-Pesa code, cheque no. etc.">
+                            {% if form.reference_number.errors %}
+                            <div class="text-danger small mt-1">{{ form.reference_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_date" class="form-label fw-semibold">Payment Date</label>
+                            <input type="date" name="date" id="id_date" class="form-control"
+                                   value="{{ form.date.value|default:'' }}">
+                            {% if form.date.errors %}
+                            <div class="text-danger small mt-1">{{ form.date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_status" class="form-label fw-semibold">Status</label>
+                            <select name="status" id="id_status" class="form-select">
+                                <option value="completed" {% if form.status.value == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="pending" {% if form.status.value == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="failed" {% if form.status.value == 'failed' %}selected{% endif %}>Failed</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="id_description" class="form-label fw-semibold">Description / Notes</label>
+                            <textarea name="description" id="id_description" class="form-control" rows="3"
+                                      placeholder="Optional notes about this payment">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'payments:list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                            <i class="bi bi-check-lg me-1"></i>Record Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

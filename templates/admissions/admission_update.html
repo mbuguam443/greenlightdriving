@@ -1,0 +1,68 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Update Admission - Green Light Driving School{% endblock %}
+
+{% block nav_admissions %}active{% endblock %}
+
+{% block page_title %}Update Admission{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-pencil-square me-2" style="color: #2E7D32;"></i>Update Admission Status
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="p-3 rounded mb-4" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="fw-bold mb-1">{{ admission.full_name }}</h6>
+                            <small class="text-muted">{{ admission.admission_number }} | {{ admission.course.name }}</small>
+                        </div>
+                        <span class="badge bg-warning text-dark">{{ admission.get_status_display }}</span>
+                    </div>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_status" class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                        <select name="status" id="id_status" class="form-select" required>
+                            <option value="PENDING" {% if form.status.value == 'PENDING' %}selected{% endif %}>Pending</option>
+                            <option value="APPROVED" {% if form.status.value == 'APPROVED' %}selected{% endif %}>Approved</option>
+                            <option value="REJECTED" {% if form.status.value == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                            <option value="ENROLLED" {% if form.status.value == 'ENROLLED' %}selected{% endif %}>Enrolled</option>
+                        </select>
+                        {% if form.status.errors %}
+                        <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_notes" class="form-label fw-semibold">Notes</label>
+                        <textarea name="notes" id="id_notes" class="form-control" rows="5"
+                                  placeholder="Add internal notes about this admission...">{{ form.notes.value|default:'' }}</textarea>
+                        {% if form.notes.errors %}
+                        <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'admissions:detail' admission.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                            <i class="bi bi-check-lg me-1"></i>Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

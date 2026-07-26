@@ -1,0 +1,196 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}New Admission - Green Light Driving School{% endblock %}
+
+{% block nav_admissions %}active{% endblock %}
+
+{% block page_title %}New Admission{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Register a new student admission</p>
+    </div>
+    <a href="{% url 'admissions:list' %}" class="btn btn-outline-secondary fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i>Back to List
+    </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate id="internalAdmissionForm">
+    {% csrf_token %}
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header text-white" style="background-color: #2E7D32;">
+            <h5 class="mb-0 fw-semibold">
+                <i class="bi bi-person me-2"></i>Personal Details
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="id_first_name" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_last_name" class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_phone" class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                    <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_date_of_birth" class="form-label fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                    {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}
+                    <div class="text-danger small mt-1">{{ form.date_of_birth.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_gender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                    <div class="text-danger small mt-1">{{ form.gender.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_national_id" class="form-label fw-semibold">National ID / Passport <span class="text-danger">*</span></label>
+                    {{ form.national_id }}
+                    {% if form.national_id.errors %}
+                    <div class="text-danger small mt-1">{{ form.national_id.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <label for="id_address" class="form-label fw-semibold">Address</label>
+                    {{ form.address }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header text-white" style="background-color: #2E7D32;">
+            <h5 class="mb-0 fw-semibold">
+                <i class="bi bi-file-earmark me-2"></i>Documents
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="id_passport_photo" class="form-label fw-semibold">Passport Photo <span class="text-danger">*</span></label>
+                    {{ form.passport_photo }}
+                    <div class="form-text">JPG or PNG, max 5MB</div>
+                    {% if form.passport_photo.errors %}
+                    <div class="text-danger small mt-1">{{ form.passport_photo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_national_id_image" class="form-label fw-semibold">ID / Passport Image <span class="text-danger">*</span></label>
+                    {{ form.national_id_image }}
+                    <div class="form-text">JPG or PNG, max 5MB</div>
+                    {% if form.national_id_image.errors %}
+                    <div class="text-danger small mt-1">{{ form.national_id_image.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header text-white" style="background-color: #2E7D32;">
+            <h5 class="mb-0 fw-semibold">
+                <i class="bi bi-book me-2"></i>Course & Branch
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="id_category" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_course" class="form-label fw-semibold">Course <span class="text-danger">*</span></label>
+                    {{ form.course }}
+                    {% if form.course.errors %}
+                    <div class="text-danger small mt-1">{{ form.course.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_branch" class="form-label fw-semibold">Branch <span class="text-danger">*</span></label>
+                    {{ form.branch }}
+                    {% if form.branch.errors %}
+                    <div class="text-danger small mt-1">{{ form.branch.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_preferred_schedule" class="form-label fw-semibold">Schedule <span class="text-danger">*</span></label>
+                    {{ form.preferred_schedule }}
+                    {% if form.preferred_schedule.errors %}
+                    <div class="text-danger small mt-1">{{ form.preferred_schedule.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <a href="{% url 'admissions:list' %}" class="btn btn-outline-secondary fw-semibold">
+            <i class="bi bi-x-lg me-1"></i>Cancel
+        </a>
+        <button type="submit" class="btn fw-semibold text-white px-4" style="background-color: #2E7D32;">
+            <i class="bi bi-check-lg me-1"></i>Create Admission
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('id_category').addEventListener('change', function() {
+    const categoryId = this.value;
+    const courseSelect = document.getElementById('id_course');
+    if (!categoryId) {
+        courseSelect.innerHTML = '<option value="">Select category first</option>';
+        return;
+    }
+    courseSelect.innerHTML = '<option value="">Loading...</option>';
+    fetch('/admissions/api/courses/?category_id=' + categoryId)
+        .then(r => r.json())
+        .then(data => {
+            let html = '<option value="">Select Course</option>';
+            data.forEach(c => { html += '<option value="' + c.id + '">' + c.name + '</option>'; });
+            courseSelect.innerHTML = html;
+        })
+        .catch(() => { courseSelect.innerHTML = '<option value="">Error loading</option>'; });
+});
+</script>
+{% endblock %}

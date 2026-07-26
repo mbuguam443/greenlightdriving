@@ -1,0 +1,200 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Website Management - Green Light Driving School{% endblock %}
+
+{% block page_title %}Website Management{% endblock %}
+{% block breadcrumb_active %}Website{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage your website content</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_courses' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-book" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ total_courses }}</h3>
+                            <small class="text-muted">Total Courses</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_courses' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-check-circle" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ active_courses }}</h3>
+                            <small class="text-muted">Active Courses</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_blog' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-journal-richtext" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ total_blog_posts }}</h3>
+                            <small class="text-muted">Blog Posts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_blog' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-eye" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ published_posts }}</h3>
+                            <small class="text-muted">Published Posts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_testimonials' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-chat-quote" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ total_testimonials }}</h3>
+                            <small class="text-muted">Testimonials</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_faqs' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-question-circle" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ total_faqs }}</h3>
+                            <small class="text-muted">FAQs</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_gallery' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-images" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ total_gallery_items }}</h3>
+                            <small class="text-muted">Gallery Items</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'website:manage_messages' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1);">
+                            <i class="bi bi-envelope" style="color: var(--primary-green); font-size: 1.3rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary-green);">{{ unread_messages }}</h3>
+                            <small class="text-muted">Unread Messages</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+            <i class="bi bi-envelope me-2"></i>Recent Messages
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Name</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in recent_messages %}
+                    <tr>
+                        <td class="ps-3 fw-semibold">{{ message.name }}</td>
+                        <td>{{ message.subject }}</td>
+                        <td><small class="text-muted">{{ message.created_at|date:"M d, Y" }}</small></td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'website:manage_message_detail' message.pk %}" class="btn btn-sm btn-outline-success" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="bi bi-envelope" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No messages yet</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,543 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Greenlight Defensive Driving School - NTSA Certified Driving School in Kenya{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Greenlight Defensive Driving School - Kenya's leading NTSA-certified driving school. Professional driving courses (Class A, B1, B2), experienced instructors, 98% pass rate. Enroll now in Kimbo, Ruiru or Waithaka branches.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}driving school Kenya, NTSA driving test, driving lessons Nairobi, defensive driving, Class B driving licence, driving school near me, Green Light driving school{% endblock %}">
+    <meta name="author" content="Greenlight Defensive Driving School">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{% block canonical %}{% endblock %}">
+
+    {% block og_tags %}
+    <meta property="og:title" content="{% block og_title %}Greenlight Defensive Driving School - Professional Driving Education in Kenya{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Kenya's leading NTSA-certified driving school with 98% pass rate. Professional driving courses, experienced instructors, and 3 branches across Nairobi.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{% block og_url %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:site_name" content="Greenlight Defensive Driving School">
+    <meta property="og:locale" content="en_KE">
+    {% endblock %}
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Greenlight Defensive Driving School{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Professional driving education with NTSA-certified instructors. 98% pass rate across 3 branches in Kenya.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% endblock %}">
+
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="msapplication-TileColor" content="#2E7D32">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+
+    {% block json_ld %}{% endblock %}
+
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --primary-green-dark: #1B5E20;
+            --light-green: #66BB6A;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--primary-green) !important;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--white);
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            color: var(--white);
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            padding: 0.5rem 0.85rem !important;
+            transition: color 0.2s ease, background-color 0.2s ease;
+            border-radius: 6px;
+            font-size: 0.92rem;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link:focus {
+            color: var(--white) !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--primary-green) !important;
+            background-color: var(--white);
+            font-weight: 600;
+        }
+
+        .btn-apply {
+            background-color: var(--primary-green);
+            color: var(--white) !important;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            border-radius: 25px;
+            border: none;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-apply:hover {
+            background-color: var(--primary-green-dark);
+            transform: translateY(-1px);
+            color: var(--white) !important;
+        }
+
+        .btn-login {
+            border: 1.5px solid var(--white);
+            color: var(--white) !important;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+            border-radius: 25px;
+            transition: all 0.2s ease;
+            font-size: 0.88rem;
+        }
+
+        .btn-login:hover {
+            background-color: var(--white);
+            color: var(--primary-green) !important;
+        }
+
+        .btn-staff-login {
+            border-color: var(--light-green);
+            color: var(--light-green) !important;
+        }
+
+        .btn-staff-login:hover {
+            background-color: var(--light-green);
+            color: var(--white) !important;
+        }
+
+        .messages-container {
+            position: fixed;
+            top: 76px;
+            left: 0;
+            right: 0;
+            z-index: 1060;
+            pointer-events: none;
+        }
+
+        .messages-container .container {
+            pointer-events: auto;
+        }
+
+        .alert-dismissible {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 200px);
+        }
+
+        footer {
+            background-color: var(--primary-green-dark, #1B5E20);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 60px 0 0;
+        }
+
+        footer h5 {
+            color: var(--white);
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            font-size: 1.05rem;
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-size: 0.92rem;
+        }
+
+        footer a:hover {
+            color: var(--light-green);
+        }
+
+        footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        footer ul li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-contact li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-contact li i {
+            color: var(--light-green);
+            font-size: 1rem;
+            margin-top: 3px;
+        }
+
+        .footer-social a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .footer-social a:hover {
+            background-color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.25rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-bottom p {
+            margin: 0;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer-logo-desc {
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .footer-logo-desc .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .footer-logo-desc .logo-text span {
+            color: var(--light-green);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+        }
+
+        .dropdown-item {
+            font-size: 0.92rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .section-padding {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                padding: 1rem 0;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 0.65rem 0.5rem !important;
+            }
+
+            .btn-apply {
+                display: block;
+                text-align: center;
+                margin-top: 0.75rem;
+            }
+
+            .auth-buttons {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.75rem;
+            }
+
+            .auth-buttons .btn-login {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'website:home' %}">
+                <div class="brand-icon">
+                    <img src="{% static 'images/logo.png' %}" alt="Greenlight Logo">
+                </div>
+                <span class="brand-text">GREENLIGHT</span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'website:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'website:about' %}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}" href="{% url 'website:courses' %}">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'pricing' %}active{% endif %}" href="{% url 'website:pricing' %}">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'branches' %}active{% endif %}" href="{% url 'website:branches' %}">Branches</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}" href="{% url 'website:gallery' %}">Gallery</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'testimonials' %}active{% endif %}" href="{% url 'website:testimonials' %}">Testimonials</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'faq' %}active{% endif %}" href="{% url 'website:faq' %}">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}" href="{% url 'website:blog' %}">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'website:contact' %}">Contact</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{% url 'admissions:online_admission' %}" class="btn btn-apply">Apply Now</a>
+
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-login">Dashboard</a>
+                        <div class="dropdown">
+                            <a class="btn btn-login dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>
+                                {{ user.first_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-login">Student Login</a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-login btn-staff-login">Staff Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endblock navbar %}
+
+    <div class="messages-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="container mt-3">
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="msg-{{ forloop.counter }}">
+                        {% if message.tags == 'success' %}
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        {% elif message.tags == 'info' %}
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer>
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-logo-desc mb-4">
+                        <div class="logo-text mb-3">GREEN<span>LIGHT</span></div>
+                        <p>
+                            Greenlight Defensive Driving School is a leading NTSA-certified institution dedicated to producing safe, confident, and responsible drivers. We combine modern training techniques with experienced instructors to deliver outstanding results.
+                        </p>
+                    </div>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h5>Quick Links</h5>
+                    <ul>
+                        <li><a href="{% url 'website:home' %}">Home</a></li>
+                        <li><a href="{% url 'website:about' %}">About Us</a></li>
+                        <li><a href="{% url 'website:courses' %}">Courses</a></li>
+                        <li><a href="{% url 'admissions:online_admission' %}">Apply Now</a></li>
+                        <li><a href="{% url 'website:contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5>Contact Info</h5>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="bi bi-telephone-fill"></i>
+                            <span>{{ site_context.phone|default:"+254 700 000 000" }}</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope-fill"></i>
+                            <span>{{ site_context.email|default:"info@greenlightschool.co.ke" }}</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>{{ site_context.address|default:"Nairobi, Kenya" }}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5>Working Hours</h5>
+                    <ul>
+                        <li>Monday - Friday: 7:00 AM - 6:00 PM</li>
+                        <li>Saturday: 8:00 AM - 4:00 PM</li>
+                        <li>Sunday: Closed</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p>&copy; {% now "Y" %} Greenlight Defensive Driving School. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p>
+                            <a href="#">Privacy Policy</a> &middot;
+                            <a href="#">Terms of Service</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock footer %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function (alert) {
+                setTimeout(function () {
+                    var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+
+            var currentPath = window.location.pathname;
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(function (link) {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    {% block chartjs %}{% endblock %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

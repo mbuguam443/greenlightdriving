@@ -1,0 +1,162 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Practical Lessons - Green Light Driving School{% endblock %}
+
+{% block page_title %}Lesson Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Manage practical driving lessons</p>
+    </div>
+    <a href="{% url 'lessons:practical_create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-plus-lg me-1"></i>Add Lesson
+    </a>
+</div>
+
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link active fw-semibold" href="{% url 'lessons:list' %}" style="color: #2E7D32; border-bottom-color: #2E7D32;">
+            <i class="bi bi-car-front me-1"></i>Practical Lessons
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold text-muted" href="{% url 'lessons:theory_list' %}">
+            <i class="bi bi-book me-1"></i>Theory Lessons
+        </a>
+    </li>
+</ul>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by student name..."
+                           value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="scheduled" {% if status_filter == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date" class="form-control" value="{{ date_filter|default:'' }}">
+            </div>
+            <div class="col-md-2">
+                <select name="instructor" class="form-select">
+                    <option value="">All Instructors</option>
+                    {% for instructor in instructors %}
+                    <option value="{{ instructor.id }}" {% if instructor_filter == instructor.id %}selected{% endif %}>
+                        {{ instructor.get_full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Student</th>
+                        <th>Lesson #</th>
+                        <th>Instructor</th>
+                        <th>Vehicle</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson in lessons %}
+                    <tr>
+                        <td class="ps-3">
+                            <div>
+                                <span class="fw-semibold">{{ lesson.student.get_full_name }}</span>
+                                <br><small class="text-muted">{{ lesson.student.student_number }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge" style="background-color: #2E7D32;">Lesson {{ lesson.lesson_number }}</span>
+                        </td>
+                        <td>{{ lesson.instructor.get_full_name }}</td>
+                        <td>
+                            <span class="fw-semibold">{{ lesson.vehicle.registration_number }}</span>
+                            <br><small class="text-muted">{{ lesson.vehicle.vehicle_type }}</small>
+                        </td>
+                        <td>{{ lesson.date|date:"d M Y" }}</td>
+                        <td>{{ lesson.start_time|time:"H:i" }} - {{ lesson.end_time|time:"H:i" }}</td>
+                        <td>
+                            {% if lesson.status == 'scheduled' %}
+                            <span class="badge" style="background-color: var(--primary-green);">Scheduled</span>
+                            {% elif lesson.status == 'in_progress' %}
+                            <span class="badge" style="background-color: var(--primary-green); color: var(--primary-green);">In Progress</span>
+                            {% elif lesson.status == 'completed' %}
+                            <span class="badge" style="background-color: #2E7D32;">Completed</span>
+                            {% elif lesson.status == 'cancelled' %}
+                            <span class="badge bg-danger">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'lessons:practical_update' lesson.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-car-front" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No practical lessons found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if lessons.has_other_pages %}
+    <div class="card-footer bg-white border-top">
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ lessons.start_index }} to {{ lessons.end_index }} of {{ lessons.paginator.count }} lessons
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                {% if lessons.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ lessons.previous_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in lessons.paginator.page_range %}
+                <li class="page-item {% if lessons.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if lessons.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ lessons.next_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
