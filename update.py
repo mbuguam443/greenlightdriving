@@ -24,6 +24,16 @@ print("\n[1/3] Running migrations...")
 call_command('migrate', '--run-syncdb', verbosity=1)
 print("      Done!")
 
+# 1b. Ensure media directory permissions
+media_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
+os.makedirs(media_dir, exist_ok=True)
+os.chmod(media_dir, 0o755)
+for sub in ['courses', 'site', 'gallery', 'testimonials', 'blog', 'admissions', 'vehicles']:
+    sub_dir = os.path.join(media_dir, sub)
+    os.makedirs(sub_dir, exist_ok=True)
+    os.chmod(sub_dir, 0o755)
+print("      Media directories ready")
+
 # 2. Collect static
 print("\n[2/3] Collecting static files...")
 call_command('collectstatic', '--noinput', verbosity=1)
