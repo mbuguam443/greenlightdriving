@@ -30,6 +30,20 @@
                                 {{ field }}
                                 <label class="form-check-label" for="{{ field.id_for_label }}"></label>
                             </div>
+                            {% elif field.name == 'image' %}
+                            <div class="mb-2">
+                                {% if field.value %}
+                                <div class="mb-2">
+                                    <img id="imagePreview" src="{{ field.value.url }}" alt="Current image" style="max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                                </div>
+                                {% else %}
+                                <div id="imagePreviewContainer" class="mb-2" style="display: none;">
+                                    <img id="imagePreview" src="" alt="Preview" style="max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                                </div>
+                                {% endif %}
+                            </div>
+                            <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="form-control" accept="image/*" onchange="previewImage(this)">
+                            <small class="text-muted">Upload a course image (JPG, PNG). Recommended: 800x600px</small>
                             {% elif field.field.widget.input_type == 'select' or field.field.widget.input_type == 'select-one' %}
                             <select name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="form-select" {% if field.field.required %}required{% endif %}>
                                 <option value="">Select...</option>
@@ -68,4 +82,32 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImage(input) {
+    var container = document.getElementById('imagePreviewContainer');
+    var preview = document.getElementById('imagePreview');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            if (container) {
+                container.style.display = 'block';
+            } else {
+                preview = input.parentNode.querySelector('img');
+                if (!preview) {
+                    var div = document.createElement('div');
+                    div.className = 'mb-2';
+                    div.innerHTML = '<img id="imagePreview" style="max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0;">';
+                    input.parentNode.insertBefore(div, input);
+                    preview = document.getElementById('imagePreview');
+                }
+            }
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 {% endblock %}

@@ -327,6 +327,12 @@ class CourseCreateView(StaffMixin, CreateView):
     fields = ['category', 'name', 'slug', 'description', 'short_description', 'duration', 'price', 'features', 'image', 'is_active']
     success_url = reverse_lazy('website:manage_courses')
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        from django.contrib import messages
+        messages.success(self.request, f'Course "{self.object.name}" created successfully!')
+        return response
+
 
 class CourseUpdateView(StaffMixin, UpdateView):
     model = Course
@@ -334,11 +340,22 @@ class CourseUpdateView(StaffMixin, UpdateView):
     fields = ['category', 'name', 'slug', 'description', 'short_description', 'duration', 'price', 'features', 'image', 'is_active']
     success_url = reverse_lazy('website:manage_courses')
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        from django.contrib import messages
+        messages.success(self.request, f'Course "{self.object.name}" updated successfully!')
+        return response
+
 
 class CourseDeleteView(StaffMixin, DeleteView):
     model = Course
     template_name = 'website/manage/confirm_delete.html'
     success_url = reverse_lazy('website:manage_courses')
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        messages.success(self.request, 'Course deleted successfully!')
+        return super().form_valid(form)
 
 
 # BlogPost

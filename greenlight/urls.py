@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from students.views import IndexView
@@ -28,8 +28,8 @@ else:
     from django.views.static import serve as static_serve
     import os
     urlpatterns += [
-        path('static/<path:path>', static_serve, {'document_root': os.path.join(settings.BASE_DIR, 'static')}),
-        path('media/<path:path>', static_serve, {'document_root': settings.MEDIA_ROOT}),
+        re_path(r'^static/(?P<path>.*)$', static_serve, {'document_root': os.path.join(settings.BASE_DIR, 'static')}),
+        re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': settings.MEDIA_ROOT}),
     ]
 
 admin.site.site_header = 'Greenlight Driving School Admin'
