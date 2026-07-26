@@ -49,17 +49,8 @@ if os.path.isdir(staticfiles_dir):
 # 3. Superuser
 print("\n[3/6] Creating superuser...")
 if not User.objects.filter(username='admin@greenlight.com').exists():
-    call_command(
-        'createsuperuser',
-        username='admin@greenlight.com',
-        email='admin@greenlight.com',
-        no_input=True,
-    )
-    u = User.objects.get(username='admin@greenlight.com')
+    u = User(username='admin@greenlight.com', email='admin@greenlight.com', first_name='Admin', last_name='User', role='SUPER_ADMIN', is_staff=True, is_superuser=True)
     u.set_password('admin1234')
-    u.role = 'SUPER_ADMIN'
-    u.is_staff = True
-    u.is_superuser = True
     u.save()
     print("      Superuser created!")
 else:
