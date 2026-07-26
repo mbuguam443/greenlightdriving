@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
 
 {% block title %}FAQ - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}Frequently asked questions about Greenlight Driving School - courses, payments, admission, exams, and more.{% endblock %}
+{% block meta_description %}Frequently asked questions about driving courses, admission, payments, NTSA tests at Greenlight Driving School.{% endblock %}
+{% block meta_keywords %}driving school FAQ, driving course questions Kenya, NTSA driving test FAQ, Greenlight driving school questions{% endblock %}
+
+{% block canonical %}{{ site_url }}/faq/{% endblock %}
+{% block og_title %}FAQ - Greenlight Defensive Driving School{% endblock %}
+{% block og_description %}Frequently asked questions about driving courses, admission, payments, NTSA tests at Greenlight Driving School.{% endblock %}
+{% block og_url %}{{ site_url }}/faq/{% endblock %}
+{% block twitter_title %}FAQ - Greenlight Defensive Driving School{% endblock %}
+{% block twitter_description %}Frequently asked questions about driving courses, admission, payments, NTSA tests at Greenlight Driving School.{% endblock %}
 
 {% block json_ld %}
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "url": "{{ site_url }}/faq/",
     "mainEntity": [
         {% for faq in faqs %}
         {

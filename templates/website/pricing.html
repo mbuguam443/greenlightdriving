@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Pricing - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}View our transparent and affordable pricing for all driving courses at Greenlight Driving School. No hidden fees.{% endblock %}
+{% block title %}Course Pricing - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Affordable driving courses from KES 15,000. View our Class A, B1, B2, C1 course fees and what's included.{% endblock %}
+{% block meta_keywords %}driving course prices Kenya, driving school fees Nairobi, Class B driving course cost, affordable driving school Kenya{% endblock %}
+
+{% block canonical %}{{ site_url }}/pricing/{% endblock %}
+{% block og_title %}Course Pricing - Greenlight Defensive Driving School{% endblock %}
+{% block og_description %}Affordable driving courses from KES 15,000. View our Class A, B1, B2, C1 course fees and what's included.{% endblock %}
+{% block og_url %}{{ site_url }}/pricing/{% endblock %}
+{% block twitter_title %}Course Pricing - Greenlight Defensive Driving School{% endblock %}
+{% block twitter_description %}Affordable driving courses from KES 15,000. View our Class A, B1, B2, C1 course fees and what's included.{% endblock %}
 
 {% block json_ld %}
 <script type="application/ld+json">
@@ -9,6 +17,7 @@
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Greenlight Driving School Course Pricing",
+    "url": "{{ site_url }}/pricing/",
     "itemListElement": [
         {% for course in courses %}
         {
@@ -18,6 +27,7 @@
                 "@type": "Course",
                 "name": "{{ course.name|escapejs }}",
                 "description": "{{ course.short_description|default:course.name|escapejs }}",
+                "url": "{{ site_url }}{% url 'website:course_detail' course.slug %}",
                 "offers": {
                     "@type": "Offer",
                     "price": "{{ course.price|floatformat:0 }}",

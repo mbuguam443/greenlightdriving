@@ -1,3 +1,9 @@
-# This file intentionally left minimal.
-# Passenger is configured via cPanel Python App.
-# Static/media files are served by Apache automatically from the document root.
+# Green Light Driving School - cPanel Passenger .htaccess
+# Passenger handles all requests. Apache serves /static/ only.
+
+RewriteEngine On
+
+# /static/ — serve directly via Apache if file exists
+RewriteCond %{REQUEST_URI} ^/static/
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]

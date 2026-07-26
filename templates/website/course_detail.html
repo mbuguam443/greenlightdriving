@@ -1,7 +1,17 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School.{{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
+{% block meta_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
+{% block meta_keywords %}{{ course.name|lower }}, {{ course.category.name|lower }} course Kenya, driving course Nairobi, NTSA driving course{% endblock %}
+
+{% block canonical %}{{ site_url }}/courses/{{ course.slug }}/{% endblock %}
+{% block og_title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
+{% block og_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
+{% block og_url %}{{ site_url }}/courses/{{ course.slug }}/{% endblock %}
+{% block og_image %}{% if course.image %}{{ site_url }}{{ course.image.url }}{% else %}{{ site_url }}{% static 'images/logo.png' %}{% endif %}{% endblock %}
+{% block twitter_title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
+{% block twitter_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School.{% endblock %}
+{% block twitter_image %}{% if course.image %}{{ site_url }}{{ course.image.url }}{% else %}{{ site_url }}{% static 'images/logo.png' %}{% endif %}{% endblock %}
 
 {% block json_ld %}
 <script type="application/ld+json">
@@ -10,9 +20,12 @@
     "@type": "Course",
     "name": "{{ course.name }}",
     "description": "{{ course.description|truncatewords:50|escapejs }}",
+    "url": "{{ site_url }}/courses/{{ course.slug }}/",
+    {% if course.image %}"image": "{{ site_url }}{{ course.image.url }}",{% endif %}
     "provider": {
         "@type": "DrivingSchool",
-        "name": "Greenlight Defensive Driving School"
+        "name": "Greenlight Defensive Driving School",
+        "url": "{{ site_url }}/"
     },
     "offers": {
         "@type": "Offer",

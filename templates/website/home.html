@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Greenlight Defensive Driving School - Learn to Drive Safe{% endblock %}
-{% block meta_description %}Kenya's leading NTSA-certified driving school. Professional instructors, modern vehicles, and affordable fees. Start your driving journey today!{% endblock %}
-{% block meta_keywords %}driving school Kenya, NTSA driving test, driving lessons Nairobi, defensive driving, driving school near me, Green Light driving school, driving licence Kenya{% endblock %}
+{% block title %}Greenlight Defensive Driving School - Learn to Drive Safe in Kenya{% endblock %}
+{% block meta_description %}Kenya's leading NTSA-certified driving school. Professional instructors, modern vehicles, and affordable fees from KES 15,000. Start your driving journey today at Kimbo, Ruiru or Waithaka!{% endblock %}
+{% block meta_keywords %}driving school Kenya, NTSA driving test, driving lessons Nairobi, defensive driving, driving school near me, Green Light driving school, driving licence Kenya, learn to drive Nairobi, Class B driving course, affordable driving school{% endblock %}
+
+{% block canonical %}{{ site_url }}/{% endblock %}
+{% block og_title %}Greenlight Defensive Driving School - Learn to Drive Safe in Kenya{% endblock %}
+{% block og_description %}Kenya's leading NTSA-certified driving school. Professional instructors, modern vehicles, and affordable fees from KES 15,000. 98% pass rate!{% endblock %}
+{% block og_url %}{{ site_url }}/{% endblock %}
+{% block og_image %}{{ site_url }}{% static 'images/logo.png' %}{% endblock %}
+{% block twitter_title %}Greenlight Defensive Driving School - Learn to Drive Safe{% endblock %}
+{% block twitter_description %}Kenya's leading NTSA-certified driving school with 98% pass rate. Enroll now!{% endblock %}
+{% block twitter_image %}{{ site_url }}{% static 'images/logo.png' %}{% endblock %}
 
 {% block json_ld %}
 <script type="application/ld+json">
@@ -12,10 +21,10 @@
     "@type": "DrivingSchool",
     "name": "Greenlight Defensive Driving School",
     "description": "Kenya's leading NTSA-certified driving school offering professional driving courses with a 98% pass rate.",
-    "url": "{{ request.build_absolute_uri }}",
-    "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}",
-    "telephone": "+254700000000",
-    "email": "info@greenlightschool.co.ke",
+    "url": "{{ site_url }}",
+    "logo": "{{ site_url }}{% static 'images/logo.png' %}",
+    "telephone": "{{ phone_primary|default:'+254700000000' }}",
+    "email": "{{ email|default:'info@greenlightdriving.co.ke' }}",
     "address": {
         "@type": "PostalAddress",
         "addressLocality": "Nairobi",
@@ -26,7 +35,7 @@
         "latitude": -1.1736,
         "longitude": 36.834
     },
-    "priceRange": "KES 15000 - KES 35000",
+    "priceRange": "KES 15000 - KES 45000",
     "openingHoursSpecification": [
         {
             "@type": "OpeningHoursSpecification",
@@ -44,21 +53,38 @@
     "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.8",
-        "reviewCount": "320"
+        "reviewCount": "320",
+        "bestRating": "5"
     },
     "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Driving Courses",
         "itemListElement": [
-            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class B1 - Saloon Cars"}},
-            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class A2 - Motorcycles"}},
-            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class B2 - Commercial Vehicles"}}
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class B1 - Saloon Cars", "url": "{{ site_url }}/courses/basic-driving/"}},
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class B2 - SUVs and Vans", "url": "{{ site_url }}/courses/suv-van-training/"}},
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class A1 - Motorcycles", "url": "{{ site_url }}/courses/motorcycle-basic/"}},
+            {"@type": "Offer", "itemOffered": {"@type": "Course", "name": "Class C1 - Commercial Driving", "url": "{{ site_url }}/courses/commercial-driving/"}}
         ]
     },
     "sameAs": [],
-    "areaServed": {
-        "@type": "Country",
-        "name": "Kenya"
+    "areaServed": [
+        {"@type": "City", "name": "Nairobi"},
+        {"@type": "City", "name": "Ruiru"},
+        {"@type": "City", "name": "Kimbo"}
+    ],
+    "hasMap": "{{ site_url }}/branches/"
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Greenlight Defensive Driving School",
+    "url": "{{ site_url }}",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ site_url }}/courses/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
     }
 }
 </script>

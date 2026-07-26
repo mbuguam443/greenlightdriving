@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
 
 {% block title %}Contact Us - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}Get in touch with Greenlight Driving School. Send us a message, call us, or visit one of our branches in Kimbo, Ruiru, or Waithaka.{% endblock %}
+{% block meta_description %}Contact Greenlight Driving School. Call us, visit our branches in Kimbo, Ruiru or Waithaka, or send us a message.{% endblock %}
+{% block meta_keywords %}contact Greenlight driving school, driving school Nairobi contact, driving school phone number Kenya{% endblock %}
+
+{% block canonical %}{{ site_url }}/contact/{% endblock %}
+{% block og_title %}Contact Us - Greenlight Defensive Driving School{% endblock %}
+{% block og_description %}Contact Greenlight Driving School. Call us, visit our branches in Kimbo, Ruiru or Waithaka, or send us a message.{% endblock %}
+{% block og_url %}{{ site_url }}/contact/{% endblock %}
+{% block twitter_title %}Contact Us - Greenlight Defensive Driving School{% endblock %}
+{% block twitter_description %}Contact Greenlight Driving School. Call us, visit our branches in Kimbo, Ruiru or Waithaka, or send us a message.{% endblock %}
 
 {% block json_ld %}
 <script type="application/ld+json">
@@ -9,11 +17,13 @@
     "@context": "https://schema.org",
     "@type": "ContactPage",
     "name": "Contact Greenlight Defensive Driving School",
+    "url": "{{ site_url }}/contact/",
     "mainEntity": {
         "@type": "DrivingSchool",
         "name": "Greenlight Defensive Driving School",
-        "telephone": "+254700000000",
-        "email": "info@greenlightschool.co.ke"
+        "url": "{{ site_url }}/",
+        "telephone": "{{ site_context.phone|default:'+254700000000' }}",
+        "email": "{{ site_context.email|default:'info@greenlightschool.co.ke' }}"
     }
 }
 </script>

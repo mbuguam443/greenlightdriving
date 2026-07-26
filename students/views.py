@@ -96,6 +96,8 @@ class StudentDeleteView(StaffTestMixin, DeleteView):
 
 class IndexView(LoginRequiredMixin, View):
     def get(self, request):
+        if request.user.role == 'STUDENT':
+            return redirect('student_portal:dashboard')
         from django.db.models import Sum, Count
         from datetime import date
         from payments.models import Payment

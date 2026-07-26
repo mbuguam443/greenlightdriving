@@ -18,6 +18,7 @@
     {% for course in courses %}
     <url>
         <loc>{{ scheme }}://{{ domain }}/courses/{{ course.slug }}/</loc>
+        {% if course.updated_at %}<lastmod>{{ course.updated_at|date:"Y-m-d" }}</lastmod>{% elif course.created_at %}<lastmod>{{ course.created_at|date:"Y-m-d" }}</lastmod>{% endif %}
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -32,6 +33,14 @@
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
+    {% for branch in branches %}
+    <url>
+        <loc>{{ scheme }}://{{ domain }}/branches/{{ branch.slug }}/</loc>
+        {% if branch.updated_at %}<lastmod>{{ branch.updated_at|date:"Y-m-d" }}</lastmod>{% elif branch.created_at %}<lastmod>{{ branch.created_at|date:"Y-m-d" }}</lastmod>{% endif %}
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    {% endfor %}
     <url>
         <loc>{{ scheme }}://{{ domain }}/gallery/</loc>
         <changefreq>monthly</changefreq>
@@ -55,6 +64,7 @@
     {% for post in posts %}
     <url>
         <loc>{{ scheme }}://{{ domain }}/blog/{{ post.slug }}/</loc>
+        {% if post.updated_at %}<lastmod>{{ post.updated_at|date:"Y-m-d" }}</lastmod>{% elif post.created_at %}<lastmod>{{ post.created_at|date:"Y-m-d" }}</lastmod>{% endif %}
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>

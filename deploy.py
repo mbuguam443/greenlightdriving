@@ -30,10 +30,15 @@ print("      Done!")
 media_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
 os.makedirs(media_dir, exist_ok=True)
 os.chmod(media_dir, 0o755)
-for sub in ['courses', 'site', 'gallery', 'testimonials', 'blog', 'admissions', 'vehicles']:
+for sub in ['courses', 'site', 'gallery', 'testimonials', 'blog', 'admissions', 'vehicles', 'student_documents']:
     sub_dir = os.path.join(media_dir, sub)
     os.makedirs(sub_dir, exist_ok=True)
     os.chmod(sub_dir, 0o755)
+# Fix permissions on any existing files (Apache needs read access)
+for root, dirs, files in os.walk(media_dir):
+    os.chmod(root, 0o755)
+    for f in files:
+        os.chmod(os.path.join(root, f), 0o644)
 print("      Media directories ready with permissions")
 
 # 2. Collect static

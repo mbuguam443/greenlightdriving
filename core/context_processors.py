@@ -4,6 +4,7 @@ from .models import Branch, SiteSettings
 def site_context(request):
     settings = SiteSettings.objects.first()
     branches = Branch.objects.filter(is_active=True)
+    site_url = f'{request.scheme}://{request.get_host()}'
 
     context = {
         "site_name": "Greenlight Defensive Driving School",
@@ -17,6 +18,7 @@ def site_context(request):
         "youtube": "",
         "branches": branches,
         "site_settings": settings,
+        "site_url": site_url,
     }
 
     if settings:

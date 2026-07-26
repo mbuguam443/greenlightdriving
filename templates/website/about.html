@@ -1,7 +1,45 @@
 {% extends 'base.html' %}
 
 {% block title %}About Us - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}Learn about Greenlight Defensive Driving School - our mission, vision, and commitment to producing safe, confident drivers across Kenya.{% endblock %}
+{% block meta_description %}Learn about Greenlight Driving School - Kenya's trusted NTSA-certified driving school with 3 branches, experienced instructors and 98% pass rate.{% endblock %}
+{% block meta_keywords %}about Greenlight driving school, driving school Nairobi, best driving school Kenya, NTSA certified driving school, driving school reviews{% endblock %}
+
+{% block canonical %}{{ site_url }}/about/{% endblock %}
+{% block og_title %}About Us - Greenlight Defensive Driving School{% endblock %}
+{% block og_description %}Learn about Greenlight Driving School - Kenya's trusted NTSA-certified driving school with 3 branches, experienced instructors and 98% pass rate.{% endblock %}
+{% block og_url %}{{ site_url }}/about/{% endblock %}
+{% block twitter_title %}About Us - Greenlight Defensive Driving School{% endblock %}
+{% block twitter_description %}Learn about Greenlight Driving School - Kenya's trusted NTSA-certified driving school with 3 branches, experienced instructors and 98% pass rate.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "DrivingSchool",
+    "name": "Greenlight Defensive Driving School",
+    "url": "{{ site_url }}/",
+    "logo": "{{ site_url }}{% static 'images/logo.png' %}",
+    "description": "Kenya's trusted NTSA-certified driving school with 3 branches, experienced instructors and 98% pass rate.",
+    "telephone": "{{ site_context.phone|default:'+254700000000' }}",
+    "email": "{{ site_context.email|default:'info@greenlightschool.co.ke' }}",
+    "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Nairobi",
+        "addressCountry": "KE"
+    },
+    "areaServed": {
+        "@type": "Country",
+        "name": "Kenya"
+    },
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "bestRating": "5",
+        "reviewCount": "500"
+    }
+}
+</script>
+{% endblock %}
 
 {% block extra_css %}
 <style>

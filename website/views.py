@@ -20,6 +20,7 @@ class SitemapView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.filter(is_active=True)
         context['posts'] = BlogPost.objects.filter(is_published=True)
+        context['branches'] = Branch.objects.filter(is_active=True)
         context['scheme'] = self.request.scheme
         context['domain'] = self.request.get_host()
         return context

@@ -9,15 +9,15 @@
     <meta name="description" content="{% block meta_description %}Greenlight Defensive Driving School - Kenya's leading NTSA-certified driving school. Professional driving courses (Class A, B1, B2), experienced instructors, 98% pass rate. Enroll now in Kimbo, Ruiru or Waithaka branches.{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}driving school Kenya, NTSA driving test, driving lessons Nairobi, defensive driving, Class B driving licence, driving school near me, Green Light driving school{% endblock %}">
     <meta name="author" content="Greenlight Defensive Driving School">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{% block canonical %}{% endblock %}">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <link rel="canonical" href="{% block canonical %}{{ site_url }}{{ request.path }}{% endblock %}">
 
     {% block og_tags %}
     <meta property="og:title" content="{% block og_title %}Greenlight Defensive Driving School - Professional Driving Education in Kenya{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Kenya's leading NTSA-certified driving school with 98% pass rate. Professional driving courses, experienced instructors, and 3 branches across Nairobi.{% endblock %}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{% block og_url %}{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ site_url }}{{ request.path }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ site_url }}{% static 'images/logo.png' %}{% endblock %}">
     <meta property="og:site_name" content="Greenlight Defensive Driving School">
     <meta property="og:locale" content="en_KE">
     {% endblock %}
@@ -25,7 +25,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{% block twitter_title %}Greenlight Defensive Driving School{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}Professional driving education with NTSA-certified instructors. 98% pass rate across 3 branches in Kenya.{% endblock %}">
-    <meta name="twitter:image" content="{% block twitter_image %}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ site_url }}{% static 'images/logo.png' %}{% endblock %}">
+    <meta name="twitter:site" content="@GreenLightKE">
 
     <meta name="theme-color" content="#2E7D32">
     <meta name="msapplication-TileColor" content="#2E7D32">
@@ -386,14 +387,22 @@
                     <a href="{% url 'admissions:online_admission' %}" class="btn btn-apply">Apply Now</a>
 
                     {% if user.is_authenticated %}
+                        {% if user.role == 'STUDENT' %}
+                        <a href="{% url 'student_portal:dashboard' %}" class="btn btn-login">My Portal</a>
+                        {% else %}
                         <a href="{% url 'dashboard' %}" class="btn btn-login">Dashboard</a>
+                        {% endif %}
                         <div class="dropdown">
                             <a class="btn btn-login dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>
                                 {{ user.first_name|default:user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
+                                {% if user.role == 'STUDENT' %}
+                                <li><a class="dropdown-item" href="{% url 'student_portal:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                {% else %}
                                 <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" action="{% url 'accounts:logout' %}">

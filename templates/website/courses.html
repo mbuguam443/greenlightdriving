@@ -1,7 +1,50 @@
 {% extends 'base.html' %}
 
-{% block title %}Our Courses - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}Explore our range of NTSA-approved driving courses at Greenlight. From Class A motorcycle to Class C commercial, find the right course for you.{% endblock %}
+{% block title %}Driving Courses - Greenlight Defensive Driving School{% endblock %}
+{% block meta_description %}Explore NTSA-approved driving courses at Greenlight. Class A motorcycle, Class B1/B2 cars, Class C commercial. Affordable fees from KES 15,000.{% endblock %}
+{% block meta_keywords %}driving courses Kenya, NTSA approved driving course, Class B driving, commercial driving licence, driving school courses Nairobi, Greenlight driving courses{% endblock %}
+
+{% block canonical %}{{ site_url }}/courses/{% endblock %}
+{% block og_title %}Driving Courses - Greenlight Defensive Driving School{% endblock %}
+{% block og_description %}Explore NTSA-approved driving courses at Greenlight. Class A motorcycle, Class B1/B2 cars, Class C commercial. Affordable fees from KES 15,000.{% endblock %}
+{% block og_url %}{{ site_url }}/courses/{% endblock %}
+{% block twitter_title %}Driving Courses - Greenlight Defensive Driving School{% endblock %}
+{% block twitter_description %}Explore NTSA-approved driving courses at Greenlight. Class A motorcycle, Class B1/B2 cars, Class C commercial. Affordable fees from KES 15,000.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Greenlight Driving School Courses",
+    "description": "NTSA-approved driving courses at Greenlight Defensive Driving School",
+    "url": "{{ site_url }}/courses/",
+    "itemListElement": [
+        {% for course in courses %}
+        {
+            "@type": "ListItem",
+            "position": {{ forloop.counter }},
+            "item": {
+                "@type": "Course",
+                "name": "{{ course.name|escapejs }}",
+                "description": "{{ course.short_description|default:course.name|escapejs }}",
+                "url": "{{ site_url }}{% url 'website:course_detail' course.slug %}",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "{{ course.price|floatformat:0 }}",
+                    "priceCurrency": "KES"
+                },
+                "provider": {
+                    "@type": "DrivingSchool",
+                    "name": "Greenlight Defensive Driving School"
+                }
+            }
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+{% endblock %}
 
 {% block extra_css %}
 <style>
