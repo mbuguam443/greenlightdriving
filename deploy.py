@@ -5,6 +5,7 @@ Run this from cPanel Python App > Run > deploy.py
 """
 import os
 import sys
+import shutil
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'greenlight.settings')
 
@@ -28,23 +29,21 @@ print("      Done!")
 # 2. Collect static
 print("\n[2/6] Collecting static files...")
 call_command('collectstatic', '--noinput', verbosity=1)
-print("      Done!")
-
-# 2b. Symlink staticfiles -> static for Apache serving
-import shutil
+# Copy collected files into static/ so Apache serves them directly at /static/
 staticfiles_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'staticfiles')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 if os.path.isdir(staticfiles_dir):
-    # Copy staticfiles content into static/ so Apache serves it from /static/
     for item in os.listdir(staticfiles_dir):
         src = os.path.join(staticfiles_dir, item)
         dst = os.path.join(static_dir, item)
         if os.path.isdir(src):
-            if not os.path.exists(dst):
-                shutil.copytree(src, dst)
+            if os.path.exists(dst):
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
     print("      Static files synced to static/")
+print("      Done!")
 
 # 3. Superuser
 print("\n[3/6] Creating superuser...")
