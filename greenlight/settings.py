@@ -14,7 +14,7 @@ SECRET_KEY = os.environ.get(
     'django-insecure-61+59ji-wkc1t&+d*mja2g7^zj&_b&$&!df_n+po1#)*#d14b='
 )
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'greenlight-driving-defensive.schones-heim-builders.co.ke',
