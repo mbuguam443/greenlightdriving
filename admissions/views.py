@@ -113,8 +113,54 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Admission updated successfully.')
-        return super().form_valid(form)
+        old_status = self.get_object().status
+        new_status = form.cleaned_data.get('status')
+        response = super().form_valid(form)
+
+        if new_status == 'APPROVED' and old_status != 'APPROVED':
+            self._create_student_profile(self.object)
+
+        if new_status:
+            messages.success(self.request, f'Admission updated to {new_status}.')
+        return response
+
+    def _create_student_profile(self, admission):
+        from students.models import Student
+        from django.utils import timezone
+        from datetime import timedelta
+
+        user = None
+        from accounts.models import User
+        user = User.objects.filter(email=admission.email).first()
+
+        if not user:
+            user = User(
+                username=admission.email,
+                email=admission.email,
+                first_name=admission.first_name,
+                last_name=admission.last_name,
+                phone=admission.phone,
+                role='STUDENT',
+            )
+            user.set_password('student1234')
+            user.save()
+            messages.success(self.request, f'New student account created: {admission.email} / student1234')
+
+        if Student.objects.filter(user=user).exists():
+            messages.warning(self.request, f'Student profile already exists for {user.email}.')
+            return
+
+        student = Student(
+            user=user,
+            admission=admission,
+            category=admission.category,
+            course=admission.course,
+            branch=admission.branch,
+            status='ACTIVE',
+            expected_graduation=timezone.now().date() + timedelta(days=90),
+        )
+        student.save()
+        messages.success(self.request, f'Student profile created: {student.student_number}')
 
 
 class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
