@@ -33,7 +33,7 @@ print("\n[2/4] Setting up media directories...")
 media_dir = os.path.join(project_dir, 'media')
 os.makedirs(media_dir, exist_ok=True)
 os.chmod(media_dir, 0o755)
-for sub in ['courses', 'site', 'gallery', 'testimonials', 'blog', 'admissions', 'vehicles', 'student_documents']:
+for sub in ['courses', 'site', 'gallery', 'testimonials', 'blog', 'admissions/passports', 'admissions/ids', 'vehicles', 'student_documents', 'student_documents/other']:
     sub_dir = os.path.join(media_dir, sub)
     os.makedirs(sub_dir, exist_ok=True)
     os.chmod(sub_dir, 0o755)
