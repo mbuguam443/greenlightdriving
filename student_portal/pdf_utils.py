@@ -1,12 +1,14 @@
 import io
+import os
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm, cm
 from reportlab.lib.colors import HexColor
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from django.conf import settings
 
 GREEN = HexColor('#2E7D32')
 LIGHT_GREEN = HexColor('#66BB6A')
@@ -55,13 +57,25 @@ def _get_styles():
     return styles
 
 
+def _get_logo():
+    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'logo.png')
+    if os.path.exists(logo_path):
+        return Image(logo_path, width=50 * mm, height=25 * mm)
+    return None
+
+
 def _header(styles, title):
-    return [
-        Paragraph('GREENLIGHT DEFENSIVE DRIVING SCHOOL', styles['SchoolName']),
-        Paragraph('Drive Safe, Drive Smart &middot; NTSA Certified', styles['SchoolTagline']),
-        HRFlowable(width='100%', thickness=1.5, color=GREEN, spaceAfter=10),
-        Paragraph(title, styles['ReportTitle']),
-    ]
+    elements = []
+    logo = _get_logo()
+    if logo:
+        logo.hAlign = 'CENTER'
+        elements.append(logo)
+        elements.append(Spacer(1, 4))
+    elements.append(Paragraph('GREENLIGHT DEFENSIVE DRIVING SCHOOL', styles['SchoolName']))
+    elements.append(Paragraph('Drive Safe, Drive Smart &middot; NTSA Certified', styles['SchoolTagline']))
+    elements.append(HRFlowable(width='100%', thickness=1.5, color=GREEN, spaceAfter=10))
+    elements.append(Paragraph(title, styles['ReportTitle']))
+    return elements
 
 
 def _footer(styles):
