@@ -39,6 +39,8 @@ class OnlineAdmissionView(View):
             'captcha_question': f'What is {a} {op} {b}?',
             'captcha_hash': captcha_hash,
             'captcha_answer': answer,
+            'course_categories': CourseCategory.objects.all(),
+            'branches': Branch.objects.filter(is_active=True),
         })
 
     def post(self, request):
@@ -50,7 +52,14 @@ class OnlineAdmissionView(View):
             elapsed = time.time() - load_time
             if elapsed < 3:
                 messages.error(request, 'Form submitted too quickly. Please take your time filling it out.')
-                return render(request, 'admissions/online_admission.html', {'form': form})
+                return render(request, 'admissions/online_admission.html', {
+                    'form': form,
+                    'course_categories': CourseCategory.objects.all(),
+                    'branches': Branch.objects.filter(is_active=True),
+                    'captcha_question': f'What is {a} {op} {b}?',
+                    'captcha_hash': captcha_hash,
+                    'captcha_answer': answer,
+                })
 
         if form.is_valid():
             admission = form.save()
@@ -58,7 +67,14 @@ class OnlineAdmissionView(View):
             messages.success(request, f'Application submitted successfully! Your admission number is {admission.admission_number}.')
             return redirect('admissions:confirmation', pk=admission.pk)
         messages.error(request, 'Please correct the errors below.')
-        return render(request, 'admissions/online_admission.html', {'form': form})
+        return render(request, 'admissions/online_admission.html', {
+            'form': form,
+            'course_categories': CourseCategory.objects.all(),
+            'branches': Branch.objects.filter(is_active=True),
+            'captcha_question': form.fields['captcha_question'].label,
+            'captcha_hash': '',
+            'captcha_answer': '',
+        })
 
 
 class AdmissionConfirmationView(View):

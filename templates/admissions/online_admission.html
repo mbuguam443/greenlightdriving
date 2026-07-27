@@ -63,11 +63,6 @@
                                     <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="id_other_names" class="form-label fw-semibold">Other Names</label>
-                                    <input type="text" name="other_names" id="id_other_names" class="form-control"
-                                           value="{{ form.other_names.value|default:'' }}">
-                                </div>
                                 <div class="col-md-6">
                                     <label for="id_email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
                                     <input type="email" name="email" id="id_email" class="form-control"
@@ -77,11 +72,11 @@
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="id_phone_number" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
-                                    <input type="tel" name="phone_number" id="id_phone_number" class="form-control"
-                                           value="{{ form.phone_number.value|default:'' }}" required>
-                                    {% if form.phone_number.errors %}
-                                    <div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>
+                                    <label for="id_phone" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phone" id="id_phone" class="form-control"
+                                           value="{{ form.phone.value|default:'' }}" required>
+                                    {% if form.phone.errors %}
+                                    <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                                 <div class="col-md-4">
@@ -138,12 +133,12 @@
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="id_id_image" class="form-label fw-semibold">ID Card / Passport Image <span class="text-danger">*</span></label>
-                                    <input type="file" name="id_image" id="id_id_image" class="form-control"
+                                    <label for="id_national_id_image" class="form-label fw-semibold">ID Card / Passport Image <span class="text-danger">*</span></label>
+                                    <input type="file" name="national_id_image" id="id_national_id_image" class="form-control"
                                            accept="image/*" required>
                                     <div class="form-text">Upload a clear copy of your ID or passport</div>
-                                    {% if form.id_image.errors %}
-                                    <div class="text-danger small mt-1">{{ form.id_image.errors.0 }}</div>
+                                    {% if form.national_id_image.errors %}
+                                    <div class="text-danger small mt-1">{{ form.national_id_image.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -159,17 +154,17 @@
                         <div class="card-body p-4">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="id_course_category" class="form-label fw-semibold">Course Category <span class="text-danger">*</span></label>
-                                    <select name="course_category" id="id_course_category" class="form-select" required>
+                                    <label for="id_category" class="form-label fw-semibold">Course Category <span class="text-danger">*</span></label>
+                                    <select name="category" id="id_category" class="form-select" required>
                                         <option value="">Select Category</option>
                                         {% for category in course_categories %}
-                                        <option value="{{ category.id }}" {% if form.course_category.value == category.id %}selected{% endif %}>
+                                        <option value="{{ category.id }}" {% if form.category.value|stringformat:"s" == category.id|stringformat:"s" %}selected{% endif %}>
                                             {{ category.name }}
                                         </option>
                                         {% endfor %}
                                     </select>
-                                    {% if form.course_category.errors %}
-                                    <div class="text-danger small mt-1">{{ form.course_category.errors.0 }}</div>
+                                    {% if form.category.errors %}
+                                    <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
@@ -186,7 +181,7 @@
                                     <select name="branch" id="id_branch" class="form-select" required>
                                         <option value="">Select Branch</option>
                                         {% for branch in branches %}
-                                        <option value="{{ branch.id }}" {% if form.branch.value == branch.id %}selected{% endif %}>
+                                        <option value="{{ branch.id }}" {% if form.branch.value|stringformat:"s" == branch.id|stringformat:"s" %}selected{% endif %}>
                                             {{ branch.name }}
                                         </option>
                                         {% endfor %}
@@ -196,16 +191,16 @@
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="id_schedule" class="form-label fw-semibold">Preferred Schedule <span class="text-danger">*</span></label>
-                                    <select name="schedule" id="id_schedule" class="form-select" required>
+                                    <label for="id_preferred_schedule" class="form-label fw-semibold">Preferred Schedule <span class="text-danger">*</span></label>
+                                    <select name="preferred_schedule" id="id_preferred_schedule" class="form-select" required>
                                         <option value="">Select Schedule</option>
-                                        <option value="morning" {% if form.schedule.value == 'morning' %}selected{% endif %}>Morning (8AM - 12PM)</option>
-                                        <option value="afternoon" {% if form.schedule.value == 'afternoon' %}selected{% endif %}>Afternoon (1PM - 5PM)</option>
-                                        <option value="evening" {% if form.schedule.value == 'evening' %}selected{% endif %}>Evening (5PM - 8PM)</option>
-                                        <option value="weekend" {% if form.schedule.value == 'weekend' %}selected{% endif %}>Weekend (Sat & Sun)</option>
+                                        <option value="MORNING" {% if form.preferred_schedule.value == 'MORNING' %}selected{% endif %}>Morning (8AM - 12PM)</option>
+                                        <option value="AFTERNOON" {% if form.preferred_schedule.value == 'AFTERNOON' %}selected{% endif %}>Afternoon (1PM - 5PM)</option>
+                                        <option value="EVENING" {% if form.preferred_schedule.value == 'EVENING' %}selected{% endif %}>Evening (5PM - 8PM)</option>
+                                        <option value="WEEKEND" {% if form.preferred_schedule.value == 'WEEKEND' %}selected{% endif %}>Weekend (Sat & Sun)</option>
                                     </select>
-                                    {% if form.schedule.errors %}
-                                    <div class="text-danger small mt-1">{{ form.schedule.errors.0 }}</div>
+                                    {% if form.preferred_schedule.errors %}
+                                    <div class="text-danger small mt-1">{{ form.preferred_schedule.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -255,7 +250,7 @@
 
 {% block extra_js %}
 <script>
-document.getElementById('id_course_category').addEventListener('change', function() {
+document.getElementById('id_category').addEventListener('change', function() {
     const categoryId = this.value;
     const courseSelect = document.getElementById('id_course');
 
@@ -266,12 +261,12 @@ document.getElementById('id_course_category').addEventListener('change', functio
 
     courseSelect.innerHTML = '<option value="">Loading courses...</option>';
 
-    fetch(`/api/courses/?category=${categoryId}`)
+    fetch(`/admissions/api/courses/?category_id=${categoryId}`)
         .then(response => response.json())
         .then(data => {
             let options = '<option value="">Select Course</option>';
             data.forEach(course => {
-                options += `<option value="${course.id}">${course.name} - KES ${parseInt(course.fee).toLocaleString()}</option>`;
+                options += `<option value="${course.id}">${course.name}</option>`;
             });
             courseSelect.innerHTML = options;
         })
