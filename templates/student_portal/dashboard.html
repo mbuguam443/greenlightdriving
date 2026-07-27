@@ -138,23 +138,116 @@
 </div>
 
 {% else %}
+<div class="mb-4">
+    <h4 class="mb-1">Welcome, {{ user.get_full_name }}!</h4>
+    <p class="text-muted mb-0">Your account is being set up</p>
+</div>
+
 <div class="row justify-content-center">
-    <div class="col-lg-6">
+    <div class="col-lg-8">
+        {% if admission %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header text-white" style="background-color: #2E7D32;">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="bi bi-file-earmark-text me-2"></i>Your Admission Application
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Admission Number</small>
+                        <span class="fw-semibold" style="color: #2E7D32;">{{ admission.admission_number }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Status</small>
+                        {% if admission.status == 'PENDING' %}
+                        <span class="badge bg-warning text-dark px-3 py-2">Pending Review</span>
+                        {% elif admission.status == 'APPROVED' %}
+                        <span class="badge bg-success px-3 py-2">Approved</span>
+                        {% elif admission.status == 'REJECTED' %}
+                        <span class="badge bg-danger px-3 py-2">Rejected</span>
+                        {% elif admission.status == 'ENROLLED' %}
+                        <span class="badge px-3 py-2" style="background-color: #2E7D32;">Enrolled</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Course</small>
+                        <span class="fw-semibold">{{ admission.course.name }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Branch</small>
+                        <span class="fw-semibold">{{ admission.branch.name }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Schedule</small>
+                        <span class="fw-semibold">{{ admission.get_preferred_schedule_display }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Date Applied</small>
+                        <span class="fw-semibold">{{ admission.created_at|date:"d M Y H:i" }}</span>
+                    </div>
+                </div>
+
+                {% if admission.status == 'PENDING' %}
+                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-clock-history me-2"></i>
+                    <div>
+                        <strong>Your application is under review.</strong> Our team is processing your admission. You will be notified once approved.
+                    </div>
+                </div>
+                {% elif admission.status == 'APPROVED' %}
+                <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <div>
+                        <strong>Your application has been approved!</strong> Your student profile is being set up. Please check back soon or contact us.
+                    </div>
+                </div>
+                {% elif admission.status == 'REJECTED' %}
+                <div class="alert alert-danger d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <div>
+                        <strong>Your application was not approved.</strong> Please contact us for more information.
+                    </div>
+                </div>
+                {% elif admission.status == 'ENROLLED' %}
+                <div class="alert d-flex align-items-center mb-0" role="alert" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-mortarboard me-2"></i>
+                    <div>
+                        <strong>You are enrolled!</strong> Your student profile is being finalized. Welcome to Green Light Driving School!
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center p-5">
-                <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
-                    <i class="bi bi-exclamation-triangle text-warning display-4"></i>
+                <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                    <i class="bi bi-journal-check display-4" style="color: #2E7D32;"></i>
                 </div>
-                <h4 class="mb-3">Profile Not Found</h4>
+                <h4 class="mb-3">No Admission Application Yet</h4>
                 <p class="text-muted mb-4">
-                    Your student profile has not been created yet. Please contact the administration to set up your account.
+                    You haven't submitted an admission application yet. Apply now to start your driving journey!
+                </p>
+                <a href="{% url 'admissions:online_admission' %}" class="btn btn-lg fw-semibold text-white" style="background-color: #2E7D32;">
+                    <i class="bi bi-pencil-square me-2"></i>Apply Now
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body text-center p-4">
+                <p class="text-muted mb-2">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Need help? Contact the administration.
                 </p>
                 <div class="d-flex justify-content-center gap-2">
-                    <a href="mailto:admin@greenlightschool.co.ke" class="btn btn-primary" style="background-color: #2E7D32; border-color: #2E7D32;">
-                        <i class="bi bi-envelope me-1"></i> Contact Admin
+                    <a href="mailto:admin@greenlightschool.co.ke" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-envelope me-1"></i>Email Us
                     </a>
-                    <a href="tel:+254700000000" class="btn btn-outline-primary">
-                        <i class="bi bi-telephone me-1"></i> Call Us
+                    <a href="tel:+254700000000" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-telephone me-1"></i>Call Us
                     </a>
                 </div>
             </div>

@@ -14,25 +14,29 @@ class StudentRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 class PortalDashboardView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
+        from admissions.models import Admission
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
             student = None
-        
+
+        admission = Admission.objects.filter(email=request.user.email).order_by('-created_at').first()
+
         context = {
             'student': student,
             'student_profile': student,
+            'admission': admission,
         }
-        
+
         if student:
             from payments.models import Payment
             from lessons.models import PracticalLesson
             from ntsa.models import NTSARecord
-            
+
             payments = Payment.objects.filter(student=student, status='COMPLETED')
             all_lessons = PracticalLesson.objects.filter(student=student)
             completed_lessons = all_lessons.filter(status='COMPLETED')
-            
+
             context['recent_payments'] = payments[:5]
             context['lessons'] = all_lessons[:10]
             context['upcoming_lessons'] = all_lessons.filter(status='SCHEDULED')[:5]
@@ -41,7 +45,7 @@ class PortalDashboardView(StudentRequiredMixin, View):
             context['progress_percentage'] = student.progress_percentage
             context['balance'] = student.balance
             context['ntsa_status'] = context['ntsa'].pdl_status.title() if context['ntsa'] else 'N/A'
-        
+
         return render(request, 'student_portal/dashboard.html', context)
 
 
