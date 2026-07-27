@@ -4,9 +4,16 @@
 {% block title %}My Payments - Green Light School{% endblock %}
 
 {% block dashboard_content %}
-<div class="mb-4">
-    <h4 class="mb-1">Payment History</h4>
-    <p class="text-muted mb-0">View all your payment transactions</p>
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h4 class="mb-1">Payment History</h4>
+        <p class="text-muted mb-0">View all your payment transactions</p>
+    </div>
+    {% if balance > 0 %}
+    <a href="{% url 'payments:mpesa_pay' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+        <i class="bi bi-phone me-1"></i>Pay Now (M-Pesa)
+    </a>
+    {% endif %}
 </div>
 
 <div class="row g-4 mb-4">
@@ -80,7 +87,7 @@
                 <tbody>
                     {% for payment in payments %}
                     <tr>
-                        <td>{{ payment.payment_date|date:"d M Y H:i" }}</td>
+                        <td>{{ payment.created_at|date:"d M Y H:i" }}</td>
                         <td class="fw-bold" style="color: #2E7D32;">KES {{ payment.amount }}</td>
                         <td>
                             <span class="badge bg-light text-dark border">{{ payment.get_payment_method_display }}</span>
