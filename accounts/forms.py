@@ -68,3 +68,52 @@ class UserAdminForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'passport_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+
+class StudentRegistrationForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={
+        'class': 'form-control', 'placeholder': 'Email Address'
+    }))
+    first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'First Name'
+    }))
+    last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'Last Name'
+    }))
+    phone = forms.CharField(max_length=20, widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'Phone Number'
+    }))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'form-control', 'placeholder': 'Create Password'
+    }))
+    password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput(attrs={
+        'class': 'form-control', 'placeholder': 'Confirm Password'
+    }))
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('An account with this email already exists.')
+        return email
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('password')
+        p2 = cleaned.get('password2')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError('Passwords do not match.')
+        return cleaned
+
+    def save(self):
+        data = self.cleaned_data
+        user = User(
+            username=data['email'],
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            phone=data['phone'],
+            role='STUDENT',
+        )
+        user.set_password(data['password'])
+        user.save()
+        return user

@@ -14,12 +14,18 @@ from website.models import Course, CourseCategory
 from core.models import Branch
 
 
-class OnlineAdmissionView(View):
+class OnlineAdmissionView(LoginRequiredMixin, View):
     FORM_LOAD_TIME = '_form_load_time'
 
     def get(self, request):
-        form = OnlineAdmissionForm()
-        # Store timestamp when form was loaded
+        initial = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+        }
+        if hasattr(request.user, 'phone') and request.user.phone:
+            initial['phone'] = request.user.phone
+        form = OnlineAdmissionForm(initial=initial)
         request.session[self.FORM_LOAD_TIME] = time.time()
         import random
         a = random.randint(1, 20)
@@ -52,6 +58,18 @@ class OnlineAdmissionView(View):
             elapsed = time.time() - load_time
             if elapsed < 3:
                 messages.error(request, 'Form submitted too quickly. Please take your time filling it out.')
+                import random, hashlib
+                a = random.randint(1, 20)
+                b = random.randint(1, 20)
+                op = random.choice(['+', '-', '×'])
+                if op == '+':
+                    answer = a + b
+                elif op == '-':
+                    a, b = max(a, b), min(a, b)
+                    answer = a - b
+                else:
+                    answer = a * b
+                captcha_hash = hashlib.sha256(f"{answer}{settings.SECRET_KEY}".encode()).hexdigest()[:16]
                 return render(request, 'admissions/online_admission.html', {
                     'form': form,
                     'course_categories': CourseCategory.objects.all(),

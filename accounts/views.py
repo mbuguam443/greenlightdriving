@@ -5,9 +5,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .models import User
-from .forms import LoginForm, UserProfileForm, UserAdminForm
+from .forms import LoginForm, UserProfileForm, UserAdminForm, StudentRegistrationForm
 
 
 class LoginView(View):
@@ -48,6 +48,26 @@ class LogoutView(View):
         logout(request)
         messages.info(request, 'You have been logged out.')
         return redirect('website:home')
+
+
+class RegisterView(View):
+    def get(self, request):
+        if request.user.is_authenticated:
+            return redirect('website:home')
+        form = StudentRegistrationForm()
+        return render(request, 'accounts/register.html', {'form': form})
+
+    def post(self, request):
+        form = StudentRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f'Welcome, {user.first_name}! Your account has been created.')
+            next_url = request.GET.get('next')
+            if not next_url:
+                next_url = reverse('admissions:online_admission')
+            return redirect(next_url)
+        return render(request, 'accounts/register.html', {'form': form})
 
 
 class ProfileView(LoginRequiredMixin, View):
