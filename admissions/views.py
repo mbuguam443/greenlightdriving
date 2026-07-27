@@ -6,8 +6,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db import models
-from django.conf import settings
-import time
 from .models import Admission
 from .forms import OnlineAdmissionForm, AdmissionUpdateForm, InternalAdmissionForm
 from website.models import Course, CourseCategory
@@ -15,7 +13,6 @@ from core.models import Branch
 
 
 class OnlineAdmissionView(LoginRequiredMixin, View):
-    FORM_LOAD_TIME = '_form_load_time'
 
     def get(self, request):
         initial = {
@@ -26,25 +23,8 @@ class OnlineAdmissionView(LoginRequiredMixin, View):
         if hasattr(request.user, 'phone') and request.user.phone:
             initial['phone'] = request.user.phone
         form = OnlineAdmissionForm(initial=initial)
-        request.session[self.FORM_LOAD_TIME] = time.time()
-        import random
-        a = random.randint(1, 20)
-        b = random.randint(1, 20)
-        op = random.choice(['+', '-', '×'])
-        if op == '+':
-            answer = a + b
-        elif op == '-':
-            a, b = max(a, b), min(a, b)
-            answer = a - b
-        else:
-            answer = a * b
-        import hashlib
-        captcha_hash = hashlib.sha256(f"{answer}{settings.SECRET_KEY}".encode()).hexdigest()[:16]
         return render(request, 'admissions/online_admission.html', {
             'form': form,
-            'captcha_question': f'What is {a} {op} {b}?',
-            'captcha_hash': captcha_hash,
-            'captcha_answer': answer,
             'course_categories': CourseCategory.objects.all(),
             'branches': Branch.objects.filter(is_active=True),
         })
@@ -52,36 +32,8 @@ class OnlineAdmissionView(LoginRequiredMixin, View):
     def post(self, request):
         form = OnlineAdmissionForm(request.POST, request.FILES)
 
-        # Timestamp check — reject if submitted too fast (under 3 seconds)
-        load_time = request.session.get(self.FORM_LOAD_TIME)
-        if load_time:
-            elapsed = time.time() - load_time
-            if elapsed < 3:
-                messages.error(request, 'Form submitted too quickly. Please take your time filling it out.')
-                import random, hashlib
-                a = random.randint(1, 20)
-                b = random.randint(1, 20)
-                op = random.choice(['+', '-', '×'])
-                if op == '+':
-                    answer = a + b
-                elif op == '-':
-                    a, b = max(a, b), min(a, b)
-                    answer = a - b
-                else:
-                    answer = a * b
-                captcha_hash = hashlib.sha256(f"{answer}{settings.SECRET_KEY}".encode()).hexdigest()[:16]
-                return render(request, 'admissions/online_admission.html', {
-                    'form': form,
-                    'course_categories': CourseCategory.objects.all(),
-                    'branches': Branch.objects.filter(is_active=True),
-                    'captcha_question': f'What is {a} {op} {b}?',
-                    'captcha_hash': captcha_hash,
-                    'captcha_answer': answer,
-                })
-
         if form.is_valid():
             admission = form.save()
-            del request.session[self.FORM_LOAD_TIME]
             messages.success(request, f'Application submitted successfully! Your admission number is {admission.admission_number}.')
             return redirect('admissions:confirmation', pk=admission.pk)
         messages.error(request, 'Please correct the errors below.')
@@ -89,9 +41,6 @@ class OnlineAdmissionView(LoginRequiredMixin, View):
             'form': form,
             'course_categories': CourseCategory.objects.all(),
             'branches': Branch.objects.filter(is_active=True),
-            'captcha_question': form.fields['captcha_question'].label,
-            'captcha_hash': '',
-            'captcha_answer': '',
         })
 
 

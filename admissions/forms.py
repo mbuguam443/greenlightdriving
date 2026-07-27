@@ -1,25 +1,9 @@
-import time
-import hashlib
 from django import forms
-from django.conf import settings
 from .models import Admission
 from website.models import CourseCategory, Course
 
 
 class OnlineAdmissionForm(forms.ModelForm):
-    # Honeypot — bots fill this, humans don't see it
-    website = forms.CharField(required=False, widget=forms.HiddenInput(attrs={'tabindex': '-1', 'autocomplete': 'off'}))
-
-    # Math captcha
-    captcha_question = forms.CharField(
-        label='Security Check',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Answer the math question',
-            'autocomplete': 'off',
-        }),
-        help_text='',
-    )
 
     class Meta:
         model = Admission
@@ -44,8 +28,6 @@ class OnlineAdmissionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.captcha_answer = None
-        self.captcha_expected = None
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = CourseCategory.objects.all()
         self.fields['course'].queryset = Course.objects.none()
@@ -60,44 +42,6 @@ class OnlineAdmissionForm(forms.ModelForm):
             self.fields['course'].queryset = Course.objects.filter(
                 category=self.instance.category, is_active=True
             )
-
-        # Generate captcha
-        import random
-        a = random.randint(1, 20)
-        b = random.randint(1, 20)
-        op = random.choice(['+', '-', '×'])
-        if op == '+':
-            answer = a + b
-        elif op == '-':
-            a, b = max(a, b), min(a, b)
-            answer = a - b
-        else:
-            answer = a * b
-
-        self.captcha_expected = str(answer)
-        self.fields['captcha_question'].label = f'What is {a} {op} {b}?'
-
-        # Store captcha hash in initial data
-        captcha_hash = hashlib.sha256(f"{answer}{settings.SECRET_KEY}".encode()).hexdigest()[:16]
-        self.fields['captcha_question'].widget.attrs['data-hash'] = captcha_hash
-
-    def clean_website(self):
-        value = self.cleaned_data.get('website')
-        if value:
-            raise forms.ValidationError('Spam detected.')
-        return value
-
-    def clean_captcha_question(self):
-        answer = self.cleaned_data.get('captcha_question', '').strip()
-        if not answer:
-            raise forms.ValidationError('Please answer the security question.')
-        try:
-            user_answer = int(answer)
-        except ValueError:
-            raise forms.ValidationError('Please enter a valid number.')
-        if str(user_answer) != self.captcha_expected:
-            raise forms.ValidationError('Incorrect answer. Please try again.')
-        return answer
 
     def clean_first_name(self):
         name = self.cleaned_data.get('first_name', '').strip()
