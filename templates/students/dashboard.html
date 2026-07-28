@@ -136,11 +136,8 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div id="revenueChart" style="height: 300px; display: flex; align-items: center; justify-content: center;">
-                    <div class="text-center text-muted">
-                        <i class="bi bi-bar-chart" style="font-size: 3rem;"></i>
-                        <p class="mt-2">Chart will load here (Chart.js)</p>
-                    </div>
+                <div class="chart-container" style="position:relative;height:300px;">
+                    <canvas id="revenueChart"></canvas>
                 </div>
             </div>
         </div>
@@ -154,11 +151,8 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div id="courseChart" style="height: 300px; display: flex; align-items: center; justify-content: center;">
-                    <div class="text-center text-muted">
-                        <i class="bi bi-pie-chart" style="font-size: 3rem;"></i>
-                        <p class="mt-2">Chart will load here (Chart.js)</p>
-                    </div>
+                <div class="chart-container" style="position:relative;height:300px;">
+                    <canvas id="courseChart"></canvas>
                 </div>
             </div>
         </div>
@@ -236,4 +230,49 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var revCtx = document.getElementById('revenueChart');
+    if (revCtx) {
+        revCtx = revCtx.getContext('2d');
+        new Chart(revCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ revenue_labels|safe }},
+                datasets: [{
+                    label: 'Revenue (KES)',
+                    data: {{ revenue_data|safe }},
+                    backgroundColor: '#2E7D32',
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return 'KES ' + v.toLocaleString(); } } } }
+            }
+        });
+    }
+    var courseCtx = document.getElementById('courseChart');
+    if (courseCtx) {
+        courseCtx = courseCtx.getContext('2d');
+        var colors = ['#2E7D32','#66BB6A','#81C784','#A5D6A7','#C8E6C9','#1B5E20','#388E3C','#43A047','#4CAF50'];
+        new Chart(courseCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ course_labels|safe }},
+                datasets: [{ data: {{ course_data|safe }}, backgroundColor: colors.slice(0, {{ course_data|length }}), borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8 } } }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

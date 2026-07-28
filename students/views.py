@@ -149,6 +149,26 @@ class IndexView(LoginRequiredMixin, View):
         today_lessons += list(TheoryLesson.objects.filter(date=today).select_related('student__user', 'instructor__user')[:5])
         today_lessons.sort(key=lambda x: x.date if hasattr(x, 'date') else x.created_at, reverse=True)
 
+        # Revenue last 7 days for chart
+        from datetime import timedelta
+        revenue_labels = []
+        revenue_data = []
+        for i in range(6, -1, -1):
+            day = today - timedelta(days=i)
+            day_total = Payment.objects.filter(created_at__date=day, status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0
+            revenue_labels.append(day.strftime('%a'))
+            revenue_data.append(float(day_total))
+
+        # Course distribution for chart
+        from website.models import Course
+        course_labels = []
+        course_data = []
+        for course in Course.objects.all():
+            count = Student.objects.filter(course=course, status='ACTIVE').count()
+            if count > 0:
+                course_labels.append(course.name[:15])
+                course_data.append(count)
+
         context = {
             'total_students': active_students.count(),
             'today_admissions': Admission.objects.filter(created_at__date=today).count(),
@@ -159,5 +179,9 @@ class IndexView(LoginRequiredMixin, View):
             'pending_balances': pending_balance_count,
             'recent_activities': recent_activities,
             'today_lessons': today_lessons,
+            'revenue_labels': revenue_labels,
+            'revenue_data': revenue_data,
+            'course_labels': course_labels,
+            'course_data': course_data,
         }
         return render(request, 'students/dashboard.html', context)
