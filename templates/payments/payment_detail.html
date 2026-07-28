@@ -51,9 +51,9 @@
                     </div>
                     <div class="col-md-6">
                         <small class="text-muted d-block">Status</small>
-                        {% if payment.status == 'completed' %}
+                        {% if payment.status == 'COMPLETED' %}
                         <span class="badge bg-success fs-6">Completed</span>
-                        {% elif payment.status == 'pending' %}
+                        {% elif payment.status == 'PENDING' %}
                         <span class="badge bg-warning text-dark fs-6">Pending</span>
                         {% else %}
                         <span class="badge bg-danger fs-6">Failed</span>

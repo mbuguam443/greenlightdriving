@@ -196,9 +196,9 @@
                                 <td class="fw-semibold">{{ payment.amount|floatformat:0 }}</td>
                                 <td>{{ payment.get_method_display }}</td>
                                 <td>
-                                    {% if payment.status == 'completed' %}
+                                    {% if payment.status == 'COMPLETED' %}
                                     <span class="badge bg-success">Completed</span>
-                                    {% elif payment.status == 'pending' %}
+                                    {% elif payment.status == 'PENDING' %}
                                     <span class="badge bg-warning text-dark">Pending</span>
                                     {% else %}
                                     <span class="badge bg-danger">Failed</span>

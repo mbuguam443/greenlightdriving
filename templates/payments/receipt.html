@@ -47,7 +47,7 @@
                     <span class="fw-semibold">{{ payment.date|date:"d M Y H:i" }}</span>
                 </div>
                 <div class="col-6 text-end">
-                    <span class="badge fs-6" style="background-color: {% if payment.status == 'completed' %}#2E7D32{% elif payment.status == 'pending' %}var(--primary-green){% else %}var(--primary-green){% endif %};">
+                    <span class="badge fs-6" style="background-color: {% if payment.status == 'COMPLETED' %}#2E7D32{% else %}var(--primary-green){% endif %};">
                         {{ payment.get_status_display|upper }}
                     </span>
                 </div>
