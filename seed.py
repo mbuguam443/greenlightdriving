@@ -37,7 +37,6 @@ print(f"      {Branch.objects.count()} branches ready")
 # 2. Course Categories & Courses
 print("\n[2/7] Courses...")
 from website.models import CourseCategory, Course, FAQ
-from lessons.models import LessonItem
 
 categories_data = [
     {'name': 'A1', 'slug': 'a1', 'description': 'Motorcycle', 'order': 1},
@@ -68,18 +67,42 @@ for c in courses_data:
     Course.objects.get_or_create(slug=c['slug'], defaults={**c, 'category': cat})
 print(f"      {Course.objects.count()} courses ready")
 
-# 3. Lesson Items
-print("\n[3/7] Lesson Items...")
+# 3. Course Packages and Lesson Items
+print("\n[3/7] Course Packages and Lesson Items...")
+from lessons.models import LessonItem, CoursePackage
+CoursePackage.objects.all().delete()
+pkg_test = CoursePackage.objects.create(name='Test Only', slug='test-only', price=5000, description='Theory lessons only')
+pkg_half = CoursePackage.objects.create(name='Half Course', slug='half-course', price=15000, description='10 practical lessons + theory')
+pkg_full = CoursePackage.objects.create(name='Full Course', slug='full-course', price=25000, description='All 20 lessons')
+packages = {'test': pkg_test, 'half': pkg_half, 'full': pkg_full}
+
+LessonItem.objects.all().delete()
 lessons_data = [
-    'Vehicle Controls & Cockpit Drill', 'Starting and Stopping', 'Steering Techniques',
-    'Gear Changing', 'Roundabouts', 'Junctions & Intersections',
-    'Reversing & Parking', 'Emergency Stops', 'Dual Carriageway Driving',
-    'Night Driving', 'Defensive Driving', 'Eco-Driving',
-    'Hill Starts', 'Overtaking', 'City Driving',
+    ('Introduction', 'THEORY', ['test', 'half', 'full']),
+    ('Theory Board Lanes', 'THEORY', ['test', 'half', 'full']),
+    ('Theory Model Town Board', 'THEORY', ['test', 'half', 'full']),
+    ('Identification of Road Signs', 'THEORY', ['test', 'half', 'full']),
+    ('Starting the Car Drill', 'PRACTICAL', ['half', 'full']),
+    ('Gear Changing Up and Down', 'PRACTICAL', ['half', 'full']),
+    ('Road Positioning', 'PRACTICAL', ['half', 'full']),
+    ('Turning Left', 'PRACTICAL', ['half', 'full']),
+    ('Turning Right Procedure', 'PRACTICAL', ['half', 'full']),
+    ('Hand Signal', 'PRACTICAL', ['half', 'full']),
+    ('Clutch Control', 'PRACTICAL', ['full']),
+    ('Three Point Turn', 'PRACTICAL', ['full']),
+    ('Steering Control', 'PRACTICAL', ['full']),
+    ('Reversing', 'PRACTICAL', ['full']),
+    ('Hill Start', 'PRACTICAL', ['full']),
+    ('Angle Parking', 'PRACTICAL', ['full']),
+    ('Flash Parking', 'PRACTICAL', ['full']),
+    ('Basic Mechanical', 'THEORY', ['test', 'half', 'full']),
+    ('First Aid on Road', 'THEORY', ['test', 'half', 'full']),
+    ('Assessment', 'ASSESSMENT', ['half', 'full']),
 ]
-for i, name in enumerate(lessons_data):
-    LessonItem.objects.get_or_create(name=name, defaults={'order': i + 1})
-print(f"      {LessonItem.objects.count()} lesson items ready")
+for i, (name, ltype, pkgs) in enumerate(lessons_data):
+    item = LessonItem.objects.create(name=name, order=i + 1, lesson_type=ltype)
+    item.packages.add(*(packages[s] for s in pkgs))
+print(f"      {LessonItem.objects.count()} lesson items assigned to {CoursePackage.objects.count()} packages")
 
 # 4. FAQs
 print("\n[4/7] FAQs...")

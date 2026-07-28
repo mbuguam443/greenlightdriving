@@ -14,6 +14,7 @@ class Student(models.Model):
     student_number = models.CharField(max_length=20, unique=True)
     category = models.ForeignKey('website.CourseCategory', on_delete=models.CASCADE)
     course = models.ForeignKey('website.Course', on_delete=models.CASCADE)
+    package = models.ForeignKey('lessons.CoursePackage', on_delete=models.SET_NULL, null=True, blank=True)
     branch = models.ForeignKey('core.Branch', on_delete=models.CASCADE)
     instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True, blank=True)
     vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, null=True, blank=True)
@@ -56,6 +57,8 @@ class Student(models.Model):
 
     @property
     def total_fees(self):
+        if self.package and self.package.price:
+            return self.package.price
         return self.course.price if self.course else 0
 
     @property

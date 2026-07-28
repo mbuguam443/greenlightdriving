@@ -10,6 +10,7 @@ from .models import Admission
 from .forms import OnlineAdmissionForm, AdmissionUpdateForm, InternalAdmissionForm
 from website.models import Course, CourseCategory
 from core.models import Branch
+from lessons.models import CoursePackage
 
 
 class OnlineAdmissionView(LoginRequiredMixin, View):
@@ -55,6 +56,12 @@ class LoadCoursesView(View):
         category_id = request.GET.get('category_id')
         courses = list(Course.objects.filter(category_id=category_id, is_active=True).values('id', 'name'))
         return JsonResponse(courses, safe=False)
+
+
+class LoadPackagesView(View):
+    def get(self, request):
+        packages = list(CoursePackage.objects.filter(is_active=True).values('id', 'name', 'price'))
+        return JsonResponse(packages, safe=False)
 
 
 class AdmissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -127,7 +134,8 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def _create_student_profile(self, admission):
         from students.models import Student
         from django.utils import timezone
-        from datetime import timedelta
+        from datetime import timedelta, date
+        from lessons.models import PracticalLesson, TheoryLesson, LessonItem
 
         user = None
         from accounts.models import User
@@ -155,12 +163,43 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             admission=admission,
             category=admission.category,
             course=admission.course,
+            package=admission.package,
             branch=admission.branch,
             status='ACTIVE',
             expected_graduation=timezone.now().date() + timedelta(days=90),
         )
         student.save()
         messages.success(self.request, f'Student profile created: {student.student_number}')
+
+        # Auto-create lesson records based on package
+        if admission.package:
+            lesson_items = LessonItem.objects.filter(packages=admission.package, is_active=True).order_by('order')
+            today = date.today()
+            created_count = 0
+            for item in lesson_items:
+                if item.lesson_type == 'PRACTICAL':
+                    if not PracticalLesson.objects.filter(student=student, lesson_item=item).exists():
+                        PracticalLesson.objects.create(
+                            student=student,
+                            lesson_item=item,
+                            date=today,
+                            status='NOT_STARTED',
+                        )
+                        created_count += 1
+                else:
+                    if not TheoryLesson.objects.filter(student=student, lesson_item=item).exists():
+                        TheoryLesson.objects.create(
+                            student=student,
+                            lesson_item=item,
+                            topic=item.name,
+                            date=today,
+                            time_start='08:00',
+                            time_end='09:00',
+                            status='NOT_STARTED',
+                        )
+                        created_count += 1
+            if created_count:
+                messages.success(self.request, f'{created_count} lesson records auto-created.')
 
 
 class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):

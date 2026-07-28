@@ -1,6 +1,7 @@
 from django import forms
 from .models import Admission
 from website.models import CourseCategory, Course
+from lessons.models import CoursePackage
 
 
 class OnlineAdmissionForm(forms.ModelForm):
@@ -9,7 +10,7 @@ class OnlineAdmissionForm(forms.ModelForm):
         model = Admission
         fields = ['first_name', 'last_name', 'email', 'phone', 'date_of_birth', 'gender',
                   'national_id', 'address', 'passport_photo', 'national_id_image',
-                  'category', 'course', 'branch', 'preferred_schedule']
+                  'category', 'course', 'package', 'branch', 'preferred_schedule']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -23,6 +24,7 @@ class OnlineAdmissionForm(forms.ModelForm):
             'national_id_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-select', 'id': 'category-select'}),
             'course': forms.Select(attrs={'class': 'form-select', 'id': 'course-select'}),
+            'package': forms.Select(attrs={'class': 'form-select', 'id': 'package-select'}),
             'branch': forms.Select(attrs={'class': 'form-select'}),
             'preferred_schedule': forms.Select(attrs={'class': 'form-select'}),
         }
@@ -31,6 +33,7 @@ class OnlineAdmissionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = CourseCategory.objects.all()
         self.fields['course'].queryset = Course.objects.none()
+        self.fields['package'].queryset = CoursePackage.objects.none()
 
         if 'category' in self.data:
             try:
@@ -42,6 +45,14 @@ class OnlineAdmissionForm(forms.ModelForm):
             self.fields['course'].queryset = Course.objects.filter(
                 category=self.instance.category, is_active=True
             )
+
+        if 'course' in self.data:
+            try:
+                self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
 
     def clean_first_name(self):
         name = self.cleaned_data.get('first_name', '').strip()
@@ -93,7 +104,7 @@ class InternalAdmissionForm(forms.ModelForm):
         model = Admission
         fields = ['first_name', 'last_name', 'email', 'phone', 'date_of_birth', 'gender',
                   'national_id', 'address', 'passport_photo', 'national_id_image',
-                  'category', 'course', 'branch', 'preferred_schedule']
+                  'category', 'course', 'package', 'branch', 'preferred_schedule']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -107,6 +118,7 @@ class InternalAdmissionForm(forms.ModelForm):
             'national_id_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-select', 'id': 'category-select'}),
             'course': forms.Select(attrs={'class': 'form-select', 'id': 'course-select'}),
+            'package': forms.Select(attrs={'class': 'form-select', 'id': 'package-select'}),
             'branch': forms.Select(attrs={'class': 'form-select'}),
             'preferred_schedule': forms.Select(attrs={'class': 'form-select'}),
         }
@@ -115,6 +127,7 @@ class InternalAdmissionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = CourseCategory.objects.all()
         self.fields['course'].queryset = Course.objects.none()
+        self.fields['package'].queryset = CoursePackage.objects.none()
 
         if 'category' in self.data:
             try:
@@ -126,3 +139,11 @@ class InternalAdmissionForm(forms.ModelForm):
             self.fields['course'].queryset = Course.objects.filter(
                 category=self.instance.category, is_active=True
             )
+
+        if 'course' in self.data:
+            try:
+                self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)

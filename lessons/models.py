@@ -1,9 +1,31 @@
 from django.db import models
 
 
+class CoursePackage(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class LessonItem(models.Model):
+    LESSON_TYPE_CHOICES = [
+        ('THEORY', 'Theory'),
+        ('PRACTICAL', 'Practical'),
+        ('ASSESSMENT', 'Assessment'),
+    ]
+
     name = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)
+    lesson_type = models.CharField(max_length=20, choices=LESSON_TYPE_CHOICES, default='PRACTICAL')
+    packages = models.ManyToManyField(CoursePackage, blank=True, related_name='lesson_items')
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -47,6 +69,7 @@ class TheoryLesson(models.Model):
     ]
     
     student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='theory_lessons')
+    lesson_item = models.ForeignKey(LessonItem, on_delete=models.SET_NULL, null=True, blank=True)
     topic = models.CharField(max_length=300)
     instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True)
     date = models.DateField()
