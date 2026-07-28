@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
+from django.http import HttpResponseRedirect
 from .models import User
 from .forms import LoginForm, UserProfileForm, UserAdminForm, StudentRegistrationForm
 
@@ -18,9 +19,12 @@ class LoginView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            return redirect(self._get_redirect_url(request.user))
+            return HttpResponseRedirect(self._get_redirect_url(request.user))
         form = LoginForm()
-        return render(request, 'accounts/login.html', {'form': form})
+        response = render(request, 'accounts/login.html', {'form': form})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        return response
 
     def post(self, request):
         form = LoginForm(request.POST)
@@ -31,11 +35,19 @@ class LoginView(View):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.first_name}!')
-                next_url = request.GET.get('next', self._get_redirect_url(user))
-                return redirect(next_url)
+                next_url = request.GET.get('next')
+                if not next_url:
+                    next_url = self._get_redirect_url(user)
+                response = HttpResponseRedirect(next_url)
+                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response['Pragma'] = 'no-cache'
+                return response
             else:
                 messages.error(request, 'Invalid email or password.')
-        return render(request, 'accounts/login.html', {'form': form})
+        response = render(request, 'accounts/login.html', {'form': form})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        return response
 
 
 class LogoutView(View):
