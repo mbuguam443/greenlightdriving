@@ -126,6 +126,7 @@ class IndexView(LoginRequiredMixin, View):
         from admissions.models import Admission
         from vehicles.models import Vehicle
         from instructors.models import Instructor
+        from lessons.models import PracticalLesson, TheoryLesson
 
         today = date.today()
         active_students = Student.objects.filter(status='ACTIVE')
@@ -133,6 +134,21 @@ class IndexView(LoginRequiredMixin, View):
         for s in active_students:
             if s.balance > 0:
                 pending_balance_count += 1
+
+        # Recent payments as activity
+        recent_payments = Payment.objects.filter(status='COMPLETED').order_by('-created_at')[:5]
+        recent_activities = []
+        for p in recent_payments:
+            recent_activities.append({
+                'description': f"Payment of KES {p.amount:,.0f} received from {p.student.user.full_name} ({p.receipt_number})",
+                'timestamp': p.created_at,
+            })
+
+        # Today's lessons
+        today_lessons = list(PracticalLesson.objects.filter(date=today).select_related('student__user', 'instructor__user', 'vehicle')[:5])
+        today_lessons += list(TheoryLesson.objects.filter(date=today).select_related('student__user', 'instructor__user')[:5])
+        today_lessons.sort(key=lambda x: x.date if hasattr(x, 'date') else x.created_at, reverse=True)
+
         context = {
             'total_students': active_students.count(),
             'today_admissions': Admission.objects.filter(created_at__date=today).count(),
@@ -140,5 +156,7 @@ class IndexView(LoginRequiredMixin, View):
             'total_vehicles': Vehicle.objects.filter(is_available=True).count(),
             'total_instructors': Instructor.objects.count(),
             'pending_balances': pending_balance_count,
+            'recent_activities': recent_activities,
+            'today_lessons': today_lessons,
         }
         return render(request, 'students/dashboard.html', context)

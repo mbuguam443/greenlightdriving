@@ -101,7 +101,7 @@
                         <i class="bi bi-exclamation-circle" style="color: var(--primary-green); font-size: 1.2rem;"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0" style="color: var(--primary-green);">KES {{ pending_balances|default:"0"|floatformat:0 }}</h4>
+                        <h4 class="fw-bold mb-0" style="color: var(--primary-green);">{{ pending_balances|default:"0" }}</h4>
                         <small class="text-muted">Pending Balances</small>
                     </div>
                 </div>
@@ -197,10 +197,10 @@
                     {% for lesson in today_lessons %}
                     <div class="list-group-item d-flex align-items-center py-3">
                         <div class="flex-grow-1">
-                            <h6 class="mb-1">{{ lesson.student.get_full_name }}</h6>
+                            <h6 class="mb-1">{{ lesson.student.user.full_name }}</h6>
                             <small class="text-muted">
-                                {{ lesson.lesson_type }} with {{ lesson.instructor.get_full_name }} |
-                                {{ lesson.vehicle.registration_number }}
+                                {{ lesson.lesson_type|default:"Lesson" }} with {{ lesson.instructor.user.full_name }} |
+                                {{ lesson.vehicle.registration_number|default:"" }}
                             </small>
                         </div>
                         <span class="badge" style="background-color: {% if lesson.status == 'completed' %}#2E7D32{% elif lesson.status == 'in_progress' %}var(--primary-green){% else %}var(--primary-green){% endif %};">
