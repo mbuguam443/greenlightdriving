@@ -153,6 +153,7 @@ class IndexView(LoginRequiredMixin, View):
             'total_students': active_students.count(),
             'today_admissions': Admission.objects.filter(created_at__date=today).count(),
             'today_revenue': Payment.objects.filter(created_at__date=today, status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0,
+            'total_revenue': Payment.objects.filter(status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0,
             'total_vehicles': Vehicle.objects.filter(is_available=True).count(),
             'total_instructors': Instructor.objects.count(),
             'pending_balances': pending_balance_count,
