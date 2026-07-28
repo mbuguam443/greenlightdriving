@@ -13,8 +13,8 @@ from .forms import LoginForm, UserProfileForm, UserAdminForm, StudentRegistratio
 class LoginView(View):
     def _get_redirect_url(self, user):
         if user.role == 'STUDENT':
-            return 'student_portal:dashboard'
-        return 'dashboard'
+            return reverse('student_portal:dashboard')
+        return reverse('dashboard')
 
     def get(self, request):
         if request.user.is_authenticated:
