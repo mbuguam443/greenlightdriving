@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
 {% block meta_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
