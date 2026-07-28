@@ -178,3 +178,23 @@ if MPESA_ENV == 'sandbox':
     MPESA_BASE_URL = 'https://sandbox.safaricom.co.ke'
 else:
     MPESA_BASE_URL = 'https://api.safaricom.co.ke'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+        },
+    },
+    'loggers': {
+        'payments': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

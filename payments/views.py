@@ -156,7 +156,29 @@ class MpesaTransactionQueryView(StaffTestMixin, View):
             tx.status = 'SUCCESS'
             tx.result_code = str(result_code)
             tx.result_desc = result_desc
-            tx.save(update_fields=['status', 'result_code', 'result_desc', 'updated_at'])
+
+            # Extract receipt from response metadata if available
+            metadata = data.get('ResultMetadata', [])
+            if isinstance(metadata, list):
+                for item in metadata:
+                    if item.get('Name') == 'MpesaReceiptNumber':
+                        tx.mpesa_receipt = item.get('Value', '')
+
+            tx.save(update_fields=['status', 'result_code', 'result_desc', 'mpesa_receipt', 'updated_at'])
+
+            # Create Payment record if not already linked
+            if not tx.payment:
+                payment = Payment.objects.create(
+                    student=tx.student,
+                    amount=tx.amount,
+                    method='MPESA',
+                    reference_number=tx.mpesa_receipt or tx.result_code,
+                    status='COMPLETED',
+                    recorded_by=self.request.user,
+                    description=f'M-Pesa STK Push (queried). Receipt: {tx.mpesa_receipt}',
+                )
+                tx.payment = payment
+                tx.save(update_fields=['payment', 'updated_at'])
         elif str(result_code) == '1032':
             tx.status = 'FAILED'
             tx.result_code = str(result_code)
@@ -282,13 +304,20 @@ class MpesaCallbackView(View):
     """Safaricom M-Pesa callback — receives STK Push result."""
     def post(self, request):
         import json
+        import logging
+        logger = logging.getLogger(__name__)
+
         try:
             body = json.loads(request.body)
+            logger.info(f"M-Pesa callback received: {json.dumps(body, default=str)[:500]}")
+
             stk_callback = body.get('Body', {}).get('stkCallback', {})
             result_code = str(stk_callback.get('ResultCode', ''))
             result_desc = stk_callback.get('ResultDesc', '')
             checkout_id = stk_callback.get('CheckoutRequestID', '')
             merchant_id = stk_callback.get('MerchantRequestID', '')
+
+            logger.info(f"Callback: code={result_code}, checkout={checkout_id}, merchant={merchant_id}")
 
             # Find the transaction
             transaction = MpesaTransaction.objects.filter(checkout_request_id=checkout_id).first()
@@ -297,6 +326,7 @@ class MpesaCallbackView(View):
                 transaction = MpesaTransaction.objects.filter(merchant_request_id=merchant_id).first()
 
             if not transaction:
+                logger.warning(f"Transaction not found for checkout={checkout_id} merchant={merchant_id}")
                 return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Transaction not found'})
 
             if result_code == '0':
@@ -314,6 +344,8 @@ class MpesaCallbackView(View):
                     elif item.get('Name') == 'PhoneNumber':
                         phone_paid = str(item.get('Value', ''))
 
+                logger.info(f"Payment success: receipt={mpesa_receipt}, amount={amount_paid}")
+
                 transaction.status = 'SUCCESS'
                 transaction.result_code = result_code
                 transaction.result_desc = result_desc
@@ -327,10 +359,13 @@ class MpesaCallbackView(View):
                     method='MPESA',
                     reference_number=mpesa_receipt,
                     status='COMPLETED',
-                    description=f'M-Pesa payment via STK Push. Receipt: {mpesa_receipt}',
+                    recorded_by=None,
+                    description=f'M-Pesa STK Push. Receipt: {mpesa_receipt}',
                 )
                 transaction.payment = payment
                 transaction.save()
+
+                logger.info(f"Payment record created: {payment.receipt_number}")
 
             else:
                 # Payment failed
@@ -338,9 +373,10 @@ class MpesaCallbackView(View):
                 transaction.result_code = result_code
                 transaction.result_desc = result_desc
                 transaction.save()
+                logger.info(f"Payment failed: code={result_code}, desc={result_desc}")
 
         except Exception as e:
-            pass  # Silently handle callback errors
+            logger.error(f"M-Pesa callback error: {e}", exc_info=True)
 
         return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Success'})
 
