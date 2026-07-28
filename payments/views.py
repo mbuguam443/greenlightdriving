@@ -50,10 +50,15 @@ class PaymentListView(StaffTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['method_choices'] = Payment.METHOD_CHOICES
         context['status_choices'] = Payment.STATUS_CHOICES
-        context['current_method'] = self.request.GET.get('method', '')
-        context['current_status'] = self.request.GET.get('status', '')
+        context['method_filter'] = self.request.GET.get('method', '')
+        context['status_filter'] = self.request.GET.get('status', '')
         context['search_query'] = self.request.GET.get('search', '')
-        context['total_payments'] = Payment.objects.filter(status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0
+        context['date_from'] = self.request.GET.get('date_from', '')
+        context['date_to'] = self.request.GET.get('date_to', '')
+        context['total_amount'] = Payment.objects.filter(status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0
+        context['completed_count'] = Payment.objects.filter(status='COMPLETED').count()
+        context['pending_count'] = Payment.objects.filter(status='PENDING').count()
+        context['failed_count'] = Payment.objects.filter(status='FAILED').count()
         return context
 
 
