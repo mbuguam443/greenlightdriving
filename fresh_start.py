@@ -33,10 +33,23 @@ with connection.cursor() as c:
             c.execute(f"ALTER TABLE {table} DROP FOREIGN KEY {row[0]}")
             print(f"      Dropped FK on {table}.{col}")
 
-    # 3. Drop old columns
-    for table, col in [('students_student', 'package_id'), ('admissions_admission', 'package_id')]:
+    # 3. Drop old columns (from partially-applied 0002 migrations)
+    for table, col in [
+        ('students_student', 'package_id'),
+        ('admissions_admission', 'package_id'),
+        ('lessons_lessonitem', 'lesson_type'),
+        ('lessons_theorylesson', 'lesson_item_id'),
+    ]:
         c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='{table}' AND column_name='{col}'")
         if c.fetchone()[0]:
+            # Drop FK constraint first if it exists
+            c.execute(f"""
+                SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+                WHERE table_schema=DATABASE() AND table_name='{table}' AND column_name='{col}'
+            """)
+            row = c.fetchone()
+            if row:
+                c.execute(f"ALTER TABLE {table} DROP FOREIGN KEY {row[0]}")
             c.execute(f"ALTER TABLE {table} DROP COLUMN {col}")
             print(f"      Dropped {table}.{col}")
 
