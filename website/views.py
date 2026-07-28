@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import HttpResponse
+from lessons.models import CoursePackage
 from .models import (
     CourseCategory, Course, Testimonial, FAQ, BlogPost,
     GalleryImage, ContactMessage, SiteContent
@@ -109,6 +110,7 @@ class CourseDetailView(DetailView):
         context['related_courses'] = Course.objects.filter(
             category=self.object.category, is_active=True
         ).exclude(pk=self.object.pk)[:3]
+        context['packages'] = CoursePackage.objects.filter(is_active=True)
         return context
 
 
@@ -123,6 +125,7 @@ class PricingView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.filter(is_active=True).select_related('category')
+        context['packages'] = CoursePackage.objects.filter(is_active=True)
         return context
 
 

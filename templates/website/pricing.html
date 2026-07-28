@@ -382,6 +382,58 @@
     </div>
 </section>
 
+{% if packages %}
+<section class="section-padding" style="background: #f1f8e9;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title" style="color: var(--primary-green);">Choose Your Package</h2>
+            <p class="text-muted" style="max-width:550px;margin:0 auto;">Pick the package that suits your learning needs and budget.</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for pkg in packages %}
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card">
+                    <div class="pricing-card-top">
+                        <div class="course-icon">
+                            {% if 'test' in pkg.slug %}
+                                <i class="bi bi-journal-text"></i>
+                            {% elif 'half' in pkg.slug %}
+                                <i class="bi bi-bookmark-star"></i>
+                            {% else %}
+                                <i class="bi bi-trophy"></i>
+                            {% endif %}
+                        </div>
+                        <h5>{{ pkg.name }}</h5>
+                    </div>
+                    <div class="pricing-card-body">
+                        <div class="price-block">
+                            <div class="price-amount">KSh {{ pkg.price|floatformat:0 }} <small>/total</small></div>
+                        </div>
+                        <ul class="feature-list">
+                            {% if pkg.description %}
+                            <li><i class="bi bi-info-circle-fill"></i><span>{{ pkg.description }}</span></li>
+                            {% endif %}
+                            {% with lesson_count=pkg.lesson_items.count %}
+                            <li><i class="bi bi-collection-fill"></i><span>{{ lesson_count }} lesson{{ lesson_count|pluralize }} included</span></li>
+                            {% endwith %}
+                            {% with theory=pkg.lesson_items.filter.lesson_type__in %}
+                            {% endwith %}
+                            {% for li in pkg.lesson_items.all %}
+                            <li><i class="bi bi-check-circle-fill"></i><span>{{ li.name }}</span></li>
+                            {% endfor %}
+                        </ul>
+                        <a href="{% url 'admissions:online_admission' %}" class="btn-enroll">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Choose {{ pkg.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {% if courses %}
 <section class="section-padding" style="background: #f1f8e9;">
     <div class="container">

@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import LessonItem, PracticalLesson, TheoryLesson
+from .models import CoursePackage, LessonItem, PracticalLesson, TheoryLesson
+
+
+@admin.register(CoursePackage)
+class CoursePackageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price', 'is_active')
+    list_editable = ('is_active',)
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(LessonItem)
