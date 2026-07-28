@@ -63,6 +63,12 @@ class PaymentCreateView(StaffTestMixin, CreateView):
     template_name = 'payments/payment_form.html'
     success_url = reverse_lazy('payments:list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+        context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        return context
+
     def form_valid(self, form):
         form.instance.recorded_by = self.request.user
         messages.success(self.request, 'Payment recorded successfully.')

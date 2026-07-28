@@ -128,6 +128,12 @@ class UserCreateView(StaffRequiredMixin, CreateView):
     template_name = 'accounts/user_form.html'
     success_url = reverse_lazy('accounts:user_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from core.models import Branch
+        context['branches'] = Branch.objects.filter(is_active=True)
+        return context
+
     def form_valid(self, form):
         user = form.save(commit=False)
         user.set_password(form.cleaned_data.get('password', 'temp1234'))
@@ -141,6 +147,12 @@ class UserUpdateView(StaffRequiredMixin, UpdateView):
     form_class = UserAdminForm
     template_name = 'accounts/user_form.html'
     success_url = reverse_lazy('accounts:user_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from core.models import Branch
+        context['branches'] = Branch.objects.filter(is_active=True)
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, 'User updated successfully.')

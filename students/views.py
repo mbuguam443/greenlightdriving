@@ -68,6 +68,17 @@ class StudentCreateView(StaffTestMixin, CreateView):
     template_name = 'students/student_form.html'
     success_url = reverse_lazy('students:list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from website.models import Course, CourseCategory
+        from core.models import Branch
+        from instructors.models import Instructor
+        context['courses'] = Course.objects.filter(is_active=True)
+        context['categories'] = CourseCategory.objects.all()
+        context['branches'] = Branch.objects.filter(is_active=True)
+        context['instructors'] = Instructor.objects.select_related('user')
+        return context
+
     def form_valid(self, form):
         messages.success(self.request, 'Student created successfully.')
         return super().form_valid(form)
@@ -78,6 +89,17 @@ class StudentUpdateView(StaffTestMixin, UpdateView):
     form_class = StudentForm
     template_name = 'students/student_form.html'
     success_url = reverse_lazy('students:list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from website.models import Course, CourseCategory
+        from core.models import Branch
+        from instructors.models import Instructor
+        context['courses'] = Course.objects.filter(is_active=True)
+        context['categories'] = CourseCategory.objects.all()
+        context['branches'] = Branch.objects.filter(is_active=True)
+        context['instructors'] = Instructor.objects.select_related('user')
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, 'Student updated successfully.')

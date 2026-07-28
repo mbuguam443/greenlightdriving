@@ -25,7 +25,7 @@
                                 <option value="">Select Student</option>
                                 {% for student in students %}
                                 <option value="{{ student.id }}" {% if form.student.value == student.id %}selected{% endif %}>
-                                    {{ student.get_full_name }} ({{ student.student_number }})
+                                    {{ student.user.full_name }} ({{ student.student_number }})
                                 </option>
                                 {% endfor %}
                             </select>
@@ -40,7 +40,7 @@
                                 <option value="">Select Instructor</option>
                                 {% for instructor in instructors %}
                                 <option value="{{ instructor.id }}" {% if form.instructor.value == instructor.id %}selected{% endif %}>
-                                    {{ instructor.get_full_name }}
+                                    {{ instructor.user.full_name }}
                                 </option>
                                 {% endfor %}
                             </select>
