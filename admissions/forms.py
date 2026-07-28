@@ -46,13 +46,14 @@ class OnlineAdmissionForm(forms.ModelForm):
                 category=self.instance.category, is_active=True
             )
 
-        if 'course' in self.data:
+        if 'category' in self.data:
             try:
-                self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
+                category_id = int(self.data.get('category'))
+                self.fields['package'].queryset = CoursePackage.objects.filter(category_id=category_id, is_active=True)
             except (ValueError, TypeError):
                 pass
-        elif self.instance.pk:
-            self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
+        elif self.instance.pk and self.instance.category:
+            self.fields['package'].queryset = CoursePackage.objects.filter(category=self.instance.category, is_active=True)
 
     def clean_first_name(self):
         name = self.cleaned_data.get('first_name', '').strip()
@@ -140,10 +141,11 @@ class InternalAdmissionForm(forms.ModelForm):
                 category=self.instance.category, is_active=True
             )
 
-        if 'course' in self.data:
+        if 'category' in self.data:
             try:
-                self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
+                category_id = int(self.data.get('category'))
+                self.fields['package'].queryset = CoursePackage.objects.filter(category_id=category_id, is_active=True)
             except (ValueError, TypeError):
                 pass
-        elif self.instance.pk:
-            self.fields['package'].queryset = CoursePackage.objects.filter(is_active=True)
+        elif self.instance.pk and self.instance.category:
+            self.fields['package'].queryset = CoursePackage.objects.filter(category=self.instance.category, is_active=True)

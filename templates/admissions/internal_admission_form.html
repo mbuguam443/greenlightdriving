@@ -145,6 +145,13 @@
                     {% endif %}
                 </div>
                 <div class="col-md-3">
+                    <label for="id_package" class="form-label fw-semibold">Package</label>
+                    {{ form.package }}
+                    {% if form.package.errors %}
+                    <div class="text-danger small mt-1">{{ form.package.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
                     <label for="id_branch" class="form-label fw-semibold">Branch <span class="text-danger">*</span></label>
                     {{ form.branch }}
                     {% if form.branch.errors %}
@@ -175,6 +182,23 @@
 
 {% block extra_js %}
 <script>
+function loadPackages(categoryId) {
+    const pkgSelect = document.getElementById('id_package');
+    if (!categoryId) {
+        pkgSelect.innerHTML = '<option value="">Select category first</option>';
+        return;
+    }
+    pkgSelect.innerHTML = '<option value="">Loading packages...</option>';
+    fetch('/admissions/api/packages/?category_id=' + categoryId)
+        .then(r => r.json())
+        .then(data => {
+            let html = '<option value="">Select Package</option>';
+            data.forEach(p => { html += '<option value="' + p.id + '">' + p.name + ' - KES ' + Number(p.price).toLocaleString() + '</option>'; });
+            pkgSelect.innerHTML = html;
+        })
+        .catch(() => { pkgSelect.innerHTML = '<option value="">Error loading</option>'; });
+}
+
 document.getElementById('id_category').addEventListener('change', function() {
     const categoryId = this.value;
     const courseSelect = document.getElementById('id_course');
@@ -191,6 +215,7 @@ document.getElementById('id_category').addEventListener('change', function() {
             courseSelect.innerHTML = html;
         })
         .catch(() => { courseSelect.innerHTML = '<option value="">Error loading</option>'; });
+    loadPackages(categoryId);
 });
 </script>
 {% endblock %}

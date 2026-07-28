@@ -60,7 +60,11 @@ class LoadCoursesView(View):
 
 class LoadPackagesView(View):
     def get(self, request):
-        packages = list(CoursePackage.objects.filter(is_active=True).values('id', 'name', 'price'))
+        category_id = request.GET.get('category_id')
+        qs = CoursePackage.objects.filter(is_active=True)
+        if category_id:
+            qs = qs.filter(category_id=category_id)
+        packages = list(qs.values('id', 'name', 'price'))
         return JsonResponse(packages, safe=False)
 
 

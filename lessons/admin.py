@@ -4,9 +4,10 @@ from .models import CoursePackage, LessonItem, PracticalLesson, TheoryLesson
 
 @admin.register(CoursePackage)
 class CoursePackageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'is_active')
+    list_display = ('name', 'category', 'price', 'is_active')
     list_editable = ('is_active',)
-    prepopulated_fields = {'slug': ('name',)}
+    list_filter = ('category',)
+    prepopulated_fields = {'slug': ('category__name', 'name')}
 
 
 @admin.register(LessonItem)

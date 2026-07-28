@@ -110,7 +110,9 @@ class CourseDetailView(DetailView):
         context['related_courses'] = Course.objects.filter(
             category=self.object.category, is_active=True
         ).exclude(pk=self.object.pk)[:3]
-        context['packages'] = CoursePackage.objects.filter(is_active=True)
+        context['packages'] = CoursePackage.objects.filter(
+            category=self.object.category, is_active=True
+        )
         return context
 
 
@@ -125,7 +127,9 @@ class PricingView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.filter(is_active=True).select_related('category')
-        context['packages'] = CoursePackage.objects.filter(is_active=True)
+        context['packages_by_category'] = CoursePackage.objects.filter(
+            is_active=True
+        ).select_related('category').order_by('category__name', 'name')
         return context
 
 
@@ -473,7 +477,7 @@ class PackageListView(StaffMixin, ListView):
 class PackageCreateView(StaffMixin, CreateView):
     model = CoursePackage
     template_name = 'website/manage/package_form.html'
-    fields = ['name', 'slug', 'price', 'description', 'is_active']
+    fields = ['category', 'name', 'slug', 'price', 'description', 'is_active']
     success_url = reverse_lazy('website:manage_packages')
 
     def form_valid(self, form):
@@ -485,7 +489,7 @@ class PackageCreateView(StaffMixin, CreateView):
 class PackageUpdateView(StaffMixin, UpdateView):
     model = CoursePackage
     template_name = 'website/manage/package_form.html'
-    fields = ['name', 'slug', 'price', 'description', 'is_active']
+    fields = ['category', 'name', 'slug', 'price', 'description', 'is_active']
     success_url = reverse_lazy('website:manage_packages')
 
 

@@ -70,13 +70,19 @@ print(f"      {Course.objects.count()} courses ready")
 # 3. Course Packages and Lesson Items
 print("\n[3/7] Course Packages and Lesson Items...")
 from lessons.models import LessonItem, CoursePackage
-CoursePackage.objects.all().delete()
-pkg_test = CoursePackage.objects.create(name='Test Only', slug='test-only', price=5000, description='Theory lessons only')
-pkg_half = CoursePackage.objects.create(name='Half Course', slug='half-course', price=15000, description='10 practical lessons + theory')
-pkg_full = CoursePackage.objects.create(name='Full Course', slug='full-course', price=25000, description='All 20 lessons')
-packages = {'test': pkg_test, 'half': pkg_half, 'full': pkg_full}
-
+from website.models import CourseCategory
 LessonItem.objects.all().delete()
+CoursePackage.objects.all().delete()
+
+# Create per-category packages
+packages = {}
+for cat in CourseCategory.objects.all():
+    slug_suffix = cat.slug.lower()
+    pkg_test = CoursePackage.objects.create(category=cat, name=f'Test Only', slug=f'test-only-{slug_suffix}', price=5000, description='Theory lessons only')
+    pkg_half = CoursePackage.objects.create(category=cat, name=f'Half Course', slug=f'half-course-{slug_suffix}', price=15000, description=f'10 practical lessons + theory')
+    pkg_full = CoursePackage.objects.create(category=cat, name=f'Full Course', slug=f'full-course-{slug_suffix}', price=25000, description='All 20 lessons')
+    packages[cat.slug] = {'test': pkg_test, 'half': pkg_half, 'full': pkg_full}
+
 lessons_data = [
     ('Introduction', 'THEORY', ['test', 'half', 'full']),
     ('Theory Board Lanes', 'THEORY', ['test', 'half', 'full']),
@@ -99,10 +105,13 @@ lessons_data = [
     ('First Aid on Road', 'THEORY', ['test', 'half', 'full']),
     ('Assessment', 'ASSESSMENT', ['half', 'full']),
 ]
-for i, (name, ltype, pkgs) in enumerate(lessons_data):
-    item = LessonItem.objects.create(name=name, order=i + 1, lesson_type=ltype)
-    item.packages.add(*(packages[s] for s in pkgs))
-print(f"      {LessonItem.objects.count()} lesson items assigned to {CoursePackage.objects.count()} packages")
+item_count = 0
+for cat_slug, cat_pkgs in packages.items():
+    for i, (name, ltype, pkg_keys) in enumerate(lessons_data):
+        item = LessonItem.objects.create(name=name, order=i + 1, lesson_type=ltype)
+        item.packages.add(*(cat_pkgs[s] for s in pkg_keys))
+        item_count += 1
+print(f"      {item_count} lesson items assigned across {CoursePackage.objects.count()} packages")
 
 # 4. FAQs
 print("\n[4/7] FAQs...")
