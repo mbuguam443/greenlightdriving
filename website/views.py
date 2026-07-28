@@ -456,6 +456,49 @@ class FAQDeleteView(StaffMixin, DeleteView):
     success_url = reverse_lazy('website:manage_faqs')
 
 
+# CoursePackage
+class PackageListView(StaffMixin, ListView):
+    model = CoursePackage
+    template_name = 'website/manage/package_list.html'
+    context_object_name = 'packages'
+
+    def get_queryset(self):
+        qs = CoursePackage.objects.all()
+        q = self.request.GET.get('q')
+        if q:
+            qs = qs.filter(Q(name__icontains=q))
+        return qs
+
+
+class PackageCreateView(StaffMixin, CreateView):
+    model = CoursePackage
+    template_name = 'website/manage/package_form.html'
+    fields = ['name', 'slug', 'price', 'description', 'is_active']
+    success_url = reverse_lazy('website:manage_packages')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Package "{self.object.name}" created successfully!')
+        return response
+
+
+class PackageUpdateView(StaffMixin, UpdateView):
+    model = CoursePackage
+    template_name = 'website/manage/package_form.html'
+    fields = ['name', 'slug', 'price', 'description', 'is_active']
+    success_url = reverse_lazy('website:manage_packages')
+
+
+class PackageDeleteView(StaffMixin, DeleteView):
+    model = CoursePackage
+    template_name = 'website/manage/confirm_delete.html'
+    success_url = reverse_lazy('website:manage_packages')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Package deleted successfully!')
+        return super().form_valid(form)
+
+
 # Gallery
 class GalleryListView2(StaffMixin, ListView):
     model = GalleryImage
