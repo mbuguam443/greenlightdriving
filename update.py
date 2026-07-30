@@ -94,6 +94,7 @@ print("\n[1/6] Cleaning stale database columns...")
 with connection.cursor() as c:
     for table, col in [
         ('lessons_lessonitem', 'lesson_type'),
+        ('lessons_theorylesson', 'lesson_item_id'),
         ('students_student', 'package_id'),
         ('admissions_admission', 'package_id'),
     ]:
