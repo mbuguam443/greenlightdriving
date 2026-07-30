@@ -41,7 +41,11 @@ if git_available:
             capture_output=True, text=True, timeout=60, cwd=project_dir
         )
         if result.returncode == 0:
-            print(f"      {result.stdout.strip() or 'Already up to date.'}")
+            output = result.stdout.strip()
+            print(f"      {output or 'Already up to date.'}")
+            if output and 'Already up to date' not in output:
+                print("      Code updated. Re-running with new version...")
+                os.execv(sys.executable, [sys.executable] + sys.argv)
         else:
             print(f"      Git pull failed: {result.stderr.strip()}")
             print("      Continuing with existing code...")
