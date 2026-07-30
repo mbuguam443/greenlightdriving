@@ -20,11 +20,36 @@ class LessonListView(StaffTestMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return PracticalLesson.objects.select_related('student', 'student__user', 'lesson_item', 'instructor').all()
+        qs = PracticalLesson.objects.select_related(
+            'student', 'student__user', 'lesson_item',
+            'instructor', 'instructor__user', 'vehicle',
+        ).all()
+        status = self.request.GET.get('status')
+        search = self.request.GET.get('search')
+        date_f = self.request.GET.get('date')
+        instructor_f = self.request.GET.get('instructor')
+        if status:
+            qs = qs.filter(status=status)
+        if search:
+            qs = qs.filter(
+                models.Q(student__user__first_name__icontains=search) |
+                models.Q(student__user__last_name__icontains=search) |
+                models.Q(student__student_number__icontains=search)
+            )
+        if date_f:
+            qs = qs.filter(date=date_f)
+        if instructor_f:
+            qs = qs.filter(instructor_id=instructor_f)
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['lesson_items'] = LessonItem.objects.filter(is_active=True)
+        from instructors.models import Instructor
+        context['instructors'] = Instructor.objects.select_related('user').all()
+        context['status_filter'] = self.request.GET.get('status', '')
+        context['search_query'] = self.request.GET.get('search', '')
+        context['date_filter'] = self.request.GET.get('date', '')
+        context['instructor_filter'] = self.request.GET.get('instructor', '')
         context['active_tab'] = 'practical'
         return context
 

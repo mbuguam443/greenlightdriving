@@ -41,10 +41,10 @@
             <div class="col-md-2">
                 <select name="status" class="form-select">
                     <option value="">All Status</option>
-                    <option value="scheduled" {% if status_filter == 'scheduled' %}selected{% endif %}>Scheduled</option>
-                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
-                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
-                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    <option value="NOT_STARTED" {% if status_filter == 'NOT_STARTED' %}selected{% endif %}>Not Started</option>
+                    <option value="IN_PROGRESS" {% if status_filter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                    <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                    <option value="NEEDS_PRACTICE" {% if status_filter == 'NEEDS_PRACTICE' %}selected{% endif %}>Needs Practice</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -54,8 +54,8 @@
                 <select name="instructor" class="form-select">
                     <option value="">All Instructors</option>
                     {% for instructor in instructors %}
-                    <option value="{{ instructor.id }}" {% if instructor_filter == instructor.id %}selected{% endif %}>
-                        {{ instructor.get_full_name }}
+                    <option value="{{ instructor.id }}" {% if instructor_filter == instructor.id|stringformat:"s" %}selected{% endif %}>
+                        {{ instructor.user.full_name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -74,13 +74,12 @@
                 <thead style="background-color: #f8f9fa;">
                     <tr>
                         <th class="ps-3">Student</th>
-                        <th>Lesson #</th>
+                        <th>Lesson Item</th>
                         <th>Instructor</th>
                         <th>Vehicle</th>
                         <th>Date</th>
-                        <th>Time</th>
                         <th>Status</th>
-                        <th class="text-end pe-3">Actions</th>
+                        <th class="pe-3">Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,38 +87,41 @@
                     <tr>
                         <td class="ps-3">
                             <div>
-                                <span class="fw-semibold">{{ lesson.student.get_full_name }}</span>
+                                <a href="{% url 'students:detail' lesson.student.pk %}" class="fw-semibold text-decoration-none" style="color: #2E7D32;">
+                                    {{ lesson.student.user.full_name }}
+                                </a>
                                 <br><small class="text-muted">{{ lesson.student.student_number }}</small>
                             </div>
                         </td>
+                        <td>{{ lesson.lesson_item.name }}</td>
+                        <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
                         <td>
-                            <span class="badge" style="background-color: #2E7D32;">Lesson {{ lesson.lesson_number }}</span>
-                        </td>
-                        <td>{{ lesson.instructor.get_full_name }}</td>
-                        <td>
+                            {% if lesson.vehicle %}
                             <span class="fw-semibold">{{ lesson.vehicle.registration_number }}</span>
-                            <br><small class="text-muted">{{ lesson.vehicle.vehicle_type }}</small>
-                        </td>
-                        <td>{{ lesson.date|date:"d M Y" }}</td>
-                        <td>{{ lesson.start_time|time:"H:i" }} - {{ lesson.end_time|time:"H:i" }}</td>
-                        <td>
-                            {% if lesson.status == 'scheduled' %}
-                            <span class="badge" style="background-color: var(--primary-green);">Scheduled</span>
-                            {% elif lesson.status == 'in_progress' %}
-                            <span class="badge" style="background-color: var(--primary-green); color: var(--primary-green);">In Progress</span>
-                            {% elif lesson.status == 'completed' %}
-                            <span class="badge" style="background-color: #2E7D32;">Completed</span>
-                            {% elif lesson.status == 'cancelled' %}
-                            <span class="badge bg-danger">Cancelled</span>
+                            <br><small class="text-muted">{{ lesson.vehicle.make }} {{ lesson.vehicle.model_name }}</small>
+                            {% else %}
+                            <span class="text-muted">—</span>
                             {% endif %}
                         </td>
-                        <td class="text-end pe-3">
-                            <span class="text-muted small">—</span>
+                        <td>{{ lesson.date|date:"d M Y" }}</td>
+                        <td>
+                            {% if lesson.status == 'NOT_STARTED' %}
+                            <span class="badge bg-secondary">Not Started</span>
+                            {% elif lesson.status == 'IN_PROGRESS' %}
+                            <span class="badge bg-warning text-dark">In Progress</span>
+                            {% elif lesson.status == 'COMPLETED' %}
+                            <span class="badge bg-success">Completed</span>
+                            {% elif lesson.status == 'NEEDS_PRACTICE' %}
+                            <span class="badge bg-info text-dark">Needs Practice</span>
+                            {% endif %}
+                        </td>
+                        <td class="pe-3">
+                            <small class="text-muted">{{ lesson.remarks|truncatechars:40|default:"—" }}</small>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">
+                        <td colspan="7" class="text-center py-4 text-muted">
                             <i class="bi bi-car-front" style="font-size: 2rem;"></i>
                             <p class="mt-2 mb-0">No practical lessons found</p>
                         </td>
