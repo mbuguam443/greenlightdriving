@@ -48,7 +48,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <input type="date" name="date" class="form-control" value="{{ date_filter|default:'' }}">
+                <input type="date" name="date" class="form-control" value="{{ date_filter|default:'' }}" placeholder="Date">
             </div>
             <div class="col-md-2">
                 <select name="instructor" class="form-select">
@@ -60,83 +60,95 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn w-100" style="background-color: #2E7D32; color: white;">
-                    <i class="bi bi-funnel"></i>
+            <div class="col-md-auto">
+                <button type="submit" class="btn" style="background-color: #2E7D32; color: white;">
+                    <i class="bi bi-funnel me-1"></i>Filter
                 </button>
             </div>
         </form>
     </div>
 
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="background-color: #f8f9fa;">
-                    <tr>
-                        <th class="ps-3">Student</th>
-                        <th>Lesson Item</th>
-                        <th>Instructor</th>
-                        <th>Vehicle</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th class="pe-3">Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lesson in lessons %}
-                    <tr>
-                        <td class="ps-3">
-                            <div>
-                                <a href="{% url 'students:detail' lesson.student.pk %}" class="fw-semibold text-decoration-none" style="color: #2E7D32;">
-                                    {{ lesson.student.user.full_name }}
-                                </a>
-                                <br><small class="text-muted">{{ lesson.student.student_number }}</small>
-                            </div>
-                        </td>
-                        <td>{{ lesson.lesson_item.name }}</td>
-                        <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
-                        <td>
-                            {% if lesson.vehicle %}
-                            <span class="fw-semibold">{{ lesson.vehicle.registration_number }}</span>
-                            <br><small class="text-muted">{{ lesson.vehicle.make }} {{ lesson.vehicle.model_name }}</small>
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ lesson.date|date:"d M Y" }}</td>
-                        <td>
-                            {% if lesson.status == 'NOT_STARTED' %}
-                            <span class="badge bg-secondary">Not Started</span>
-                            {% elif lesson.status == 'IN_PROGRESS' %}
-                            <span class="badge bg-warning text-dark">In Progress</span>
-                            {% elif lesson.status == 'COMPLETED' %}
-                            <span class="badge bg-success">Completed</span>
-                            {% elif lesson.status == 'NEEDS_PRACTICE' %}
-                            <span class="badge bg-info text-dark">Needs Practice</span>
-                            {% endif %}
-                        </td>
-                        <td class="pe-3">
-                            <small class="text-muted">{{ lesson.remarks|truncatechars:40|default:"—" }}</small>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
-                            <i class="bi bi-car-front" style="font-size: 2rem;"></i>
-                            <p class="mt-2 mb-0">No practical lessons found</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% if grouped_lessons %}
+        <div class="accordion" id="lessonAccordion">
+            {% for group in grouped_lessons %}
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed bg-white" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#student-{{ group.student.pk }}" aria-expanded="false"
+                            style="font-weight: 600;">
+                        <div class="d-flex align-items-center gap-3 w-100">
+                            <a href="{% url 'students:detail' group.student.pk %}" class="text-decoration-none" style="color: #2E7D32;"
+                               onclick="event.stopPropagation();">
+                                {{ group.student.user.full_name }}
+                            </a>
+                            <small class="text-muted">{{ group.student.student_number }}</small>
+                            <span class="badge bg-secondary ms-auto me-3">{{ group.lessons|length }} lesson{{ group.lessons|pluralize }}</span>
+                            <small class="text-muted me-2">
+                                {{ group.completed }} / {{ group.lessons|length }} completed
+                            </small>
+                        </div>
+                    </button>
+                </h2>
+                <div id="student-{{ group.student.pk }}" class="accordion-collapse collapse"
+                     data-bs-parent="#lessonAccordion">
+                    <div class="accordion-body p-0">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3" style="width:40%;">Lesson Item</th>
+                                    <th>Instructor</th>
+                                    <th>Vehicle</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lesson in group.lessons %}
+                                <tr>
+                                    <td class="ps-3">{{ lesson.lesson_item.name }}</td>
+                                    <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
+                                    <td>
+                                        {% if lesson.vehicle %}
+                                        {{ lesson.vehicle.registration_number }}
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ lesson.date|date:"d M Y" }}</td>
+                                    <td>
+                                        {% if lesson.status == 'NOT_STARTED' %}
+                                        <span class="badge bg-secondary">Not Started</span>
+                                        {% elif lesson.status == 'IN_PROGRESS' %}
+                                        <span class="badge bg-warning text-dark">In Progress</span>
+                                        {% elif lesson.status == 'COMPLETED' %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% elif lesson.status == 'NEEDS_PRACTICE' %}
+                                        <span class="badge bg-info text-dark">Needs Practice</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-car-front" style="font-size: 2.5rem;"></i>
+            <p class="mt-2 mb-0">No practical lessons found</p>
+        </div>
+        {% endif %}
     </div>
 
     {% if lessons.has_other_pages %}
     <div class="card-footer bg-white border-top">
         <nav class="d-flex justify-content-between align-items-center">
             <small class="text-muted">
-                Showing {{ lessons.start_index }} to {{ lessons.end_index }} of {{ lessons.paginator.count }} lessons
+                {{ lessons.paginator.count }} lesson{{ lessons.paginator.count|pluralize }} across {{ lessons.paginator.num_pages }} page{{ lessons.paginator.num_pages|pluralize }}
             </small>
             <ul class="pagination pagination-sm mb-0">
                 {% if lessons.has_previous %}

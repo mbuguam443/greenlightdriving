@@ -17,7 +17,7 @@ class LessonListView(StaffTestMixin, ListView):
     model = PracticalLesson
     template_name = 'lessons/lesson_list.html'
     context_object_name = 'lessons'
-    paginate_by = 20
+    paginate_by = 50
 
     def get_queryset(self):
         qs = PracticalLesson.objects.select_related(
@@ -51,6 +51,17 @@ class LessonListView(StaffTestMixin, ListView):
         context['date_filter'] = self.request.GET.get('date', '')
         context['instructor_filter'] = self.request.GET.get('instructor', '')
         context['active_tab'] = 'practical'
+
+        lessons = context['lessons']
+        grouped = {}
+        for lesson in lessons:
+            sid = lesson.student_id
+            if sid not in grouped:
+                grouped[sid] = {'student': lesson.student, 'lessons': [], 'completed': 0}
+            grouped[sid]['lessons'].append(lesson)
+            if lesson.status == 'COMPLETED':
+                grouped[sid]['completed'] += 1
+        context['grouped_lessons'] = list(grouped.values())
         return context
 
 
