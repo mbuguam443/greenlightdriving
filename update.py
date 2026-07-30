@@ -121,12 +121,17 @@ with connection.cursor() as c:
 
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
-        DELETE t1 FROM lessons_lessonitem t1
+        SELECT t1.id, t2.id FROM lessons_lessonitem t1
         INNER JOIN lessons_lessonitem t2
-        WHERE t1.id > t2.id AND t1.name = t2.name AND t1.lesson_type = t2.lesson_type
+        ON t1.name = t2.name AND t1.lesson_type = t2.lesson_type AND t1.id > t2.id
     """)
-    if c.rowcount:
-        print(f"      Removed {c.rowcount} duplicate LessonItem record(s)")
+    dups = c.fetchall()
+    if dups:
+        for dup_id, keep_id in dups:
+            c.execute("UPDATE lessons_practicallesson SET lesson_item_id = %s WHERE lesson_item_id = %s", [keep_id, dup_id])
+            c.execute("UPDATE lessons_theorylesson SET lesson_item_id = %s WHERE lesson_item_id = %s", [keep_id, dup_id])
+            c.execute("DELETE FROM lessons_lessonitem WHERE id = %s", [dup_id])
+        print(f"      Removed {len(dups)} duplicate LessonItem record(s)")
 
     # Ensure lesson_item_id column exists
     c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='lessons_theorylesson' AND column_name='lesson_item_id'")
