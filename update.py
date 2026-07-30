@@ -119,6 +119,15 @@ with connection.cursor() as c:
         c.execute("ALTER TABLE lessons_lessonitem ADD COLUMN lesson_type VARCHAR(20) DEFAULT 'PRACTICAL' NOT NULL")
         print("      Added missing column lessons_lessonitem.lesson_type")
 
+    # Remove duplicate LessonItem records (seed run multiple times)
+    c.execute("""
+        DELETE t1 FROM lessons_lessonitem t1
+        INNER JOIN lessons_lessonitem t2
+        WHERE t1.id > t2.id AND t1.name = t2.name AND t1.lesson_type = t2.lesson_type
+    """)
+    if c.rowcount:
+        print(f"      Removed {c.rowcount} duplicate LessonItem record(s)")
+
     # Ensure lesson_item_id column exists
     c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='lessons_theorylesson' AND column_name='lesson_item_id'")
     if not c.fetchone()[0]:
