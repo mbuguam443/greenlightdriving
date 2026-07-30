@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
-{% block meta_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
+{% block meta_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course from KES {{ course.test_only_price|floatformat:0 }}.{% endblock %}
 {% block meta_keywords %}{{ course.name|lower }}, {{ course.category.name|lower }} course Kenya, driving course Nairobi, NTSA driving course{% endblock %}
 
 {% block canonical %}{{ site_url }}/courses/{{ course.slug }}/{% endblock %}
 {% block og_title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
-{% block og_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course at KSh {{ course.price|floatformat:0 }}.{% endblock %}
+{% block og_description %}{{ course.short_description|default:course.name }} - Enroll now at Greenlight Driving School. {{ course.duration }} course from KES {{ course.test_only_price|floatformat:0 }}.{% endblock %}
 {% block og_url %}{{ site_url }}/courses/{{ course.slug }}/{% endblock %}
 {% block og_image %}{% if course.image %}{{ site_url }}{{ course.image.url }}{% else %}{{ site_url }}{% static 'images/logo.png' %}{% endif %}{% endblock %}
 {% block twitter_title %}{{ course.name }} - Greenlight Defensive Driving School{% endblock %}
@@ -30,7 +30,7 @@
     },
     "offers": {
         "@type": "Offer",
-        "price": "{{ course.price|floatformat:0 }}",
+        "price": "{{ course.full_course_price|floatformat:0 }}",
         "priceCurrency": "KES",
         "availability": "https://schema.org/InStock"
     },
@@ -163,13 +163,6 @@
             <div class="col-lg-4">
                 <div class="info-card sticky-lg-top" style="top:100px;">
                     <div class="info-item">
-                        <div class="info-icon"><i class="bi bi-tag"></i></div>
-                        <div>
-                            <div class="info-label">Price</div>
-                            <div class="info-value" style="color:var(--primary-green);font-size:1.4rem;">KSh {{ course.price|floatformat:0 }}</div>
-                        </div>
-                    </div>
-                    <div class="info-item">
                         <div class="info-icon"><i class="bi bi-clock"></i></div>
                         <div>
                             <div class="info-label">Duration</div>
@@ -192,14 +185,18 @@
                     </div>
                     <div class="mt-4">
                         <h6 class="mb-3" style="font-weight:700;color:var(--primary-green);">Available Packages</h6>
-                        {% for pkg in packages %}
                         <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color:#f0f0f0!important;">
-                            <span style="font-size:0.9rem;">{{ pkg.name }}</span>
-                            <span style="font-weight:700;color:var(--primary-green);">KSh {{ pkg.price|floatformat:0 }}</span>
+                            <span style="font-size:0.9rem;">Full Course</span>
+                            <span style="font-weight:700;color:var(--primary-green);">KES {{ course.full_course_price|floatformat:0 }}</span>
                         </div>
-                        {% empty %}
-                        <p class="text-muted small">No packages available</p>
-                        {% endfor %}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color:#f0f0f0!important;">
+                            <span style="font-size:0.9rem;">Half Course</span>
+                            <span style="font-weight:700;color:var(--primary-green);">KES {{ course.half_course_price|floatformat:0 }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span style="font-size:0.9rem;">Test Only</span>
+                            <span style="font-weight:700;color:var(--primary-green);">KES {{ course.test_only_price|floatformat:0 }}</span>
+                        </div>
                     </div>
                     <div class="mt-3">
                         <a href="{% url 'admissions:online_admission' %}" class="btn btn-apply">
@@ -233,7 +230,7 @@
                         <span class="course-badge" style="font-size:0.72rem;">{{ rc.category.name }}</span>
                         <h6 style="font-weight:700;color:var(--primary-green);margin-top:0.5rem;">{{ rc.name }}</h6>
                         <div class="d-flex justify-content-between align-items-center mt-2">
-                            <span style="font-weight:800;color:var(--primary-green);">KSh {{ rc.price|floatformat:0 }}</span>
+                            <span style="font-weight:800;color:var(--primary-green);">From KES {{ rc.test_only_price|floatformat:0 }}</span>
                             <a href="{% url 'website:course_detail' rc.slug %}" style="color:var(--primary-green);font-weight:600;font-size:0.85rem;text-decoration:none;">
                                 Details <i class="bi bi-arrow-right ms-1"></i>
                             </a>

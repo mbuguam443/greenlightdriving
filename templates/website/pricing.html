@@ -30,7 +30,7 @@
                 "url": "{{ site_url }}{% url 'website:course_detail' course.slug %}",
                 "offers": {
                     "@type": "Offer",
-                    "price": "{{ course.price|floatformat:0 }}",
+                    "price": "{{ course.full_course_price|floatformat:0 }}",
                     "priceCurrency": "KES"
                 }
             }
@@ -340,10 +340,20 @@
                         <span class="category-badge">{{ course.category.name }}</span>
                     </div>
                     <div class="pricing-card-body">
-                        <div class="price-block">
-                            <div class="price-amount">KSh {{ course.price|floatformat:0 }} <small>/total</small></div>
-                            <div class="price-duration"><i class="bi bi-clock"></i>{{ course.duration }}</div>
-                        </div>
+                        <ul class="list-unstyled mb-3" style="font-size:0.9rem;">
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Full Course</span>
+                                <strong style="color:var(--primary-green);">KES {{ course.full_course_price|floatformat:0 }}</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Half Course</span>
+                                <strong style="color:var(--primary-green);">KES {{ course.half_course_price|floatformat:0 }}</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2">
+                                <span>Test Only</span>
+                                <strong style="color:var(--primary-green);">KES {{ course.test_only_price|floatformat:0 }}</strong>
+                            </li>
+                        </ul>
 
                         <ul class="feature-list">
                             {% if course.feature_list %}
@@ -361,6 +371,8 @@
                                 <li><i class="bi bi-check-circle-fill"></i><span>Certificate upon completion</span></li>
                             {% endif %}
                         </ul>
+
+                        <div class="price-duration text-center mb-3"><i class="bi bi-clock"></i> {{ course.duration }}</div>
 
                         <a href="{% url 'website:course_detail' course.slug %}" class="btn-enroll">
                             <i class="bi bi-arrow-right-circle me-1"></i>View Details
@@ -382,66 +394,6 @@
     </div>
 </section>
 
-{% if packages_by_category %}
-<section class="section-padding" style="background: #f1f8e9;">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title" style="color: var(--primary-green);">Choose Your Package</h2>
-            <p class="text-muted" style="max-width:550px;margin:0 auto;">Each course category has its own packages with tailored pricing.</p>
-        </div>
-
-        {% regroup packages_by_category by category as category_groups %}
-        {% for group in category_groups %}
-        <div class="mb-5">
-            <div class="d-flex align-items-center gap-2 mb-3">
-                <span style="display:inline-block;background:var(--primary-green);color:#fff;font-weight:700;padding:0.3rem 0.9rem;border-radius:20px;font-size:0.85rem;">{{ group.grouper.name }}</span>
-                <small class="text-muted">{{ group.grouper.description }}</small>
-            </div>
-            <div class="row g-4">
-                {% for pkg in group.list %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="pricing-card">
-                        <div class="pricing-card-top">
-                            <div class="course-icon">
-                                {% if 'test' in pkg.slug %}
-                                    <i class="bi bi-journal-text"></i>
-                                {% elif 'half' in pkg.slug %}
-                                    <i class="bi bi-bookmark-star"></i>
-                                {% else %}
-                                    <i class="bi bi-trophy"></i>
-                                {% endif %}
-                            </div>
-                            <h5>{{ pkg.name }}</h5>
-                        </div>
-                        <div class="pricing-card-body">
-                            <div class="price-block">
-                                <div class="price-amount">KSh {{ pkg.price|floatformat:0 }} <small>/total</small></div>
-                            </div>
-                            <ul class="feature-list">
-                                {% if pkg.description %}
-                                <li><i class="bi bi-info-circle-fill"></i><span>{{ pkg.description }}</span></li>
-                                {% endif %}
-                                {% with lesson_count=pkg.lesson_items.count %}
-                                <li><i class="bi bi-collection-fill"></i><span>{{ lesson_count }} lesson{{ lesson_count|pluralize }} included</span></li>
-                                {% endwith %}
-                                {% for li in pkg.lesson_items.all %}
-                                <li><i class="bi bi-check-circle-fill"></i><span>{{ li.name }}</span></li>
-                                {% endfor %}
-                            </ul>
-                            <a href="{% url 'admissions:online_admission' %}" class="btn-enroll">
-                                <i class="bi bi-arrow-right-circle me-1"></i>Choose {{ pkg.name }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</section>
-{% endif %}
-
 {% if courses %}
 <section class="section-padding" style="background: #f1f8e9;">
     <div class="container">
@@ -456,7 +408,9 @@
                         <th>Course</th>
                         <th>Category</th>
                         <th>Duration</th>
-                        <th>Price</th>
+                        <th>Full Course</th>
+                        <th>Half Course</th>
+                        <th>Test Only</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -466,7 +420,9 @@
                         <td><strong>{{ course.name }}</strong></td>
                         <td><span class="category-pill">{{ course.category.name }}</span></td>
                         <td><i class="bi bi-clock me-1 text-muted"></i>{{ course.duration }}</td>
-                        <td class="price-cell">KSh {{ course.price|floatformat:0 }}</td>
+                        <td class="price-cell">KES {{ course.full_course_price|floatformat:0 }}</td>
+                        <td class="price-cell">KES {{ course.half_course_price|floatformat:0 }}</td>
+                        <td class="price-cell">KES {{ course.test_only_price|floatformat:0 }}</td>
                         <td class="text-center">
                             <a href="{% url 'website:course_detail' course.slug %}" class="detail-link">
                                 Details <i class="bi bi-arrow-right ms-1"></i>

@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-Green Light Driving School - Seed Data Script
-Run this from cPanel Python App > Run > seed.py
-Seeds/refreshes all sample data without touching existing records.
-"""
 import os
 import sys
 
@@ -56,32 +51,21 @@ for c in categories_data:
 print(f"      {CourseCategory.objects.count()} categories ready")
 
 courses_data = [
-    {'cat_slug': 'b1', 'name': 'Basic Driving Course', 'slug': 'basic-driving', 'description': 'Comprehensive driving course for beginners covering all road rules and practical skills.', 'short_description': 'Perfect for first-time drivers', 'duration': '4 Weeks', 'price': 25000, 'features': 'Road rules theory\nPractical driving lessons\nDefensive driving\nHighway driving'},
-    {'cat_slug': 'b1', 'name': 'Intensive Driving Course', 'slug': 'intensive-driving', 'description': 'Fast-track driving course for those who want to learn quickly.', 'short_description': 'Learn to drive in 2 weeks', 'duration': '2 Weeks', 'price': 35000, 'features': 'Daily driving sessions\nTheory included\nMock NTSA test\nCertificate'},
-    {'cat_slug': 'b2', 'name': 'SUV & Van Training', 'slug': 'suv-van-training', 'description': 'Specialized training for larger vehicles.', 'short_description': 'Handle bigger vehicles with confidence', 'duration': '3 Weeks', 'price': 30000, 'features': 'Vehicle handling\nParking maneuvers\nOff-road basics'},
-    {'cat_slug': 'a1', 'name': 'Motorcycle Basic', 'slug': 'motorcycle-basic', 'description': 'Basic motorcycle riding course.', 'short_description': 'Get your motorcycle license', 'duration': '2 Weeks', 'price': 15000, 'features': 'Balance and control\nTraffic navigation\nSafety gear usage'},
-    {'cat_slug': 'c1', 'name': 'Commercial Driving', 'slug': 'commercial-driving', 'description': 'Commercial vehicle driving for logistics and delivery.', 'short_description': 'Drive for business', 'duration': '6 Weeks', 'price': 45000, 'features': 'Commercial regulations\nLoad management\nRoute planning'},
+    {'cat_slug': 'b1', 'name': 'Basic Driving Course', 'slug': 'basic-driving', 'description': 'Comprehensive driving course for beginners covering all road rules and practical skills.', 'short_description': 'Perfect for first-time drivers', 'duration': '4 Weeks', 'full_course_price': 25000, 'half_course_price': 15000, 'test_only_price': 5000, 'features': 'Road rules theory\nPractical driving lessons\nDefensive driving\nHighway driving'},
+    {'cat_slug': 'b1', 'name': 'Intensive Driving Course', 'slug': 'intensive-driving', 'description': 'Fast-track driving course for those who want to learn quickly.', 'short_description': 'Learn to drive in 2 weeks', 'duration': '2 Weeks', 'full_course_price': 35000, 'half_course_price': 20000, 'test_only_price': 7000, 'features': 'Daily driving sessions\nTheory included\nMock NTSA test\nCertificate'},
+    {'cat_slug': 'b2', 'name': 'SUV & Van Training', 'slug': 'suv-van-training', 'description': 'Specialized training for larger vehicles.', 'short_description': 'Handle bigger vehicles with confidence', 'duration': '3 Weeks', 'full_course_price': 30000, 'half_course_price': 18000, 'test_only_price': 6000, 'features': 'Vehicle handling\nParking maneuvers\nOff-road basics'},
+    {'cat_slug': 'a1', 'name': 'Motorcycle Basic', 'slug': 'motorcycle-basic', 'description': 'Basic motorcycle riding course.', 'short_description': 'Get your motorcycle license', 'duration': '2 Weeks', 'full_course_price': 15000, 'half_course_price': 9000, 'test_only_price': 3000, 'features': 'Balance and control\nTraffic navigation\nSafety gear usage'},
+    {'cat_slug': 'c1', 'name': 'Commercial Driving', 'slug': 'commercial-driving', 'description': 'Commercial vehicle driving for logistics and delivery.', 'short_description': 'Drive for business', 'duration': '6 Weeks', 'full_course_price': 45000, 'half_course_price': 27000, 'test_only_price': 10000, 'features': 'Commercial regulations\nLoad management\nRoute planning'},
 ]
 for c in courses_data:
     cat = CourseCategory.objects.get(slug=c.pop('cat_slug'))
     Course.objects.get_or_create(slug=c['slug'], defaults={**c, 'category': cat})
 print(f"      {Course.objects.count()} courses ready")
 
-# 3. Course Packages and Lesson Items
-print("\n[3/7] Course Packages and Lesson Items...")
-from lessons.models import LessonItem, CoursePackage
-from website.models import CourseCategory
+# 3. Lesson Items (no CoursePackage)
+print("\n[3/7] Lesson Items...")
+from lessons.models import LessonItem
 LessonItem.objects.all().delete()
-CoursePackage.objects.all().delete()
-
-# Create per-category packages
-packages = {}
-for cat in CourseCategory.objects.all():
-    slug_suffix = cat.slug.lower()
-    pkg_test = CoursePackage.objects.create(category=cat, name=f'Test Only', slug=f'test-only-{slug_suffix}', price=5000, description='Theory lessons only')
-    pkg_half = CoursePackage.objects.create(category=cat, name=f'Half Course', slug=f'half-course-{slug_suffix}', price=15000, description=f'10 practical lessons + theory')
-    pkg_full = CoursePackage.objects.create(category=cat, name=f'Full Course', slug=f'full-course-{slug_suffix}', price=25000, description='All 20 lessons')
-    packages[cat.slug] = {'test': pkg_test, 'half': pkg_half, 'full': pkg_full}
 
 lessons_data = [
     ('Introduction', 'THEORY', ['test', 'half', 'full']),
@@ -105,13 +89,9 @@ lessons_data = [
     ('First Aid on Road', 'THEORY', ['test', 'half', 'full']),
     ('Assessment', 'ASSESSMENT', ['half', 'full']),
 ]
-item_count = 0
-for cat_slug, cat_pkgs in packages.items():
-    for i, (name, ltype, pkg_keys) in enumerate(lessons_data):
-        item = LessonItem.objects.create(name=name, order=i + 1, lesson_type=ltype)
-        item.packages.add(*(cat_pkgs[s] for s in pkg_keys))
-        item_count += 1
-print(f"      {item_count} lesson items assigned across {CoursePackage.objects.count()} packages")
+for i, (name, ltype, pkgs) in enumerate(lessons_data):
+    LessonItem.objects.create(name=name, order=i + 1, lesson_type=ltype)
+print(f"      {LessonItem.objects.count()} lesson items ready")
 
 # 4. FAQs
 print("\n[4/7] FAQs...")
@@ -216,7 +196,7 @@ branch_kimbo = Branch.objects.get(slug='kimbo')
 for su in User.objects.filter(role='STUDENT'):
     Student.objects.get_or_create(
         user=su,
-        defaults={'student_number': f'GLS-{su.id:04d}', 'category': cat_b1, 'course': course_basic, 'branch': branch_kimbo, 'instructor': instructors[0], 'vehicle': vehicles[0], 'status': 'ACTIVE', 'expected_graduation': timezone.now().date() + timedelta(days=90)}
+        defaults={'student_number': f'GLS-{su.id:04d}', 'category': cat_b1, 'course': course_basic, 'package_choice': 'FULL', 'branch': branch_kimbo, 'instructor': instructors[0], 'vehicle': vehicles[0], 'status': 'ACTIVE', 'expected_graduation': timezone.now().date() + timedelta(days=90)}
     )
 print(f"      {Student.objects.count()} student profiles ready")
 

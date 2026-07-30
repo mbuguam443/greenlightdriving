@@ -18,13 +18,19 @@
                 <form method="post" novalidate>
                     {% csrf_token %}
 
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="id_student" class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
                             <select name="student" id="id_student" class="form-select" required>
                                 <option value="">Select Student</option>
                                 {% for student in students %}
-                                <option value="{{ student.id }}" {% if form.student.value == student.id %}selected{% endif %}>
+                                <option value="{{ student.id }}" {% if form.student.value|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
                                     {{ student.user.full_name }} ({{ student.student_number }})
                                 </option>
                                 {% endfor %}
@@ -39,7 +45,7 @@
                             <select name="instructor" id="id_instructor" class="form-select" required>
                                 <option value="">Select Instructor</option>
                                 {% for instructor in instructors %}
-                                <option value="{{ instructor.id }}" {% if form.instructor.value == instructor.id %}selected{% endif %}>
+                                <option value="{{ instructor.id }}" {% if form.instructor.value|stringformat:"s" == instructor.id|stringformat:"s" %}selected{% endif %}>
                                     {{ instructor.user.full_name }}
                                 </option>
                                 {% endfor %}
@@ -59,12 +65,6 @@
                             {% endif %}
                         </div>
 
-                        <div class="col-12">
-                            <label for="id_description" class="form-label fw-semibold">Description</label>
-                            <textarea name="description" id="id_description" class="form-control" rows="3"
-                                      placeholder="Brief description of the lesson content">{{ form.description.value|default:'' }}</textarea>
-                        </div>
-
                         <div class="col-md-6">
                             <label for="id_date" class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
                             <input type="date" name="date" id="id_date" class="form-control"
@@ -75,36 +75,42 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label for="id_start_time" class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
-                            <input type="time" name="start_time" id="id_start_time" class="form-control"
-                                   value="{{ form.start_time.value|default:'' }}" required>
-                            {% if form.start_time.errors %}
-                            <div class="text-danger small mt-1">{{ form.start_time.errors.0 }}</div>
+                            <label for="id_time_start" class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
+                            <input type="time" name="time_start" id="id_time_start" class="form-control"
+                                   value="{{ form.time_start.value|default:'' }}" required>
+                            {% if form.time_start.errors %}
+                            <div class="text-danger small mt-1">{{ form.time_start.errors.0 }}</div>
                             {% endif %}
                         </div>
 
                         <div class="col-md-3">
-                            <label for="id_end_time" class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
-                            <input type="time" name="end_time" id="id_end_time" class="form-control"
-                                   value="{{ form.end_time.value|default:'' }}" required>
-                            {% if form.end_time.errors %}
-                            <div class="text-danger small mt-1">{{ form.end_time.errors.0 }}</div>
+                            <label for="id_time_end" class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
+                            <input type="time" name="time_end" id="id_time_end" class="form-control"
+                                   value="{{ form.time_end.value|default:'' }}" required>
+                            {% if form.time_end.errors %}
+                            <div class="text-danger small mt-1">{{ form.time_end.errors.0 }}</div>
                             {% endif %}
                         </div>
 
                         <div class="col-md-6">
                             <label for="id_status" class="form-label fw-semibold">Status</label>
                             <select name="status" id="id_status" class="form-select">
-                                <option value="scheduled" {% if form.status.value == 'scheduled' %}selected{% endif %}>Scheduled</option>
-                                <option value="completed" {% if form.status.value == 'completed' %}selected{% endif %}>Completed</option>
-                                <option value="cancelled" {% if form.status.value == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                {% for value, label in form.fields.status.choices %}
+                                <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
                             </select>
+                            {% if form.status.errors %}
+                            <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                            {% endif %}
                         </div>
 
-                        <div class="col-md-6">
-                            <label for="id_venue" class="form-label fw-semibold">Venue</label>
-                            <input type="text" name="venue" id="id_venue" class="form-control"
-                                   value="{{ form.venue.value|default:'' }}" placeholder="Classroom / Online">
+                        <div class="col-12">
+                            <label for="id_notes" class="form-label fw-semibold">Notes</label>
+                            <textarea name="notes" id="id_notes" class="form-control" rows="3"
+                                      placeholder="Lesson notes...">{{ form.notes.value|default:'' }}</textarea>
+                            {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
 

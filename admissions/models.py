@@ -30,9 +30,15 @@ class Admission(models.Model):
     passport_photo = models.ImageField(upload_to='admissions/passports/')
     national_id_image = models.ImageField(upload_to='admissions/ids/', verbose_name='National ID Image')
 
+    PACKAGE_CHOICES = [
+        ('FULL', 'Full Course'),
+        ('HALF', 'Half Course'),
+        ('TEST', 'Test Only'),
+    ]
+
     category = models.ForeignKey('website.CourseCategory', on_delete=models.CASCADE)
     course = models.ForeignKey('website.Course', on_delete=models.CASCADE)
-    package = models.ForeignKey('lessons.CoursePackage', on_delete=models.SET_NULL, null=True, blank=True)
+    package_choice = models.CharField(max_length=10, choices=PACKAGE_CHOICES, default='FULL')
     branch = models.ForeignKey('core.Branch', on_delete=models.CASCADE)
     preferred_schedule = models.CharField(max_length=20, choices=SCHEDULE_CHOICES, default='MORNING')
 

@@ -31,7 +31,7 @@
                 "url": "{{ site_url }}{% url 'website:course_detail' course.slug %}",
                 "offers": {
                     "@type": "Offer",
-                    "price": "{{ course.price|floatformat:0 }}",
+                    "price": "{{ course.full_course_price|floatformat:0 }}",
                     "priceCurrency": "KES"
                 },
                 "provider": {
@@ -174,7 +174,7 @@
                         <p>{{ course.short_description|truncatewords:15 }}</p>
                         <div class="course-meta">
                             <div>
-                                <div class="course-price">KSh {{ course.price|floatformat:0 }}</div>
+                                <div class="course-price">From KES {{ course.test_only_price|floatformat:0 }}</div>
                                 <div class="course-duration"><i class="bi bi-clock me-1"></i>{{ course.duration }}</div>
                             </div>
                             <a href="{% url 'website:course_detail' course.slug %}" class="btn-view-details">

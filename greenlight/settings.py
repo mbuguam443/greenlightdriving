@@ -144,7 +144,18 @@ AUTH_USER_MODEL = 'accounts.User'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_SAVE_EVERY_REQUEST = True
+
+# CSRF
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_TRUSTED_ORIGINS = [
+    'http://greenlight-driving-defensive.schones-heim-builders.co.ke',
+    'https://greenlight-driving-defensive.schones-heim-builders.co.ke',
+]
 
 # Authentication URLs
 LOGIN_URL = '/accounts/login/'

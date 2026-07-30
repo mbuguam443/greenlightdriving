@@ -5,7 +5,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import HttpResponse
-from lessons.models import CoursePackage
 from .models import (
     CourseCategory, Course, Testimonial, FAQ, BlogPost,
     GalleryImage, ContactMessage, SiteContent
@@ -110,9 +109,6 @@ class CourseDetailView(DetailView):
         context['related_courses'] = Course.objects.filter(
             category=self.object.category, is_active=True
         ).exclude(pk=self.object.pk)[:3]
-        context['packages'] = CoursePackage.objects.filter(
-            category=self.object.category, is_active=True
-        )
         return context
 
 
@@ -127,9 +123,6 @@ class PricingView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.filter(is_active=True).select_related('category')
-        context['packages_by_category'] = CoursePackage.objects.filter(
-            is_active=True
-        ).select_related('category').order_by('category__name', 'name')
         return context
 
 
@@ -332,7 +325,7 @@ class CourseListView2(StaffMixin, ListView):
 class CourseCreateView(StaffMixin, CreateView):
     model = Course
     template_name = 'website/manage/course_form.html'
-    fields = ['category', 'name', 'slug', 'description', 'short_description', 'duration', 'price', 'features', 'image', 'is_active']
+    fields = ['category', 'name', 'slug', 'description', 'short_description', 'duration', 'full_course_price', 'half_course_price', 'test_only_price', 'features', 'image', 'is_active']
     success_url = reverse_lazy('website:manage_courses')
 
     def form_valid(self, form):
@@ -345,7 +338,7 @@ class CourseCreateView(StaffMixin, CreateView):
 class CourseUpdateView(StaffMixin, UpdateView):
     model = Course
     template_name = 'website/manage/course_form.html'
-    fields = ['category', 'name', 'slug', 'description', 'short_description', 'duration', 'price', 'features', 'image', 'is_active']
+    fields = ['category', 'name', 'slug', 'description', 'short_description', 'duration', 'full_course_price', 'half_course_price', 'test_only_price', 'features', 'image', 'is_active']
     success_url = reverse_lazy('website:manage_courses')
 
     def form_valid(self, form):
@@ -458,49 +451,6 @@ class FAQDeleteView(StaffMixin, DeleteView):
     model = FAQ
     template_name = 'website/manage/confirm_delete.html'
     success_url = reverse_lazy('website:manage_faqs')
-
-
-# CoursePackage
-class PackageListView(StaffMixin, ListView):
-    model = CoursePackage
-    template_name = 'website/manage/package_list.html'
-    context_object_name = 'packages'
-
-    def get_queryset(self):
-        qs = CoursePackage.objects.all()
-        q = self.request.GET.get('q')
-        if q:
-            qs = qs.filter(Q(name__icontains=q))
-        return qs
-
-
-class PackageCreateView(StaffMixin, CreateView):
-    model = CoursePackage
-    template_name = 'website/manage/package_form.html'
-    fields = ['category', 'name', 'slug', 'price', 'description', 'is_active']
-    success_url = reverse_lazy('website:manage_packages')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, f'Package "{self.object.name}" created successfully!')
-        return response
-
-
-class PackageUpdateView(StaffMixin, UpdateView):
-    model = CoursePackage
-    template_name = 'website/manage/package_form.html'
-    fields = ['category', 'name', 'slug', 'price', 'description', 'is_active']
-    success_url = reverse_lazy('website:manage_packages')
-
-
-class PackageDeleteView(StaffMixin, DeleteView):
-    model = CoursePackage
-    template_name = 'website/manage/confirm_delete.html'
-    success_url = reverse_lazy('website:manage_packages')
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Package deleted successfully!')
-        return super().form_valid(form)
 
 
 # Gallery

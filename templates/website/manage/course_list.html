@@ -48,7 +48,7 @@
                         <th class="ps-3">Name</th>
                         <th>Category</th>
                         <th>Duration</th>
-                        <th>Price</th>
+                        <th>Full Price</th>
                         <th>Status</th>
                         <th class="text-end pe-3">Actions</th>
                     </tr>
@@ -59,7 +59,7 @@
                         <td class="ps-3 fw-semibold" style="color: var(--primary-green);">{{ course.name }}</td>
                         <td>{{ course.category|default:"-" }}</td>
                         <td>{{ course.duration|default:"-" }}</td>
-                        <td>{% if course.price %}KES {{ course.price|floatformat:0 }}{% else %}-{% endif %}</td>
+                        <td>{% if course.full_course_price %}KES {{ course.full_course_price|floatformat:0 }}{% else %}-{% endif %}</td>
                         <td>
                             {% if course.is_active %}
                             <span class="badge" style="background-color: var(--primary-green);">Active</span>

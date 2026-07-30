@@ -12,9 +12,15 @@ class Student(models.Model):
     user = models.OneToOneField('accounts.User', on_delete=models.CASCADE, related_name='student_profile')
     admission = models.OneToOneField('admissions.Admission', on_delete=models.SET_NULL, null=True, blank=True)
     student_number = models.CharField(max_length=20, unique=True)
+    PACKAGE_CHOICES = [
+        ('FULL', 'Full Course'),
+        ('HALF', 'Half Course'),
+        ('TEST', 'Test Only'),
+    ]
+
     category = models.ForeignKey('website.CourseCategory', on_delete=models.CASCADE)
     course = models.ForeignKey('website.Course', on_delete=models.CASCADE)
-    package = models.ForeignKey('lessons.CoursePackage', on_delete=models.SET_NULL, null=True, blank=True)
+    package_choice = models.CharField(max_length=10, choices=PACKAGE_CHOICES, default='FULL')
     branch = models.ForeignKey('core.Branch', on_delete=models.CASCADE)
     instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True, blank=True)
     vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, null=True, blank=True)
@@ -57,9 +63,14 @@ class Student(models.Model):
 
     @property
     def total_fees(self):
-        if self.package and self.package.price:
-            return self.package.price
-        return self.course.price if self.course else 0
+        if self.course:
+            prices = {
+                'FULL': self.course.full_course_price,
+                'HALF': self.course.half_course_price,
+                'TEST': self.course.test_only_price,
+            }
+            return prices.get(self.package_choice, 0)
+        return 0
 
     @property
     def amount_paid(self):
