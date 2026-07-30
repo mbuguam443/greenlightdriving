@@ -89,12 +89,18 @@ django.setup()
 from django.core.management import call_command
 from django.db import connection
 
-# 2. Clean stale columns (from partially-applied old migrations)
-print("\n[1/6] Cleaning stale database columns...")
+# 2. Repair database (handle missing/stale columns from old migrations)
+print("\n[1/6] Repairing database schema...")
 with connection.cursor() as c:
+    # Drop old junction tables (these are truly stale, CoursePackage is gone)
+    for t in ['lessons_lessonitem_packages', 'lessons_coursepackage']:
+        c.execute(f"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='{t}'")
+        if c.fetchone()[0]:
+            c.execute(f"DROP TABLE {t}")
+            print(f"      Dropped stale table {t}")
+
+    # Drop stale FK columns (package_id -> replaced by package_choice CharField)
     for table, col in [
-        ('lessons_lessonitem', 'lesson_type'),
-        ('lessons_theorylesson', 'lesson_item_id'),
         ('students_student', 'package_id'),
         ('admissions_admission', 'package_id'),
     ]:
@@ -106,13 +112,20 @@ with connection.cursor() as c:
                 c.execute(f"ALTER TABLE {table} DROP FOREIGN KEY {row[0]}")
             c.execute(f"ALTER TABLE {table} DROP COLUMN {col}")
             print(f"      Dropped stale column {table}.{col}")
-    # Drop old junction table if it exists
-    for t in ['lessons_lessonitem_packages', 'lessons_coursepackage']:
-        c.execute(f"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='{t}'")
-        if c.fetchone()[0]:
-            c.execute(f"DROP TABLE {t}")
-            print(f"      Dropped stale table {t}")
-print("      Database cleanup done")
+
+    # Ensure lesson_type column exists (may have been dropped by a prior failed migration cycle)
+    c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='lessons_lessonitem' AND column_name='lesson_type'")
+    if not c.fetchone()[0]:
+        c.execute("ALTER TABLE lessons_lessonitem ADD COLUMN lesson_type VARCHAR(20) DEFAULT 'PRACTICAL' NOT NULL")
+        print("      Added missing column lessons_lessonitem.lesson_type")
+
+    # Ensure lesson_item_id column exists
+    c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='lessons_theorylesson' AND column_name='lesson_item_id'")
+    if not c.fetchone()[0]:
+        c.execute("ALTER TABLE lessons_theorylesson ADD COLUMN lesson_item_id INT NULL REFERENCES lessons_lessonitem(id)")
+        print("      Added missing column lessons_theorylesson.lesson_item_id")
+
+print("      Database repair done")
 
 # 3. Migrations
 print("\n[2/6] Running migrations...")
