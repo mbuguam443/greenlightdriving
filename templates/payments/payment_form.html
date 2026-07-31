@@ -8,6 +8,18 @@
 {% block dashboard_content %}
 <div class="row justify-content-center">
     <div class="col-lg-7">
+        {% if selected_student %}
+        <div class="alert border-0 mb-3 text-white d-flex align-items-center justify-content-between"
+             style="background-color: #2E7D32;">
+            <div>
+                <i class="bi bi-person-check me-2"></i>
+                Recording payment for <strong>{{ selected_student.user.full_name }}</strong>
+                <span class="ms-2 opacity-75">({{ selected_student.student_number }})</span>
+                <span class="ms-2 opacity-75">| Balance: KES {{ selected_student.balance|floatformat:0 }}</span>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
@@ -18,14 +30,35 @@
                 <form method="post" novalidate>
                     {% csrf_token %}
 
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+                    {% endif %}
+
                     <div class="row g-3">
-                        <div class="col-md-8">
+                        <div class="col-12">
                             <label for="id_student" class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
-                            <select name="student" id="id_student" class="form-select" required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <input type="text" id="student_search" class="form-control"
+                                       placeholder="Type to search student name or number..."
+                                       value="{% if selected_student %}{{ selected_student.user.full_name }} ({{ selected_student.student_number }}){% endif %}"
+                                       autocomplete="off">
+                            </div>
+                            <select name="student" id="id_student" class="form-select mt-1" required size="6"
+                                    style="display:none;">
                                 <option value="">Select Student</option>
                                 {% for student in students %}
-                                <option value="{{ student.id }}" {% if form.student.value == student.id %}selected{% endif %}>
-                                    {{ student.get_full_name }} ({{ student.student_number }})
+                                <option value="{{ student.id }}" data-search="{{ student.user.full_name|lower }} {{ student.student_number|lower }}"
+                                    {% if form.student.value|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ student.user.full_name }} ({{ student.student_number }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <select name="student" id="id_student_fallback" class="form-select mt-1" required>
+                                <option value="">Select Student</option>
+                                {% for student in students %}
+                                <option value="{{ student.id }}" {% if form.student.value|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ student.user.full_name }} ({{ student.student_number }})
                                 </option>
                                 {% endfor %}
                             </select>
@@ -43,50 +76,40 @@
                             {% endif %}
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_method" class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
                             <select name="method" id="id_method" class="form-select" required>
                                 <option value="">Select Method</option>
-                                <option value="cash" {% if form.method.value == 'cash' %}selected{% endif %}>Cash</option>
-                                <option value="mpesa" {% if form.method.value == 'mpesa' %}selected{% endif %}>M-Pesa</option>
-                                <option value="bank" {% if form.method.value == 'bank' %}selected{% endif %}>Bank Transfer</option>
-                                <option value="card" {% if form.method.value == 'card' %}selected{% endif %}>Card Payment</option>
+                                {% for value, label in form.fields.method.choices %}
+                                <option value="{{ value }}" {% if form.method.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
                             </select>
                             {% if form.method.errors %}
                             <div class="text-danger small mt-1">{{ form.method.errors.0 }}</div>
                             {% endif %}
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_reference_number" class="form-label fw-semibold">Reference / Transaction No.</label>
                             <input type="text" name="reference_number" id="id_reference_number" class="form-control"
-                                   value="{{ form.reference_number.value|default:'' }}" placeholder="M-Pesa code, cheque no. etc.">
+                                   value="{{ form.reference_number.value|default:'' }}" placeholder="M-Pesa code, cheque no.">
                             {% if form.reference_number.errors %}
                             <div class="text-danger small mt-1">{{ form.reference_number.errors.0 }}</div>
                             {% endif %}
                         </div>
 
                         <div class="col-md-6">
-                            <label for="id_date" class="form-label fw-semibold">Payment Date</label>
-                            <input type="date" name="date" id="id_date" class="form-control"
-                                   value="{{ form.date.value|default:'' }}">
-                            {% if form.date.errors %}
-                            <div class="text-danger small mt-1">{{ form.date.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
                             <label for="id_status" class="form-label fw-semibold">Status</label>
                             <select name="status" id="id_status" class="form-select">
-                                <option value="completed" {% if form.status.value == 'completed' %}selected{% endif %}>Completed</option>
-                                <option value="pending" {% if form.status.value == 'pending' %}selected{% endif %}>Pending</option>
-                                <option value="failed" {% if form.status.value == 'failed' %}selected{% endif %}>Failed</option>
+                                {% for value, label in form.fields.status.choices %}
+                                <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
 
                         <div class="col-12">
                             <label for="id_description" class="form-label fw-semibold">Description / Notes</label>
-                            <textarea name="description" id="id_description" class="form-control" rows="3"
+                            <textarea name="description" id="id_description" class="form-control" rows="2"
                                       placeholder="Optional notes about this payment">{{ form.description.value|default:'' }}</textarea>
                             {% if form.description.errors %}
                             <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
@@ -107,4 +130,67 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var searchInput = document.getElementById('student_search');
+    var fallbackSelect = document.getElementById('id_student_fallback');
+    var hiddenSelect = document.getElementById('id_student');
+    var options = hiddenSelect.getElementsByTagName('option');
+    var optionMap = {};
+    for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        if (opt.value) {
+            optionMap[opt.value] = opt;
+        }
+    }
+
+    function filterOptions(query) {
+        var q = query.toLowerCase();
+        fallbackSelect.innerHTML = '<option value="">Select Student</option>';
+        hiddenSelect.innerHTML = '<option value="">Select Student</option>';
+        var found = 0;
+        for (var i = 1; i < options.length; i++) {
+            var opt = options[i];
+            var text = opt.getAttribute('data-search') || '';
+            if (text.indexOf(q) >= 0) {
+                var clone = opt.cloneNode(true);
+                fallbackSelect.appendChild(clone);
+                hiddenSelect.appendChild(opt.cloneNode(true));
+                found++;
+            }
+        }
+        if (searchInput.dataset.lastSelected && optionMap[searchInput.dataset.lastSelected]) {
+            fallbackSelect.value = searchInput.dataset.lastSelected;
+            hiddenSelect.value = searchInput.dataset.lastSelected;
+        }
+    }
+
+    searchInput.addEventListener('input', function() {
+        filterOptions(this.value);
+        fallbackSelect.style.display = '';
+        hiddenSelect.style.display = 'none';
+    });
+
+    searchInput.addEventListener('focus', function() {
+        if (this.value) filterOptions(this.value);
+    });
+
+    fallbackSelect.addEventListener('change', function() {
+        if (this.value) {
+            var selectedOpt = this.options[this.selectedIndex];
+            searchInput.value = selectedOpt ? selectedOpt.text : '';
+            searchInput.dataset.lastSelected = this.value;
+            hiddenSelect.value = this.value;
+        }
+    });
+
+    {% if form.student.value %}
+    hiddenSelect.value = '{{ form.student.value|stringformat:"s" }}';
+    fallbackSelect.value = '{{ form.student.value|stringformat:"s" }}';
+    {% endif %}
+})();
+</script>
 {% endblock %}

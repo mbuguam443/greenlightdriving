@@ -68,10 +68,23 @@ class PaymentCreateView(StaffTestMixin, CreateView):
     template_name = 'payments/payment_form.html'
     success_url = reverse_lazy('payments:list')
 
+    def get_initial(self):
+        initial = super().get_initial()
+        student_id = self.request.GET.get('student')
+        if student_id:
+            initial['student'] = student_id
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from students.models import Student
         context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        student_id = self.request.GET.get('student') or self.request.POST.get('student')
+        if student_id:
+            try:
+                context['selected_student'] = Student.objects.select_related('user').get(pk=student_id)
+            except (Student.DoesNotExist, ValueError):
+                pass
         return context
 
     def form_valid(self, form):
