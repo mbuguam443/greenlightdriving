@@ -70,21 +70,21 @@
                     <tr>
                         <td class="ps-3">
                             <a href="{% url 'vehicles:detail' vehicle.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
-                                {{ vehicle.reg_number }}
+                                {{ vehicle.registration_number }}
                             </a>
                         </td>
-                        <td>{{ vehicle.make }} {{ vehicle.model }}</td>
+                        <td>{{ vehicle.make }} {{ vehicle.model_name }}</td>
                         <td>
                             <span class="badge bg-light text-dark border">{{ vehicle.get_category_display }}</span>
                         </td>
                         <td>{{ vehicle.year }}</td>
                         <td>
-                            {% if vehicle.instructor %}
+                            {% if vehicle.assigned_instructor %}
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; background-color: rgba(46,125,50,0.1);">
                                         <i class="bi bi-person" style="color: #2E7D32;"></i>
                                     </div>
-                                    <span>{{ vehicle.instructor.user.get_full_name }}</span>
+                                    <span>{{ vehicle.assigned_instructor.user.full_name }}</span>
                                 </div>
                             {% else %}
                                 <span class="text-muted">Unassigned</span>
