@@ -56,6 +56,12 @@ class NTSARecordCreateView(StaffTestMixin, CreateView):
     template_name = 'ntsa/ntsa_form.html'
     success_url = reverse_lazy('ntsa:list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+        context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        return context
+
     def form_valid(self, form):
         messages.success(self.request, 'NTSA record created successfully.')
         return super().form_valid(form)
@@ -66,6 +72,12 @@ class NTSARecordUpdateView(StaffTestMixin, UpdateView):
     form_class = NTSARecordForm
     template_name = 'ntsa/ntsa_form.html'
     success_url = reverse_lazy('ntsa:list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+        context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, 'NTSA record updated successfully.')
