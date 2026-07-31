@@ -1,7 +1,11 @@
 # Green Light Driving School - cPanel Passenger .htaccess
-# Passenger handles all requests. Apache serves /static/ only.
 
 RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
 # /static/ — serve directly via Apache if file exists
 RewriteCond %{REQUEST_URI} ^/static/

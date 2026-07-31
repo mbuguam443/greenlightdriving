@@ -157,6 +157,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://greenlight-driving-defensive.schones-heim-builders.co.ke',
 ]
 
+# Force HTTPS
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Authentication URLs
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
