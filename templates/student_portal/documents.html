@@ -11,7 +11,7 @@
 {% block dashboard_content %}
 <div class="mb-4">
     <h4 class="mb-1">Study Materials & Resources</h4>
-    <p class="text-muted mb-0">Theory notes, diagrams, guides — view online or download for offline study</p>
+    <p class="text-muted mb-0">View theory notes, diagrams, and guides — read-only access</p>
 </div>
 
 <div class="d-flex flex-wrap gap-2 mb-4">
@@ -32,15 +32,30 @@
     <div class="col-lg-4 col-md-6">
         <div class="card border-0 shadow-sm h-100">
             {% if doc.file_extension in 'JPG JPEG PNG GIF' %}
-            <img src="{{ doc.file.url }}" alt="{{ doc.title }}" class="card-img-top" style="height:200px;object-fit:cover;cursor:pointer;"
+            <div style="position:relative;overflow:hidden;cursor:pointer;"
                  onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'image')">
+                <img src="{{ doc.file.url }}" alt="{{ doc.title }}" class="card-img-top"
+                     style="height:220px;object-fit:cover;transition:transform 0.3s;"
+                     oncontextmenu="return false;"
+                     onmouseover="this.style.transform='scale(1.05)'"
+                     onmouseout="this.style.transform='scale(1)'">
+                <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.6));padding:30px 12px 8px;">
+                    <span class="text-white small"><i class="bi bi-zoom-in me-1"></i>Click to view</span>
+                </div>
+            </div>
             {% elif doc.file_extension == 'PDF' %}
-            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:160px;background-color:#f1f8e9;">
-                <i class="bi bi-file-earmark-text" style="font-size:3rem;color:#2E7D32;opacity:0.4;"></i>
+            <div style="position:relative;height:180px;background:#f1f8e9;cursor:pointer;"
+                 onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'pdf')">
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center">
+                        <i class="bi bi-file-earmark-text" style="font-size:3.5rem;color:#2E7D32;opacity:0.3;"></i>
+                        <p class="mt-2 mb-0 fw-semibold" style="color:#2E7D32;">Click to Read</p>
+                    </div>
+                </div>
             </div>
             {% else %}
-            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:160px;background-color:#f1f8e9;">
-                <i class="bi bi-file-earmark" style="font-size:3rem;color:#2E7D32;opacity:0.4;"></i>
+            <div class="text-center py-5" style="background:#f1f8e9;">
+                <i class="bi bi-file-earmark" style="font-size:3rem;color:#2E7D32;opacity:0.3;"></i>
             </div>
             {% endif %}
 
@@ -48,30 +63,11 @@
                 <h6 class="fw-semibold mb-1">{{ doc.title }}</h6>
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">{{ doc.get_category_display }}</span>
-                    <small class="text-muted">{{ doc.file_extension }} &middot; {{ doc.file_size_display }}</small>
+                    <small class="text-muted">{{ doc.file_extension }}</small>
                 </div>
                 {% if doc.description %}
-                <p class="text-muted small mb-3 flex-grow-1">{{ doc.description|truncatewords:15 }}</p>
-                {% else %}
-                <div class="flex-grow-1"></div>
+                <p class="text-muted small mb-0">{{ doc.description|truncatewords:15 }}</p>
                 {% endif %}
-
-                <div class="d-flex gap-2">
-                    {% if doc.file_extension in 'JPG JPEG PNG GIF' %}
-                    <button onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'image')"
-                            class="btn btn-sm btn-outline-success flex-grow-1" style="border-radius:8px;">
-                        <i class="bi bi-eye me-1"></i>View
-                    </button>
-                    {% elif doc.file_extension == 'PDF' %}
-                    <button onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'pdf')"
-                            class="btn btn-sm btn-outline-success flex-grow-1" style="border-radius:8px;">
-                        <i class="bi bi-eye me-1"></i>View
-                    </button>
-                    {% endif %}
-                    <a href="{{ doc.file.url }}" download class="btn btn-sm text-white flex-grow-1" style="background-color: #2E7D32; border-radius:8px;">
-                        <i class="bi bi-download me-1"></i>Download
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -95,14 +91,17 @@
                 <h5 class="modal-title" id="viewerTitle"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-0" style="background:#1a1a1a;">
-                <iframe id="viewerFrame" style="width:100%;height:75vh;border:none;background:#fff;"></iframe>
-                <img id="viewerImage" style="width:100%;display:none;">
+            <div class="modal-body p-0 text-center" style="background:#f5f5f5;min-height:70vh;">
+                <iframe id="viewerFrame" style="width:100%;height:75vh;border:none;background:#fff;"
+                        sandbox="allow-scripts allow-same-origin"></iframe>
+                <img id="viewerImage" style="max-width:100%;max-height:75vh;display:none;object-fit:contain;"
+                     oncontextmenu="return false;">
+                <div id="viewerWatermark" style="display:none;position:absolute;bottom:0;left:0;right:0;background:rgba(46,125,50,0.08);padding:8px;text-align:center;">
+                    <small class="text-muted">Greenlight Defensive Driving School — Study Material</small>
+                </div>
             </div>
             <div class="modal-footer">
-                <a href="#" id="downloadLink" download class="btn btn-sm text-white" style="background-color:#2E7D32;">
-                    <i class="bi bi-download me-1"></i>Download
-                </a>
+                <small class="text-muted me-auto"><i class="bi bi-shield-lock me-1"></i>Read-only — download disabled</small>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -113,19 +112,39 @@
 {% block extra_js %}
 <script>
 function openViewer(url, title, type) {
+    var viewerFrame = document.getElementById('viewerFrame');
+    var viewerImage = document.getElementById('viewerImage');
+    var watermark = document.getElementById('viewerWatermark');
     document.getElementById('viewerTitle').textContent = title;
-    document.getElementById('downloadLink').href = url;
 
     if (type === 'pdf') {
-        document.getElementById('viewerFrame').style.display = '';
-        document.getElementById('viewerImage').style.display = 'none';
-        document.getElementById('viewerFrame').src = url + '#toolbar=0&navpanes=0';
+        viewerFrame.style.display = '';
+        viewerImage.style.display = 'none';
+        watermark.style.display = 'none';
+        viewerFrame.src = url + '#toolbar=0&navpanes=0&download=0';
     } else {
-        document.getElementById('viewerFrame').style.display = 'none';
-        document.getElementById('viewerImage').style.display = '';
-        document.getElementById('viewerImage').src = url;
+        viewerFrame.style.display = 'none';
+        viewerImage.style.display = '';
+        watermark.style.display = 'block';
+        viewerImage.src = url;
     }
     new bootstrap.Modal(document.getElementById('viewerModal')).show();
 }
+
+document.getElementById('viewerModal').addEventListener('hidden.bs.modal', function() {
+    document.getElementById('viewerFrame').src = '';
+    document.getElementById('viewerImage').src = '';
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'PrintScreen') {
+        e.preventDefault();
+        return false;
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        return false;
+    }
+});
 </script>
 {% endblock %}
