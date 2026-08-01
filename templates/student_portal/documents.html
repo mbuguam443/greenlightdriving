@@ -1,25 +1,27 @@
 {% extends "student_portal_base.html" %}
 {% load static %}
 
-{% block title %}Documents - Green Light School{% endblock %}
+{% block title %}Study Materials - Green Light School{% endblock %}
 
 {% block nav_portal_documents %}active{% endblock %}
 
-{% block page_title %}Documents{% endblock %}
-{% block breadcrumb_active %}Documents{% endblock %}
+{% block page_title %}Study Materials{% endblock %}
+{% block breadcrumb_active %}Study Materials{% endblock %}
 
 {% block dashboard_content %}
 <div class="mb-4">
-    <h4 class="mb-1">Documents</h4>
-    <p class="text-muted mb-0">Download forms, certificates, guidelines and other important documents</p>
+    <h4 class="mb-1">Study Materials & Resources</h4>
+    <p class="text-muted mb-0">Theory notes, diagrams, guides — view online or download for offline study</p>
 </div>
 
 <div class="d-flex flex-wrap gap-2 mb-4">
-    <a href="{% url 'student_portal:documents' %}" class="btn btn-sm {% if not current_category %}text-white{% else %}btn-outline-success{% endif %}" style="{% if not current_category %}background-color: #2E7D32;{% endif %} border-radius: 20px;">
+    <a href="{% url 'student_portal:documents' %}" class="btn btn-sm {% if not current_category %}text-white{% else %}btn-outline-success{% endif %}"
+       style="{% if not current_category %}background-color: #2E7D32;{% endif %} border-radius: 20px;">
         <i class="bi bi-folder2-open me-1"></i>All
     </a>
     {% for value, label in categories %}
-    <a href="?category={{ value }}" class="btn btn-sm {% if current_category == value %}text-white{% else %}btn-outline-success{% endif %}" style="{% if current_category == value %}background-color: #2E7D32;{% endif %} border-radius: 20px;">
+    <a href="?category={{ value }}" class="btn btn-sm {% if current_category == value %}text-white{% else %}btn-outline-success{% endif %}"
+       style="{% if current_category == value %}background-color: #2E7D32;{% endif %} border-radius: 20px;">
         {{ label }}
     </a>
     {% endfor %}
@@ -29,35 +31,47 @@
     {% for doc in documents %}
     <div class="col-lg-4 col-md-6">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-start mb-3">
-                    <div class="rounded d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background-color: rgba(46,125,50,0.1); flex-shrink: 0;">
-                        {% if doc.file_extension == 'PDF' %}
-                            <i class="bi bi-file-earmark-text fs-4" style="color: #2E7D32;"></i>
-                        {% elif doc.file_extension == 'DOC' or doc.file_extension == 'DOCX' %}
-                            <i class="bi bi-file-earmark-word fs-4" style="color: #2E7D32;"></i>
-                        {% elif doc.file_extension == 'XLS' or doc.file_extension == 'XLSX' %}
-                            <i class="bi bi-file-earmark-excel fs-4" style="color: #2E7D32;"></i>
-                        {% elif doc.file_extension == 'JPG' or doc.file_extension == 'JPEG' or doc.file_extension == 'PNG' %}
-                            <i class="bi bi-file-earmark-image fs-4" style="color: #2E7D32;"></i>
-                        {% else %}
-                            <i class="bi bi-file-earmark fs-4" style="color: #2E7D32;"></i>
-                        {% endif %}
-                    </div>
-                    <div class="flex-grow-1 min-width-0">
-                        <h6 class="mb-1 fw-semibold">{{ doc.title }}</h6>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">{{ doc.get_category_display }}</span>
-                            <small class="text-muted">{{ doc.file_extension }} &middot; {{ doc.file_size_display }}</small>
-                        </div>
-                    </div>
+            {% if doc.file_extension in 'JPG JPEG PNG GIF' %}
+            <img src="{{ doc.file.url }}" alt="{{ doc.title }}" class="card-img-top" style="height:200px;object-fit:cover;cursor:pointer;"
+                 onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'image')">
+            {% elif doc.file_extension == 'PDF' %}
+            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:160px;background-color:#f1f8e9;">
+                <i class="bi bi-file-earmark-text" style="font-size:3rem;color:#2E7D32;opacity:0.4;"></i>
+            </div>
+            {% else %}
+            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:160px;background-color:#f1f8e9;">
+                <i class="bi bi-file-earmark" style="font-size:3rem;color:#2E7D32;opacity:0.4;"></i>
+            </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+                <h6 class="fw-semibold mb-1">{{ doc.title }}</h6>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">{{ doc.get_category_display }}</span>
+                    <small class="text-muted">{{ doc.file_extension }} &middot; {{ doc.file_size_display }}</small>
                 </div>
                 {% if doc.description %}
-                <p class="text-muted small mb-3">{{ doc.description|truncatewords:20 }}</p>
+                <p class="text-muted small mb-3 flex-grow-1">{{ doc.description|truncatewords:15 }}</p>
+                {% else %}
+                <div class="flex-grow-1"></div>
                 {% endif %}
-                <a href="{{ doc.file.url }}" download class="btn btn-sm w-100 text-white" style="background-color: #2E7D32; border-radius: 8px;">
-                    <i class="bi bi-download me-1"></i>Download
-                </a>
+
+                <div class="d-flex gap-2">
+                    {% if doc.file_extension in 'JPG JPEG PNG GIF' %}
+                    <button onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'image')"
+                            class="btn btn-sm btn-outline-success flex-grow-1" style="border-radius:8px;">
+                        <i class="bi bi-eye me-1"></i>View
+                    </button>
+                    {% elif doc.file_extension == 'PDF' %}
+                    <button onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'pdf')"
+                            class="btn btn-sm btn-outline-success flex-grow-1" style="border-radius:8px;">
+                        <i class="bi bi-eye me-1"></i>View
+                    </button>
+                    {% endif %}
+                    <a href="{{ doc.file.url }}" download class="btn btn-sm text-white flex-grow-1" style="background-color: #2E7D32; border-radius:8px;">
+                        <i class="bi bi-download me-1"></i>Download
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -66,11 +80,52 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
                 <i class="bi bi-folder-x display-4 d-block mb-3" style="color: #ddd;"></i>
-                <h5 style="color: #999;">No Documents Available</h5>
-                <p class="text-muted mb-0">Documents will appear here once uploaded by administration.</p>
+                <h5 style="color: #999;">No Materials Available</h5>
+                <p class="text-muted mb-0">Study materials will appear here once uploaded by the administration.</p>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<div class="modal fade" id="viewerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewerTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="background:#1a1a1a;">
+                <iframe id="viewerFrame" style="width:100%;height:75vh;border:none;background:#fff;"></iframe>
+                <img id="viewerImage" style="width:100%;display:none;">
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadLink" download class="btn btn-sm text-white" style="background-color:#2E7D32;">
+                    <i class="bi bi-download me-1"></i>Download
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openViewer(url, title, type) {
+    document.getElementById('viewerTitle').textContent = title;
+    document.getElementById('downloadLink').href = url;
+
+    if (type === 'pdf') {
+        document.getElementById('viewerFrame').style.display = '';
+        document.getElementById('viewerImage').style.display = 'none';
+        document.getElementById('viewerFrame').src = url + '#toolbar=0&navpanes=0';
+    } else {
+        document.getElementById('viewerFrame').style.display = 'none';
+        document.getElementById('viewerImage').style.display = '';
+        document.getElementById('viewerImage').src = url;
+    }
+    new bootstrap.Modal(document.getElementById('viewerModal')).show();
+}
+</script>
 {% endblock %}

@@ -5,6 +5,7 @@ from django.utils import timezone
 class StudentDocument(models.Model):
     CATEGORY_CHOICES = [
         ('general', 'General'),
+        ('theory', 'Theory Materials'),
         ('forms', 'Forms'),
         ('certificates', 'Certificates'),
         ('guidelines', 'Guidelines'),
