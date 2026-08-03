@@ -27,13 +27,26 @@
     {% endfor %}
 </div>
 
+<script>
+var imageCollection = {};
+{% for doc in documents %}
+{% if doc.file_extension in 'JPG JPEG PNG GIF' %}
+imageCollection['{{ doc.file.url }}'] = {
+    title: '{{ doc.title|escapejs }}',
+    category: '{{ doc.get_category_display }}'
+};
+{% endif %}
+{% endfor %}
+var imageUrls = Object.keys(imageCollection);
+</script>
+
 <div class="row g-4">
     {% for doc in documents %}
     <div class="col-lg-4 col-md-6">
         <div class="card border-0 shadow-sm h-100">
             {% if doc.file_extension in 'JPG JPEG PNG GIF' %}
             <div style="position:relative;overflow:hidden;cursor:pointer;"
-                 onclick="openViewer('{{ doc.file.url }}', '{{ doc.title|escapejs }}', 'image')">
+                 onclick="openImageViewer('{{ doc.file.url }}')">
                 <img src="{{ doc.file.url }}" alt="{{ doc.title }}" class="card-img-top"
                      style="height:220px;object-fit:cover;transition:transform 0.3s;"
                      oncontextmenu="return false;"
@@ -84,6 +97,44 @@
     {% endfor %}
 </div>
 
+<div class="modal fade" id="imageViewerModal" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="background:#111;">
+            <div class="modal-header border-0" style="background:rgba(0,0,0,0.5);position:absolute;top:0;left:0;right:0;z-index:10;">
+                <span id="imageCounter" class="text-white small"></span>
+                <div class="d-flex gap-2 ms-auto">
+                    <button class="btn btn-sm text-white" onclick="prevImage()" title="Previous">
+                        <i class="bi bi-chevron-left fs-5"></i>
+                    </button>
+                    <button class="btn btn-sm text-white" onclick="nextImage()" title="Next">
+                        <i class="bi bi-chevron-right fs-5"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm text-white" data-bs-dismiss="modal" title="Close">
+                        <i class="bi bi-x-lg fs-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center" style="height:100vh;"
+                 onclick="nextImage()">
+                <div style="position:absolute;top:50%;left:20px;transform:translateY(-50%);z-index:10;"
+                     onclick="event.stopPropagation();prevImage()">
+                    <button class="btn btn-dark btn-lg opacity-50" style="border-radius:50%;">
+                        <i class="bi bi-chevron-left fs-3"></i>
+                    </button>
+                </div>
+                <div style="position:absolute;top:50%;right:20px;transform:translateY(-50%);z-index:10;"
+                     onclick="event.stopPropagation();nextImage()">
+                    <button class="btn btn-dark btn-lg opacity-50" style="border-radius:50%;">
+                        <i class="bi bi-chevron-right fs-3"></i>
+                    </button>
+                </div>
+                <img id="fullscreenImage" style="max-width:100%;max-height:100vh;object-fit:contain;"
+                     oncontextmenu="return false;">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="viewerModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -94,14 +145,9 @@
             <div class="modal-body p-0 text-center" style="background:#f5f5f5;min-height:70vh;">
                 <iframe id="viewerFrame" style="width:100%;height:75vh;border:none;background:#fff;"
                         sandbox="allow-scripts allow-same-origin"></iframe>
-                <img id="viewerImage" style="max-width:100%;max-height:75vh;display:none;object-fit:contain;"
-                     oncontextmenu="return false;">
-                <div id="viewerWatermark" style="display:none;position:absolute;bottom:0;left:0;right:0;background:rgba(46,125,50,0.08);padding:8px;text-align:center;">
-                    <small class="text-muted">Greenlight Defensive Driving School — Study Material</small>
-                </div>
             </div>
             <div class="modal-footer">
-                <small class="text-muted me-auto"><i class="bi bi-shield-lock me-1"></i>Read-only — download disabled</small>
+                <small class="text-muted me-auto"><i class="bi bi-shield-lock me-1"></i>Read-only</small>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -111,39 +157,55 @@
 
 {% block extra_js %}
 <script>
+var currentImageIndex = -1;
+
+function openImageViewer(url) {
+    currentImageIndex = imageUrls.indexOf(url);
+    showCurrentImage();
+    new bootstrap.Modal(document.getElementById('imageViewerModal')).show();
+}
+
+function showCurrentImage() {
+    if (currentImageIndex < 0 || currentImageIndex >= imageUrls.length) return;
+    var url = imageUrls[currentImageIndex];
+    var info = imageCollection[url];
+    document.getElementById('fullscreenImage').src = url;
+    document.getElementById('imageCounter').textContent = 'Image ' + (currentImageIndex + 1) + ' of ' + imageUrls.length;
+}
+
+function nextImage() {
+    if (imageUrls.length === 0) return;
+    currentImageIndex = (currentImageIndex + 1) % imageUrls.length;
+    showCurrentImage();
+}
+
+function prevImage() {
+    if (imageUrls.length === 0) return;
+    currentImageIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+    showCurrentImage();
+}
+
 function openViewer(url, title, type) {
     var viewerFrame = document.getElementById('viewerFrame');
-    var viewerImage = document.getElementById('viewerImage');
-    var watermark = document.getElementById('viewerWatermark');
     document.getElementById('viewerTitle').textContent = title;
-
-    if (type === 'pdf') {
-        viewerFrame.style.display = '';
-        viewerImage.style.display = 'none';
-        watermark.style.display = 'none';
-        viewerFrame.src = url + '#toolbar=0&navpanes=0&download=0';
-    } else {
-        viewerFrame.style.display = 'none';
-        viewerImage.style.display = '';
-        watermark.style.display = 'block';
-        viewerImage.src = url;
-    }
+    viewerFrame.style.display = '';
+    viewerFrame.src = url + '#toolbar=0&navpanes=0&download=0';
     new bootstrap.Modal(document.getElementById('viewerModal')).show();
 }
 
 document.getElementById('viewerModal').addEventListener('hidden.bs.modal', function() {
     document.getElementById('viewerFrame').src = '';
-    document.getElementById('viewerImage').src = '';
 });
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'PrintScreen') {
-        e.preventDefault();
-        return false;
-    }
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        return false;
+    if (e.key === 'PrintScreen') { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); return false; }
+
+    var imgModal = document.getElementById('imageViewerModal');
+    if (imgModal && imgModal.classList.contains('show')) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { nextImage(); e.preventDefault(); }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { prevImage(); e.preventDefault(); }
+        if (e.key === 'Escape') { bootstrap.Modal.getInstance(imgModal).hide(); }
     }
 });
 </script>
