@@ -1,7 +1,7 @@
 {% extends "dashboard_base.html" %}
 {% load static %}
 
-{% block title %}{% if form.instance.pk %}Edit Document{% else %}Add Document{% endif %} - Green Light School{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Document{% else %}Add Documents{% endif %} - Green Light School{% endblock %}
 
 {% block page_title %}
 <nav aria-label="breadcrumb">
@@ -10,7 +10,7 @@
         <li class="breadcrumb-item active">{% if form.instance.pk %}Edit{% else %}Add{% endif %}</li>
     </ol>
 </nav>
-<h1 class="h3 mb-0">{% if form.instance.pk %}Edit Document{% else %}Add Document{% endif %}</h1>
+<h1 class="h3 mb-0">{% if form.instance.pk %}Edit Document{% else %}Upload Study Materials{% endif %}</h1>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -18,7 +18,7 @@
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-                <form method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
                     {% csrf_token %}
 
                     {% if form.errors %}
@@ -33,13 +33,18 @@
                     {% endif %}
 
                     <div class="mb-3">
-                        <label for="id_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
-                        <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" required placeholder="e.g. Student Registration Form">
+                        <label for="id_title" class="form-label fw-semibold">
+                            Title <span class="text-danger">*</span>
+                            <small class="text-muted fw-normal">(shared across all files uploaded together)</small>
+                        </label>
+                        <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" required
+                               placeholder="e.g. Road Signs, Theory Board Lanes, First Aid">
                     </div>
 
                     <div class="mb-3">
                         <label for="id_description" class="form-label fw-semibold">Description</label>
-                        <textarea name="description" id="id_description" class="form-control" rows="3" placeholder="Brief description of the document">{{ form.description.value|default:'' }}</textarea>
+                        <textarea name="description" id="id_description" class="form-control" rows="2"
+                                  placeholder="Brief description or instructions">{{ form.description.value|default:'' }}</textarea>
                     </div>
 
                     <div class="row g-3 mb-3">
@@ -47,16 +52,19 @@
                             <label for="id_category" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
                             <select name="category" id="id_category" class="form-select" required>
                                 <option value="">Select category</option>
-                                <option value="general" {% if form.category.value == 'general' %}selected{% endif %}>General</option>
-                                <option value="forms" {% if form.category.value == 'forms' %}selected{% endif %}>Forms</option>
-                                <option value="certificates" {% if form.category.value == 'certificates' %}selected{% endif %}>Certificates</option>
-                                <option value="guidelines" {% if form.category.value == 'guidelines' %}selected{% endif %}>Guidelines</option>
-                                <option value="ntsa" {% if form.category.value == 'ntsa' %}selected{% endif %}>NTSA Documents</option>
+                                {% for value, label in categories %}
+                                <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="id_file" class="form-label fw-semibold">File <span class="text-danger">*</span></label>
-                            <input type="file" name="file" id="id_file" class="form-control" {% if not form.instance.pk %}required{% endif %}>
+                            <label for="id_files" class="form-label fw-semibold">
+                                Files <span class="text-danger">*</span>
+                                <small class="text-muted fw-normal">(select multiple images or PDFs)</small>
+                            </label>
+                            <input type="file" name="files" id="id_files" class="form-control" multiple accept="image/*,.pdf"
+                                   {% if not form.instance.pk %}required{% endif %}>
+                            <div id="filePreview" class="mt-2 d-flex flex-wrap gap-2"></div>
                             {% if form.instance.pk and form.instance.file %}
                             <div class="form-text">
                                 <i class="bi bi-file-earmark me-1"></i>Current: {{ form.instance.file.name|truncatechars:40 }}
@@ -76,8 +84,10 @@
                         <a href="{% url 'student_portal:manage_documents' %}" class="btn btn-light px-4">
                             <i class="bi bi-x-circle me-1"></i>Cancel
                         </a>
-                        <button type="submit" class="btn text-white px-4" style="background-color: #2E7D32;">
-                            <i class="bi bi-check-circle me-1"></i>{% if form.instance.pk %}Update{% else %}Upload{% endif %} Document
+                        <button type="submit" class="btn text-white px-4" style="background-color: #2E7D32;" id="submitBtn">
+                            <i class="bi bi-cloud-upload me-1"></i>
+                            <span id="submitText">{% if form.instance.pk %}Update{% else %}Upload{% endif %}</span>
+                            <span id="submitCount" class="ms-1 small opacity-75"></span>
                         </button>
                     </div>
                 </form>
@@ -85,4 +95,30 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var fileInput = document.getElementById('id_files');
+if (fileInput) {
+    fileInput.addEventListener('change', function() {
+        var preview = document.getElementById('filePreview');
+        var count = document.getElementById('submitCount');
+        var count = document.getElementById('submitCount');
+        preview.innerHTML = '';
+        if (this.files.length > 0) {
+            count.textContent = '(' + this.files.length + ' file' + (this.files.length > 1 ? 's' : '') + ')';
+            Array.from(this.files).forEach(function(f) {
+                var isImg = f.type.startsWith('image/');
+                var badge = document.createElement('span');
+                badge.className = 'badge bg-light text-dark border small';
+                badge.innerHTML = (isImg ? '<i class="bi bi-file-image me-1"></i>' : '<i class="bi bi-file-pdf me-1"></i>') + f.name;
+                preview.appendChild(badge);
+            });
+        } else {
+            count.textContent = '';
+        }
+    });
+}
+</script>
 {% endblock %}

@@ -222,6 +222,44 @@ class DocCreateView(StaffMixin, CreateView):
         from .models import StudentDocument
         self.model = StudentDocument
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from .models import StudentDocument
+        context['categories'] = StudentDocument.CATEGORY_CHOICES
+        return context
+
+    def post(self, request, *args, **kwargs):
+        from .models import StudentDocument
+        from django.contrib import messages
+
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        category = request.POST.get('category', 'theory')
+        is_active = request.POST.get('is_active') == 'on'
+        files = request.FILES.getlist('files')
+
+        if not title:
+            messages.error(request, 'Title is required.')
+            return self.form_invalid(self.get_form())
+
+        if not files:
+            messages.error(request, 'At least one file is required.')
+            return self.form_invalid(self.get_form())
+
+        created = 0
+        for f in files:
+            StudentDocument.objects.create(
+                title=title if len(files) == 1 else f"{title} - {f.name}",
+                description=description,
+                file=f,
+                category=category,
+                is_active=is_active,
+            )
+            created += 1
+
+        messages.success(request, f'{created} document(s) uploaded successfully.')
+        return redirect(self.success_url)
+
 
 class DocUpdateView(StaffMixin, UpdateView):
     from .models import StudentDocument
