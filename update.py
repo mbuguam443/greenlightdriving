@@ -220,6 +220,16 @@ try:
 except Exception:
     print("      Could not check seed status.")
 
+# 7. Seed study materials
+print("\n[7/6] Seeding study materials...")
+material_script = os.path.join(project_dir, 'seed_materials.py')
+if os.path.isfile(material_script):
+    import subprocess as sp
+    sp.run([sys.executable, material_script], cwd=project_dir)
+    print("      Done!")
+else:
+    print("      seed_materials.py not found")
+
 print("\n" + "=" * 50)
 print("  UPDATE COMPLETE!")
 print("=" * 50)
