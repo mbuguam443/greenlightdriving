@@ -58,6 +58,23 @@
                             </select>
                         </div>
                         <div class="col-md-6">
+                            <label for="id_student" class="form-label fw-semibold">
+                                Assign to Student
+                                <small class="text-muted fw-normal">(leave blank for all students)</small>
+                            </label>
+                            <select name="student" id="id_student" class="form-select">
+                                <option value="">All Students (Public)</option>
+                                {% for s in all_students %}
+                                <option value="{{ s.pk }}" {% if form.student.value|stringformat:"s" == s.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ s.user.full_name }} ({{ s.student_number }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
                             <label for="id_files" class="form-label fw-semibold">
                                 Files <span class="text-danger">*</span>
                                 <small class="text-muted fw-normal">(select multiple images or PDFs)</small>

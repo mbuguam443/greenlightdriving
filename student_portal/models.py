@@ -16,6 +16,8 @@ class StudentDocument(models.Model):
     description = models.TextField(blank=True)
     file = models.FileField(upload_to='student_documents/')
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='general')
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, null=True, blank=True,
+                                help_text='Leave blank for all students; select one for private document')
     is_active = models.BooleanField(default=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

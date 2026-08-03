@@ -165,8 +165,14 @@ class PortalProfileView(StudentRequiredMixin, View):
 class PortalDocumentsView(StudentRequiredMixin, View):
     def get(self, request):
         from .models import StudentDocument
+        from students.models import Student
+        from django.db.models import Q
+
         category = request.GET.get('category', '')
-        docs = StudentDocument.objects.filter(is_active=True)
+        student = Student.objects.filter(user=request.user).first()
+        docs = StudentDocument.objects.filter(is_active=True).filter(
+            Q(student__isnull=True) | Q(student=student)
+        )
         if category:
             docs = docs.filter(category=category)
         categories = StudentDocument.CATEGORY_CHOICES
@@ -225,7 +231,9 @@ class DocCreateView(StaffMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from .models import StudentDocument
+        from students.models import Student
         context['categories'] = StudentDocument.CATEGORY_CHOICES
+        context['all_students'] = Student.objects.select_related('user').all()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -236,6 +244,7 @@ class DocCreateView(StaffMixin, CreateView):
         description = request.POST.get('description', '').strip()
         category = request.POST.get('category', 'theory')
         is_active = request.POST.get('is_active') == 'on'
+        student_id = request.POST.get('student') or None
         files = request.FILES.getlist('files')
 
         if not title:
@@ -253,6 +262,7 @@ class DocCreateView(StaffMixin, CreateView):
                 description=description,
                 file=f,
                 category=category,
+                student_id=student_id,
                 is_active=is_active,
             )
             created += 1
