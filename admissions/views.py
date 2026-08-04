@@ -129,6 +129,8 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         from django.utils import timezone
         from datetime import timedelta, date
         from lessons.models import PracticalLesson, TheoryLesson, LessonItem
+        from instructors.models import Instructor
+        from vehicles.models import Vehicle
 
         from accounts.models import User
         user = User.objects.filter(email=admission.email).first()
@@ -150,6 +152,10 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             messages.warning(self.request, f'Student profile already exists for {user.email}.')
             return
 
+        # Assign first available instructor and vehicle
+        instructor = Instructor.objects.filter(is_active=True).first()
+        vehicle = Vehicle.objects.filter(is_available=True).first()
+
         student = Student(
             user=user,
             admission=admission,
@@ -157,6 +163,8 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             course=admission.course,
             package_choice=admission.package_choice,
             branch=admission.branch,
+            instructor=instructor,
+            vehicle=vehicle,
             status='ACTIVE',
             expected_graduation=timezone.now().date() + timedelta(days=90),
         )
@@ -171,24 +179,28 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             'FULL': LessonItem.objects.filter(is_active=True),
         }
         lesson_items = package_lesson_map.get(admission.package_choice, [])
-        today = date.today()
+        lesson_date = date.today() + timedelta(days=1)
         created_count = 0
         for item in lesson_items:
             if item.lesson_type == 'PRACTICAL':
                 if not PracticalLesson.objects.filter(student=student, lesson_item=item).exists():
                     PracticalLesson.objects.create(
-                        student=student, lesson_item=item, date=today, status='NOT_STARTED',
+                        student=student, lesson_item=item, instructor=instructor,
+                        vehicle=vehicle, date=lesson_date, status='NOT_STARTED',
                     )
+                    lesson_date += timedelta(days=2)
                     created_count += 1
-            else:
+            elif item.lesson_type == 'THEORY':
                 if not TheoryLesson.objects.filter(student=student, lesson_item=item).exists():
                     TheoryLesson.objects.create(
                         student=student, lesson_item=item, topic=item.name,
-                        date=today, time_start='08:00', time_end='09:00', status='NOT_STARTED',
+                        instructor=instructor, date=lesson_date,
+                        time_start='08:00', time_end='09:00', status='NOT_STARTED',
                     )
+                    lesson_date += timedelta(days=1)
                     created_count += 1
         if created_count:
-            messages.success(self.request, f'{created_count} lesson records auto-created.')
+            messages.success(self.request, f'{created_count} lessons auto-created with instructor & vehicle.')
 
 
 class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):

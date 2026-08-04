@@ -4,6 +4,8 @@ from django.views import View
 from django.views.generic import ListView, CreateView
 from django.urls import reverse_lazy
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
 from .models import PracticalLesson, TheoryLesson, LessonItem
 from .forms import PracticalLessonForm, TheoryLessonForm
 
@@ -92,6 +94,19 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
         context['lesson_items'] = LessonItem.objects.filter(is_active=True)
         return context
 
+    def get_initial(self):
+        initial = super().get_initial()
+        from students.models import Student
+        student_id = self.request.GET.get('student')
+        if student_id:
+            student = Student.objects.filter(pk=student_id).first()
+            if student:
+                initial['student'] = student.pk
+                initial['instructor'] = student.instructor_id
+                initial['vehicle'] = student.vehicle_id
+                initial['date'] = timezone.now().date() + timedelta(days=1)
+        return initial
+
     def form_valid(self, form):
         from django.contrib import messages
         messages.success(self.request, 'Lesson scheduled successfully.')
@@ -111,3 +126,15 @@ class TheoryLessonCreateView(StaffTestMixin, CreateView):
         context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
         context['instructors'] = Instructor.objects.select_related('user')
         return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        from students.models import Student
+        student_id = self.request.GET.get('student')
+        if student_id:
+            student = Student.objects.filter(pk=student_id).first()
+            if student:
+                initial['student'] = student.pk
+                initial['instructor'] = student.instructor_id
+                initial['date'] = timezone.now().date() + timedelta(days=1)
+        return initial
