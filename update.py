@@ -222,7 +222,44 @@ if os.path.isfile(seed_script):
 else:
     print("      seed.py not found")
 
-# 8. Seed study materials
+# 8. Setup Simon Mureithi as instructor
+print("\n[7/6] Setting up Simon Mureithi as instructor...")
+try:
+    from instructors.models import Instructor
+    from accounts.models import User
+
+    Instructor.objects.all().delete()
+    print("      Cleared all existing instructors")
+
+    simon_user, created = User.objects.get_or_create(
+        username='simon@greenlight.com',
+        defaults={
+            'email': 'simon@greenlight.com',
+            'first_name': 'Simon',
+            'last_name': 'Mureithi',
+            'role': 'INSTRUCTOR',
+        }
+    )
+    if created:
+        simon_user.set_password('simon123')
+        simon_user.save()
+        print(f"      Created user: simon@greenlight.com / simon123")
+
+    Instructor.objects.update_or_create(
+        user=simon_user,
+        defaults={
+            'license_number': 'INS-SM001',
+            'license_class': 'ALL',
+            'experience_years': 10,
+            'phone': '+254 700 000 000',
+            'is_active': True,
+        }
+    )
+    print("      Simon Mureithi set as instructor")
+except Exception as e:
+    print(f"      Error: {e}")
+
+# 9. Seed study materials
 print("\n[7/6] Seeding study materials...")
 material_script = os.path.join(project_dir, 'seed_materials.py')
 if os.path.isfile(material_script):
