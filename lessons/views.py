@@ -156,7 +156,13 @@ class PracticalLessonUpdateView(StaffTestMixin, UpdateView):
         context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
         context['instructors'] = Instructor.objects.select_related('user')
         context['vehicles'] = Vehicle.objects.filter(is_available=True)
-        context['lesson_items'] = LessonItem.objects.filter(is_active=True)
+
+        lesson_items = LessonItem.objects.filter(is_active=True)
+        student_id = self.request.GET.get('student') or (self.request.POST.get('student') if self.request.method == 'POST' else None)
+        if student_id:
+            existing = PracticalLesson.objects.filter(student_id=student_id).values_list('lesson_item_id', flat=True)
+            lesson_items = lesson_items.exclude(id__in=existing)
+        context['lesson_items'] = lesson_items
         return context
 
     def form_valid(self, form):
