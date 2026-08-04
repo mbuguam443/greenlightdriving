@@ -106,7 +106,7 @@ class ReceiptView(StaffTestMixin, View):
             payment=payment,
             defaults={'receipt_number': payment.receipt_number, 'issued_by': request.user}
         )
-        return render(request, 'payments/receipt.html', {'payment': payment, 'receipt': receipt})
+        return render(request, 'payments/receipt_standalone.html', {'payment': payment})
 
 
 # ==================== M-PESA STAFF VIEWS ====================

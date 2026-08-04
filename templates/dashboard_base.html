@@ -145,6 +145,7 @@
             <div class="sb-section">Reports & Settings</div>
             <ul class="sb-nav">
                 <li><a class="{% block nav_reports %}{% endblock %}" href="{% url 'reports:index' %}"><i class="bi bi-bar-chart"></i><span>Reports</span></a></li>
+                <li><a href="{% url 'reports:backup' %}"><i class="bi bi-download"></i><span>Backup Database</span></a></li>
                 <li><a class="{% block nav_branches %}{% endblock %}" href="{% url 'core:branch_list' %}"><i class="bi bi-building"></i><span>Branches</span></a></li>
                 <li><a class="{% block nav_settings %}{% endblock %}" href="{% url 'accounts:profile' %}"><i class="bi bi-gear"></i><span>Settings</span></a></li>
                 {% if user.role == 'SUPER_ADMIN' or user.role == 'MANAGER' %}

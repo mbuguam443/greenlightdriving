@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from django.views import View
 from django.db.models import Sum, Count, Q
 from datetime import date, timedelta
@@ -177,3 +178,22 @@ class StudentProgressReportView(StaffTestMixin, View):
             'students': students,
         }
         return render(request, 'reports/student_progress.html', context)
+
+
+
+class BackupView(StaffTestMixin, View):
+    def get(self, request):
+        from django.core.management import call_command
+        from django.http import HttpResponse
+        import io
+        import gzip
+        from datetime import datetime
+
+        buf = io.StringIO()
+        call_command('dumpdata', '--exclude', 'auth.permission', '--exclude', 'contenttypes',
+                     '--exclude', 'admin.logentry', '--exclude', 'sessions.session',
+                     stdout=buf)
+        response = HttpResponse(buf.getvalue(), content_type='application/json')
+        response['Content-Disposition'] = f'attachment; filename="greenlight_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+        messages.success(request, 'Backup downloaded successfully.')
+        return response
