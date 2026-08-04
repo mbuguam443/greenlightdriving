@@ -185,14 +185,18 @@
                     </div>
                     <div class="mt-4">
                         <h6 class="mb-3" style="font-weight:700;color:var(--primary-green);">Available Packages</h6>
+                        {% if course.full_course_price > 0 %}
                         <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color:#f0f0f0!important;">
                             <span style="font-size:0.9rem;">Full Course</span>
                             <span style="font-weight:700;color:var(--primary-green);">KES {{ course.full_course_price|floatformat:0 }}</span>
                         </div>
+                        {% endif %}
+                        {% if course.half_course_price > 0 %}
                         <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color:#f0f0f0!important;">
                             <span style="font-size:0.9rem;">Half Course</span>
                             <span style="font-weight:700;color:var(--primary-green);">KES {{ course.half_course_price|floatformat:0 }}</span>
                         </div>
+                        {% endif %}
                         <div class="d-flex justify-content-between align-items-center py-2">
                             <span style="font-size:0.9rem;">Test Only</span>
                             <span style="font-weight:700;color:var(--primary-green);">KES {{ course.test_only_price|floatformat:0 }}</span>

@@ -341,14 +341,18 @@
                     </div>
                     <div class="pricing-card-body">
                         <ul class="list-unstyled mb-3" style="font-size:0.9rem;">
+                            {% if course.full_course_price > 0 %}
                             <li class="d-flex justify-content-between py-2 border-bottom">
                                 <span>Full Course</span>
                                 <strong style="color:var(--primary-green);">KES {{ course.full_course_price|floatformat:0 }}</strong>
                             </li>
+                            {% endif %}
+                            {% if course.half_course_price > 0 %}
                             <li class="d-flex justify-content-between py-2 border-bottom">
                                 <span>Half Course</span>
                                 <strong style="color:var(--primary-green);">KES {{ course.half_course_price|floatformat:0 }}</strong>
                             </li>
+                            {% endif %}
                             <li class="d-flex justify-content-between py-2">
                                 <span>Test Only</span>
                                 <strong style="color:var(--primary-green);">KES {{ course.test_only_price|floatformat:0 }}</strong>
@@ -420,8 +424,8 @@
                         <td><strong>{{ course.name }}</strong></td>
                         <td><span class="category-pill">{{ course.category.name }}</span></td>
                         <td><i class="bi bi-clock me-1 text-muted"></i>{{ course.duration }}</td>
-                        <td class="price-cell">KES {{ course.full_course_price|floatformat:0 }}</td>
-                        <td class="price-cell">KES {{ course.half_course_price|floatformat:0 }}</td>
+                        <td class="price-cell">{% if course.full_course_price > 0 %}KES {{ course.full_course_price|floatformat:0 }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        <td class="price-cell">{% if course.half_course_price > 0 %}KES {{ course.half_course_price|floatformat:0 }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
                         <td class="price-cell">KES {{ course.test_only_price|floatformat:0 }}</td>
                         <td class="text-center">
                             <a href="{% url 'website:course_detail' course.slug %}" class="detail-link">

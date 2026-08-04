@@ -212,18 +212,17 @@ if os.path.isfile(passenger_file):
 else:
     print("      passenger_wsgi.py not found — skipping restart")
 
-# 7. Seed check
-print("\n[6/6] Checking if seed data needed...")
-try:
-    from website.models import Course
-    if Course.objects.count() == 0:
-        print("      Courses not found. Run python seed.py to seed data.")
-    else:
-        print(f"      {Course.objects.count()} course(s) already exist — skipping seed.")
-except Exception:
-    print("      Could not check seed status.")
+# 7. Seed course data
+print("\n[6/6] Updating course pricing & categories...")
+seed_script = os.path.join(project_dir, 'seed.py')
+if os.path.isfile(seed_script):
+    import subprocess as sp
+    sp.run([sys.executable, seed_script], cwd=project_dir)
+    print("      Done!")
+else:
+    print("      seed.py not found")
 
-# 7. Seed study materials
+# 8. Seed study materials
 print("\n[7/6] Seeding study materials...")
 material_script = os.path.join(project_dir, 'seed_materials.py')
 if os.path.isfile(material_script):

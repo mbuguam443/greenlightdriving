@@ -34,32 +34,42 @@ print("\n[2/7] Courses...")
 from website.models import CourseCategory, Course, FAQ
 
 categories_data = [
-    {'name': 'A1', 'slug': 'a1', 'description': 'Motorcycle', 'order': 1},
-    {'name': 'A2', 'slug': 'a2', 'description': 'Motorcycle Advanced', 'order': 2},
-    {'name': 'B1', 'slug': 'b1', 'description': 'Saloon Cars', 'order': 3},
-    {'name': 'B2', 'slug': 'b2', 'description': 'SUVs and Vans', 'order': 4},
-    {'name': 'C1', 'slug': 'c1', 'description': 'Light Commercial', 'order': 5},
-    {'name': 'C2', 'slug': 'c2', 'description': 'Heavy Commercial', 'order': 6},
-    {'name': 'D1', 'slug': 'd1', 'description': 'Light PSV', 'order': 7},
-    {'name': 'D2', 'slug': 'd2', 'description': 'Heavy PSV', 'order': 8},
-    {'name': 'CE', 'slug': 'ce', 'description': 'Articulated Vehicles', 'order': 9},
-    {'name': 'F', 'slug': 'f', 'description': 'Special Vehicles', 'order': 10},
-    {'name': 'G', 'slug': 'g', 'description': 'Earth Moving Equipment', 'order': 11},
+    {'name': 'A1', 'slug': 'a1', 'description': 'Motorcycle (A1)', 'order': 1},
+    {'name': 'A2', 'slug': 'a2', 'description': 'Motorcycle (A2)', 'order': 2},
+    {'name': 'A3', 'slug': 'a3', 'description': 'Tuk-tuk / Three-wheeler', 'order': 3},
+    {'name': 'B1', 'slug': 'b1', 'description': 'Saloon Car (B1)', 'order': 4},
+    {'name': 'B2', 'slug': 'b2', 'description': 'Light Vehicle (B2)', 'order': 5},
+    {'name': 'C1', 'slug': 'c1', 'description': 'Light Truck (C1)', 'order': 6},
+    {'name': 'C2', 'slug': 'c2', 'description': 'Medium Truck (C2)', 'order': 7},
+    {'name': 'D', 'slug': 'd', 'description': 'Minibus / Bus (D1 & D2)', 'order': 8},
+    {'name': 'CE', 'slug': 'ce', 'description': 'Trailer Truck (CE)', 'order': 9},
+    {'name': 'Combined', 'slug': 'combined', 'description': 'Combined B Light / C1', 'order': 10},
 ]
 for c in categories_data:
-    CourseCategory.objects.get_or_create(slug=c['slug'], defaults=c)
+    CourseCategory.objects.update_or_create(slug=c['slug'], defaults=c)
 print(f"      {CourseCategory.objects.count()} categories ready")
 
 courses_data = [
-    {'cat_slug': 'b1', 'name': 'Basic Driving Course', 'slug': 'basic-driving', 'description': 'Comprehensive driving course for beginners covering all road rules and practical skills.', 'short_description': 'Perfect for first-time drivers', 'duration': '4 Weeks', 'full_course_price': 25000, 'half_course_price': 15000, 'test_only_price': 5000, 'features': 'Road rules theory\nPractical driving lessons\nDefensive driving\nHighway driving'},
-    {'cat_slug': 'b1', 'name': 'Intensive Driving Course', 'slug': 'intensive-driving', 'description': 'Fast-track driving course for those who want to learn quickly.', 'short_description': 'Learn to drive in 2 weeks', 'duration': '2 Weeks', 'full_course_price': 35000, 'half_course_price': 20000, 'test_only_price': 7000, 'features': 'Daily driving sessions\nTheory included\nMock NTSA test\nCertificate'},
-    {'cat_slug': 'b2', 'name': 'SUV & Van Training', 'slug': 'suv-van-training', 'description': 'Specialized training for larger vehicles.', 'short_description': 'Handle bigger vehicles with confidence', 'duration': '3 Weeks', 'full_course_price': 30000, 'half_course_price': 18000, 'test_only_price': 6000, 'features': 'Vehicle handling\nParking maneuvers\nOff-road basics'},
-    {'cat_slug': 'a1', 'name': 'Motorcycle Basic', 'slug': 'motorcycle-basic', 'description': 'Basic motorcycle riding course.', 'short_description': 'Get your motorcycle license', 'duration': '2 Weeks', 'full_course_price': 15000, 'half_course_price': 9000, 'test_only_price': 3000, 'features': 'Balance and control\nTraffic navigation\nSafety gear usage'},
-    {'cat_slug': 'c1', 'name': 'Commercial Driving', 'slug': 'commercial-driving', 'description': 'Commercial vehicle driving for logistics and delivery.', 'short_description': 'Drive for business', 'duration': '6 Weeks', 'full_course_price': 45000, 'half_course_price': 27000, 'test_only_price': 10000, 'features': 'Commercial regulations\nLoad management\nRoute planning'},
+    # A-category
+    {'cat_slug': 'a1', 'name': 'A1 – Motorcycle', 'slug': 'a1-motorcycle', 'description': 'Motorcycle riding course for beginners. Learn balance, control, traffic navigation, and safety gear usage.', 'short_description': '18 years & above', 'duration': 'Training Period', 'full_course_price': 8500, 'half_course_price': 7000, 'test_only_price': 5000, 'features': 'Balance and control\nTraffic navigation\nSafety gear usage\nNTSA test prep'},
+    {'cat_slug': 'a2', 'name': 'A2 – Motorcycle Advanced', 'slug': 'a2-motorcycle', 'description': 'Advanced motorcycle riding for experienced riders.', 'short_description': '18 years & above', 'duration': 'Training Period', 'full_course_price': 8500, 'half_course_price': 7000, 'test_only_price': 5000, 'features': 'Advanced control\nHighway riding\nDefensive techniques\nNTSA test prep'},
+    {'cat_slug': 'a3', 'name': 'A3 – Tuk-tuk', 'slug': 'a3-tuktuk', 'description': 'Three-wheeler (Tuk-tuk) driving course.', 'short_description': '18 years & above', 'duration': 'Training Period', 'full_course_price': 8500, 'half_course_price': 7000, 'test_only_price': 5000, 'features': 'Vehicle handling\nPassenger safety\nTraffic navigation\nNTSA test prep'},
+    # B-category
+    {'cat_slug': 'b1', 'name': 'B1 – Saloon Car', 'slug': 'b1-saloon', 'description': 'Comprehensive saloon car driving course for beginners covering all road rules and practical skills.', 'short_description': '18 years & above', 'duration': 'Training Period', 'full_course_price': 12800, 'half_course_price': 9500, 'test_only_price': 6500, 'features': 'Road rules theory\nPractical driving\nModel town board\nDefensive driving\nHighway driving\nNTSA test prep'},
+    {'cat_slug': 'b2', 'name': 'B2 – Light Vehicle', 'slug': 'b2-light', 'description': 'Light vehicle driving including SUVs and vans.', 'short_description': '18 years & above', 'duration': 'Training Period', 'full_course_price': 12800, 'half_course_price': 8500, 'test_only_price': 6500, 'features': 'Vehicle handling\nParking maneuvers\nCity & highway driving\nNTSA test prep'},
+    # Combined
+    {'cat_slug': 'combined', 'name': 'Combined B Light / C1', 'slug': 'combined-b-c1', 'description': 'Combined course covering both B Light (saloon/SUV) and C1 (light truck) categories.', 'short_description': 'Dual category training', 'duration': 'Training Period', 'full_course_price': 15800, 'half_course_price': 10000, 'test_only_price': 9000, 'features': 'B Light training\nC1 Light truck training\nDual exam preparation'},
+    # C-category
+    {'cat_slug': 'c1', 'name': 'C1 – Light Truck', 'slug': 'c1-light-truck', 'description': 'Light commercial truck driving course.', 'short_description': '22 years & above', 'duration': 'Training Period', 'full_course_price': 12500, 'half_course_price': 9000, 'test_only_price': 7000, 'features': 'Commercial regulations\nLoad management\nRoute planning\nNTSA test prep'},
+    {'cat_slug': 'c2', 'name': 'C2 – Medium Truck', 'slug': 'c2-medium-truck', 'description': 'Medium commercial truck driving course.', 'short_description': '24 years & above', 'duration': 'Training Period', 'full_course_price': 13000, 'half_course_price': 9000, 'test_only_price': 7000, 'features': 'Heavy vehicle handling\nLoad management\nSafety regulations\nNTSA test prep'},
+    # D-category (Test Only)
+    {'cat_slug': 'd', 'name': 'D1 & D2 – Minibus / Bus', 'slug': 'd-minibus-bus', 'description': 'Minibus and bus driving test preparation. Requires 4 years driving experience.', 'short_description': '4 years driving experience required', 'duration': 'Test Only', 'full_course_price': 0, 'half_course_price': 0, 'test_only_price': 8000, 'features': 'Test preparation only\nNTSA driving test prep\nRequires 4 years driving experience'},
+    # CE (Test Only)
+    {'cat_slug': 'ce', 'name': 'CE – Trailer Truck', 'slug': 'ce-trailer', 'description': 'Articulated trailer truck driving test preparation.', 'short_description': 'Test Only', 'duration': 'Test Only', 'full_course_price': 0, 'half_course_price': 0, 'test_only_price': 15000, 'features': 'Trailer handling\nArticulated vehicle control\nNTSA test prep'},
 ]
 for c in courses_data:
     cat = CourseCategory.objects.get(slug=c.pop('cat_slug'))
-    Course.objects.get_or_create(slug=c['slug'], defaults={**c, 'category': cat})
+    Course.objects.update_or_create(slug=c['slug'], defaults={**c, 'category': cat})
 print(f"      {Course.objects.count()} courses ready")
 
 # 3. Lesson Items (no CoursePackage)
@@ -190,13 +200,13 @@ for v in vehicles_info:
 print(f"      {Vehicle.objects.count()} vehicles ready")
 
 cat_b1 = CourseCategory.objects.get(slug='b1')
-course_basic = Course.objects.get(slug='basic-driving')
+course_saloon = Course.objects.filter(category=cat_b1).first()
 branch_kimbo = Branch.objects.get(slug='kimbo')
 
 for su in User.objects.filter(role='STUDENT'):
     Student.objects.get_or_create(
         user=su,
-        defaults={'student_number': f'GLS-{su.id:04d}', 'category': cat_b1, 'course': course_basic, 'package_choice': 'FULL', 'branch': branch_kimbo, 'instructor': instructors[0], 'vehicle': vehicles[0], 'status': 'ACTIVE', 'expected_graduation': timezone.now().date() + timedelta(days=90)}
+        defaults={'student_number': f'GLS-{su.id:04d}', 'category': cat_b1, 'course': course_saloon, 'package_choice': 'FULL', 'branch': branch_kimbo, 'instructor': instructors[0], 'vehicle': vehicles[0], 'status': 'ACTIVE', 'expected_graduation': timezone.now().date() + timedelta(days=90)}
     )
 print(f"      {Student.objects.count()} student profiles ready")
 
