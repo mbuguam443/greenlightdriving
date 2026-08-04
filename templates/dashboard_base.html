@@ -126,6 +126,7 @@
 
             <div class="sb-section">Website</div>
             <ul class="sb-nav">
+                <li><a class="{% block nav_web_categories %}{% endblock %}" href="{% url 'website:manage_categories' %}"><i class="bi bi-tags"></i><span>Categories</span></a></li>
                 <li><a class="{% block nav_web_courses %}{% endblock %}" href="{% url 'website:manage_courses' %}"><i class="bi bi-book"></i><span>Courses</span></a></li>
                 <li><a class="{% block nav_web_blog %}{% endblock %}" href="{% url 'website:manage_blog' %}"><i class="bi bi-pencil-square"></i><span>Blog Posts</span></a></li>
                 <li><a class="{% block nav_web_gallery %}{% endblock %}" href="{% url 'website:manage_gallery' %}"><i class="bi bi-images"></i><span>Gallery</span></a></li>
