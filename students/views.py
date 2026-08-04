@@ -61,6 +61,13 @@ class StudentDetailView(StaffTestMixin, DetailView):
         from lessons.models import PracticalLesson
         context['payments'] = Payment.objects.filter(student=student)[:10]
         context['lessons'] = PracticalLesson.objects.filter(student=student).order_by('-date')[:10]
+        context['practical_completed'] = PracticalLesson.objects.filter(student=student, status='COMPLETED').count()
+        context['practical_total'] = PracticalLesson.objects.filter(student=student).count()
+        context['practical_percentage'] = int((context['practical_completed'] / context['practical_total'] * 100) if context['practical_total'] else 0)
+        from lessons.models import TheoryLesson
+        context['theory_completed'] = TheoryLesson.objects.filter(student=student, status='COMPLETED').count()
+        context['theory_total'] = TheoryLesson.objects.filter(student=student).count()
+        context['theory_percentage'] = int((context['theory_completed'] / context['theory_total'] * 100) if context['theory_total'] else 0)
         return context
 
 

@@ -229,12 +229,12 @@
             <div class="card-footer bg-white">
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Total Paid:</span>
-                    <span class="fw-bold" style="color: #2E7D32;">KES {{ total_paid|floatformat:0 }}</span>
+                    <span class="fw-bold" style="color: #2E7D32;">KES {{ student.amount_paid|floatformat:0 }}</span>
                 </div>
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Balance:</span>
-                    <span class="fw-bold" style="color: {% if outstanding_balance > 0 %}var(--primary-green){% else %}#2E7D32{% endif %};">
-                        KES {{ outstanding_balance|floatformat:0 }}
+                    <span class="fw-bold" style="color: {% if student.balance > 0 %}var(--primary-green){% else %}#2E7D32{% endif %};">
+                        KES {{ student.balance|floatformat:0 }}
                     </span>
                 </div>
             </div>
