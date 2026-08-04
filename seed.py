@@ -76,7 +76,6 @@ print(f"      {Course.objects.count()} courses ready")
 # 3. Lesson Items (no CoursePackage)
 print("\n[3/7] Lesson Items...")
 from lessons.models import LessonItem
-LessonItem.objects.all().delete()
 
 lessons_data = [
     ('Introduction', 'THEORY', ['test', 'half', 'full']),
@@ -100,8 +99,8 @@ lessons_data = [
     ('First Aid on Road', 'THEORY', ['test', 'half', 'full']),
     ('Assessment', 'ASSESSMENT', ['half', 'full']),
 ]
-for i, (name, ltype, pkgs) in enumerate(lessons_data):
-    LessonItem.objects.create(name=name, order=i + 1, lesson_type=ltype)
+for i, (name, ltype, _pkgs) in enumerate(lessons_data):
+    LessonItem.objects.get_or_create(name=name, defaults={'order': i + 1, 'lesson_type': ltype})
 print(f"      {LessonItem.objects.count()} lesson items ready")
 
 # 4. FAQs
