@@ -2,16 +2,15 @@
 {% load static %}
 
 {% block title %}{% if form.instance.pk %}Edit Theory Lesson{% else %}Add Theory Lesson{% endif %} - Green Light Driving School{% endblock %}
-
 {% block page_title %}{% if form.instance.pk %}Edit Theory Lesson{% else %}Add Theory Lesson{% endif %}{% endblock %}
 
 {% block dashboard_content %}
 <div class="row justify-content-center">
-    <div class="col-lg-7">
+    <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
-                    <i class="bi bi-book me-2" style="color: #2E7D32;"></i>Theory Lesson Details
+                    <i class="bi bi-book me-2"></i>Theory Lesson Details
                 </h5>
             </div>
             <div class="card-body p-4">
@@ -19,108 +18,26 @@
                     {% csrf_token %}
 
                     {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-                    </div>
+                    <div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i>{{ form.non_field_errors.0 }}</div>
                     {% endif %}
 
                     <div class="row g-3">
+                        {% for field in form %}
                         <div class="col-md-6">
-                            <label for="id_student" class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
-                            <select name="student" id="id_student" class="form-select" required>
-                                <option value="">Select Student</option>
-                                {% for student in students %}
-                                <option value="{{ student.id }}" {% if form.student.value|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ student.user.full_name }} ({{ student.student_number }})
-                                </option>
-                                {% endfor %}
-                            </select>
-                            {% if form.student.errors %}
-                            <div class="text-danger small mt-1">{{ form.student.errors.0 }}</div>
-                            {% endif %}
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
                         </div>
-
-                        <div class="col-md-6">
-                            <label for="id_instructor" class="form-label fw-semibold">Instructor <span class="text-danger">*</span></label>
-                            <select name="instructor" id="id_instructor" class="form-select" required>
-                                <option value="">Select Instructor</option>
-                                {% for instructor in instructors %}
-                                <option value="{{ instructor.id }}" {% if form.instructor.value|stringformat:"s" == instructor.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ instructor.user.full_name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            {% if form.instructor.errors %}
-                            <div class="text-danger small mt-1">{{ form.instructor.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-12">
-                            <label for="id_topic" class="form-label fw-semibold">Topic <span class="text-danger">*</span></label>
-                            <input type="text" name="topic" id="id_topic" class="form-control"
-                                   value="{{ form.topic.value|default:'' }}" required
-                                   placeholder="e.g. Road Signs, Traffic Rules, Defensive Driving">
-                            {% if form.topic.errors %}
-                            <div class="text-danger small mt-1">{{ form.topic.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="id_date" class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
-                            <input type="date" name="date" id="id_date" class="form-control"
-                                   value="{{ form.date.value|default:'' }}" required>
-                            {% if form.date.errors %}
-                            <div class="text-danger small mt-1">{{ form.date.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="id_time_start" class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
-                            <input type="time" name="time_start" id="id_time_start" class="form-control"
-                                   value="{{ form.time_start.value|default:'' }}" required>
-                            {% if form.time_start.errors %}
-                            <div class="text-danger small mt-1">{{ form.time_start.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="id_time_end" class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
-                            <input type="time" name="time_end" id="id_time_end" class="form-control"
-                                   value="{{ form.time_end.value|default:'' }}" required>
-                            {% if form.time_end.errors %}
-                            <div class="text-danger small mt-1">{{ form.time_end.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="id_status" class="form-label fw-semibold">Status</label>
-                            <select name="status" id="id_status" class="form-select">
-                                {% for value, label in form.fields.status.choices %}
-                                <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                            {% if form.status.errors %}
-                            <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-12">
-                            <label for="id_notes" class="form-label fw-semibold">Notes</label>
-                            <textarea name="notes" id="id_notes" class="form-control" rows="3"
-                                      placeholder="Lesson notes...">{{ form.notes.value|default:'' }}</textarea>
-                            {% if form.notes.errors %}
-                            <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
-                            {% endif %}
-                        </div>
+                        {% endfor %}
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{% url 'lessons:theory_list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-lg me-1"></i>Cancel
-                        </a>
+                        <a href="{% url 'lessons:theory_list' %}" class="btn btn-outline-secondary">Cancel</a>
                         <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
-                            <i class="bi bi-check-lg me-1"></i>
-                            {% if form.instance.pk %}Update Lesson{% else %}Save Lesson{% endif %}
+                            <i class="bi bi-check-lg me-1"></i>Save Lesson
                         </button>
                     </div>
                 </form>
