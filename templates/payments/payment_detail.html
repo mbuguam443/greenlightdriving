@@ -58,6 +58,10 @@
                         {% else %}
                         <span class="badge bg-danger fs-6">Failed</span>
                         {% endif %}
+                        <span class="ms-2 text-muted small">|</span>
+                        <a href="{% url 'payments:update_status' payment.pk 'COMPLETED' %}" class="btn btn-sm btn-outline-success" title="Mark Completed">Complete</a>
+                        <a href="{% url 'payments:update_status' payment.pk 'PENDING' %}" class="btn btn-sm btn-outline-warning" title="Mark Pending">Pending</a>
+                        <a href="{% url 'payments:update_status' payment.pk 'FAILED' %}" class="btn btn-sm btn-outline-danger" title="Mark Failed">Failed</a>
                     </div>
                     {% if payment.description %}
                     <div class="col-12">

@@ -98,7 +98,7 @@ class PortalPaymentsView(StudentRequiredMixin, View):
 
         payments = Payment.objects.filter(student=student, status='COMPLETED') if student else []
         total_paid = sum(p.amount for p in payments) if student else 0
-        total_fees = student.course.price if student and student.course else 0
+        total_fees = student.total_fees if student else 0
         balance = total_fees - total_paid
 
         return render(request, 'student_portal/payments.html', {

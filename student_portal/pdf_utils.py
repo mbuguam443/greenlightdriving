@@ -226,7 +226,7 @@ def generate_payment_report(student):
 
     story.append(Spacer(1, 8))
     story.append(Paragraph('Summary', styles['SectionHead']))
-    course_fee = student.course.price if student.course else 0
+    course_fee = student.total_fees if student else 0
     story.append(_info_table(styles, [
         ('Course Fee:', f'KES {course_fee:,.0f}'),
         ('Total Paid:', f'KES {total_paid:,.0f}'),
@@ -263,7 +263,7 @@ def generate_enrollment_report(student):
     story.append(_info_table(styles, [
         ('Category:', student.category.name if student.category else 'N/A'),
         ('Course:', student.course.name if student.course else 'N/A'),
-        ('Course Fee:', f'KES {student.course.price:,.0f}' if student.course else 'N/A'),
+        ('Course Fee:', f'KES {student.total_fees:,.0f}' if student.course else 'N/A'),
         ('Branch:', student.branch.name if student.branch else 'N/A'),
         ('Instructor:', student.instructor.user.get_full_name() if student.instructor and student.instructor.user else 'Not Assigned'),
         ('Vehicle:', f'{student.vehicle.make} {student.vehicle.model} ({student.vehicle.reg_number})' if student.vehicle else 'Not Assigned'),

@@ -8,6 +8,7 @@ urlpatterns = [
     path('create/', views.PaymentCreateView.as_view(), name='create'),
     path('<int:pk>/', views.PaymentDetailView.as_view(), name='detail'),
     path('<int:pk>/receipt/', views.ReceiptView.as_view(), name='receipt'),
+    path('<int:pk>/status/<str:status>/', views.PaymentStatusUpdateView.as_view(), name='update_status'),
     # M-Pesa
     path('mpesa/', views.MpesaPaymentView.as_view(), name='mpesa'),
     path('mpesa/status/<int:pk>/', views.MpesaStatusView.as_view(), name='mpesa_status'),

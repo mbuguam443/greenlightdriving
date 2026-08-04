@@ -99,6 +99,16 @@ class PaymentDetailView(StaffTestMixin, DetailView):
     context_object_name = 'payment'
 
 
+class PaymentStatusUpdateView(StaffTestMixin, View):
+    def get(self, request, pk, status):
+        payment = get_object_or_404(Payment, pk=pk)
+        if status in dict(Payment.STATUS_CHOICES):
+            payment.status = status
+            payment.save(update_fields=['status'])
+            messages.success(request, f'Payment {payment.receipt_number} marked as {payment.get_status_display()}.')
+        return redirect('payments:detail', pk=payment.pk)
+
+
 class ReceiptView(StaffTestMixin, View):
     def get(self, request, pk):
         payment = get_object_or_404(Payment, pk=pk)
@@ -106,7 +116,11 @@ class ReceiptView(StaffTestMixin, View):
             payment=payment,
             defaults={'receipt_number': payment.receipt_number, 'issued_by': request.user}
         )
-        return render(request, 'payments/receipt_standalone.html', {'payment': payment})
+        from django.templatetags.static import static
+        return render(request, 'payments/receipt_standalone.html', {
+            'payment': payment,
+            'logo_url': request.build_absolute_uri(static('images/logo.png')),
+        })
 
 
 # ==================== M-PESA STAFF VIEWS ====================
