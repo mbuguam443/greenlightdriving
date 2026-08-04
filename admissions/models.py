@@ -27,7 +27,7 @@ class Admission(models.Model):
     national_id = models.CharField(max_length=30, verbose_name='National ID Number')
     address = models.TextField()
 
-    passport_photo = models.ImageField(upload_to='admissions/passports/')
+    passport_photo = models.ImageField(upload_to='admissions/passports/', verbose_name='Passport Size Photo')
     national_id_image = models.ImageField(upload_to='admissions/ids/', verbose_name='National ID Image')
 
     PACKAGE_CHOICES = [

@@ -103,7 +103,7 @@
         <div class="card-body p-4">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="id_passport_photo" class="form-label fw-semibold">Passport Photo <span class="text-danger">*</span></label>
+                    <label for="id_passport_photo" class="form-label fw-semibold">Passport Size Photo <span class="text-danger">*</span></label>
                     {{ form.passport_photo }}
                     <div class="form-text">JPG or PNG, max 5MB</div>
                     {% if form.passport_photo.errors %}
@@ -111,7 +111,7 @@
                     {% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label for="id_national_id_image" class="form-label fw-semibold">ID / Passport Image <span class="text-danger">*</span></label>
+                    <label for="id_national_id_image" class="form-label fw-semibold">ID Card Image <span class="text-danger">*</span></label>
                     {{ form.national_id_image }}
                     <div class="form-text">JPG or PNG, max 5MB</div>
                     {% if form.national_id_image.errors %}
