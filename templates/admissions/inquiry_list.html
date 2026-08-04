@@ -10,12 +10,35 @@
 {% block dashboard_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <p class="text-muted mb-0">Record and track customer walk-in inquiries</p>
+        <p class="text-muted mb-0">Record and track customer walk-in inquiries at the office</p>
     </div>
     <button class="btn fw-semibold text-white" style="background-color: #2E7D32;" data-bs-toggle="modal" data-bs-target="#inquiryModal">
         <i class="bi bi-plus-lg me-1"></i>New Inquiry
     </button>
 </div>
+
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if filter_tab == 'all' %}active{% endif %} fw-semibold" href="?tab=all" style="{% if filter_tab == 'all' %}color: #2E7D32; border-bottom-color: #2E7D32;{% endif %}">
+            All ({{ total_count }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if filter_tab == 'pending' %}active{% endif %} fw-semibold" href="?tab=pending" style="{% if filter_tab == 'pending' %}color: #2E7D32; border-bottom-color: #2E7D32;{% endif %}">
+            <i class="bi bi-exclamation-circle text-warning me-1"></i>Pending ({{ pending_count }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if filter_tab == 'followed' %}active{% endif %} fw-semibold" href="?tab=followed" style="{% if filter_tab == 'followed' %}color: #2E7D32; border-bottom-color: #2E7D32;{% endif %}">
+            <i class="bi bi-check-circle text-success me-1"></i>Followed Up ({{ followed_count }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if filter_tab == 'converted' %}active{% endif %} fw-semibold" href="?tab=converted" style="{% if filter_tab == 'converted' %}color: #2E7D32; border-bottom-color: #2E7D32;{% endif %}">
+            <i class="bi bi-person-check text-success me-1"></i>Converted ({{ converted_count }})
+        </a>
+    </li>
+</ul>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
@@ -29,12 +52,12 @@
                         <th>Course</th>
                         <th>Feedback</th>
                         <th>Status</th>
-                        <th class="text-end pe-3">Action</th>
+                        <th class="text-end pe-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for inquiry in inquiries %}
-                    <tr {% if not inquiry.followed_up %}class="table-warning"{% endif %}>
+                    <tr class="{% if not inquiry.followed_up and not inquiry.converted %}table-warning{% elif inquiry.converted %}table-success{% endif %}">
                         <td class="ps-3">{{ inquiry.created_at|date:"d M Y" }}<br><small class="text-muted">{{ inquiry.created_at|time:"H:i" }}</small></td>
                         <td class="fw-semibold">{{ inquiry.name }}</td>
                         <td>
@@ -44,23 +67,39 @@
                         <td>{{ inquiry.course.name|default:"—" }}</td>
                         <td><small>{{ inquiry.feedback|truncatechars:60|default:"—" }}</small></td>
                         <td>
-                            {% if inquiry.followed_up %}
-                            <span class="badge bg-success">Followed Up</span>
+                            {% if inquiry.converted %}
+                            <span class="badge bg-success"><i class="bi bi-person-check me-1"></i>Converted</span>
+                            {% elif inquiry.followed_up %}
+                            <span class="badge bg-info text-dark"><i class="bi bi-check-lg me-1"></i>Followed Up</span>
                             {% else %}
-                            <span class="badge bg-warning text-dark">Pending</span>
+                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i>Pending</span>
                             {% endif %}
                         </td>
                         <td class="text-end pe-3">
-                            <a href="{% url 'admissions:inquiry_toggle' inquiry.pk %}" class="btn btn-sm {% if inquiry.followed_up %}btn-outline-secondary{% else %}btn-outline-success{% endif %}">
-                                {% if inquiry.followed_up %}<i class="bi bi-arrow-counterclockwise"></i>{% else %}<i class="bi bi-check-lg"></i>{% endif %}
-                            </a>
+                            <div class="d-flex gap-1 justify-content-end">
+                                {% if not inquiry.followed_up %}
+                                <a href="{% url 'admissions:inquiry_toggle' inquiry.pk %}" class="btn btn-sm btn-outline-success" title="Mark Followed Up">
+                                    <i class="bi bi-check-lg"></i>
+                                </a>
+                                {% endif %}
+                                {% if inquiry.followed_up and not inquiry.converted %}
+                                <a href="{% url 'admissions:inquiry_convert' inquiry.pk %}" class="btn btn-sm btn-outline-primary" title="Mark Converted to Student">
+                                    <i class="bi bi-person-check"></i>
+                                </a>
+                                {% endif %}
+                                {% if inquiry.converted %}
+                                <a href="{% url 'admissions:inquiry_toggle' inquiry.pk %}" class="btn btn-sm btn-outline-secondary" title="Undo">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </a>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
                             <i class="bi bi-people" style="font-size:2.5rem;"></i>
-                            <p class="mt-2 mb-0">No inquiries yet</p>
+                            <p class="mt-2 mb-0">No inquiries yet. Click "New Inquiry" to record a walk-in.</p>
                         </td>
                     </tr>
                     {% endfor %}

@@ -231,10 +231,25 @@ class InquiryListView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request):
         from .models import WalkInInquiry
         from .forms import InquiryForm
-        inquiries = WalkInInquiry.objects.select_related('course').all()
+        tab = request.GET.get('tab', 'all')
+        all_inquiries = WalkInInquiry.objects.select_related('course').all()
+        if tab == 'pending':
+            inquiries = all_inquiries.filter(followed_up=False, converted=False)
+        elif tab == 'followed':
+            inquiries = all_inquiries.filter(followed_up=True, converted=False)
+        elif tab == 'converted':
+            inquiries = all_inquiries.filter(converted=True)
+        else:
+            inquiries = all_inquiries
+
         return render(request, 'admissions/inquiry_list.html', {
             'inquiries': inquiries,
             'inquiry_form': InquiryForm(),
+            'filter_tab': tab,
+            'total_count': all_inquiries.count(),
+            'pending_count': all_inquiries.filter(followed_up=False, converted=False).count(),
+            'followed_count': all_inquiries.filter(followed_up=True, converted=False).count(),
+            'converted_count': all_inquiries.filter(converted=True).count(),
         })
 
 
@@ -263,5 +278,21 @@ class InquiryToggleView(LoginRequiredMixin, UserPassesTestMixin, View):
         from .models import WalkInInquiry
         inquiry = get_object_or_404(WalkInInquiry, pk=pk)
         inquiry.followed_up = not inquiry.followed_up
-        inquiry.save(update_fields=['followed_up'])
+        if not inquiry.followed_up:
+            inquiry.converted = False
+        inquiry.save(update_fields=['followed_up', 'converted'])
+        return redirect('admissions:inquiry_list')
+
+
+class InquiryConvertView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def get(self, request, pk):
+        from .models import WalkInInquiry
+        inquiry = get_object_or_404(WalkInInquiry, pk=pk)
+        inquiry.converted = not inquiry.converted
+        if inquiry.converted:
+            inquiry.followed_up = True
+        inquiry.save(update_fields=['converted', 'followed_up'])
         return redirect('admissions:inquiry_list')

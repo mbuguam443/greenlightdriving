@@ -14,4 +14,5 @@ urlpatterns = [
     path('inquiries/', views.InquiryListView.as_view(), name='inquiry_list'),
     path('inquiries/create/', views.InquiryCreateView.as_view(), name='inquiry_create'),
     path('inquiries/<int:pk>/toggle/', views.InquiryToggleView.as_view(), name='inquiry_toggle'),
+    path('inquiries/<int:pk>/convert/', views.InquiryConvertView.as_view(), name='inquiry_convert'),
 ]

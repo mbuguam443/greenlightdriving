@@ -78,6 +78,7 @@ class WalkInInquiry(models.Model):
     course = models.ForeignKey('website.Course', on_delete=models.SET_NULL, null=True, blank=True)
     feedback = models.TextField(blank=True, help_text='What they said, interested in, etc.')
     followed_up = models.BooleanField(default=False)
+    converted = models.BooleanField(default=False, help_text='Converted to admission/student?')
     recorded_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
