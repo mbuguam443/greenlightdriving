@@ -33,6 +33,13 @@ print(f"      {Branch.objects.count()} branches ready")
 print("\n[2/7] Courses...")
 from website.models import CourseCategory, Course, FAQ
 
+# Remove old dumpy courses (slugs that don't exist in new data)
+new_slugs = {'a1-motorcycle', 'a2-motorcycle', 'a3-tuktuk', 'b1-saloon', 'b2-light',
+             'combined-b-c1', 'c1-light-truck', 'c2-medium-truck', 'd-minibus-bus', 'ce-trailer'}
+old_deleted = Course.objects.exclude(slug__in=new_slugs).delete()[0]
+if old_deleted:
+    print(f"      Removed {old_deleted} old course(s)")
+
 categories_data = [
     {'name': 'A1', 'slug': 'a1', 'description': 'Motorcycle (A1)', 'order': 1},
     {'name': 'A2', 'slug': 'a2', 'description': 'Motorcycle (A2)', 'order': 2},
@@ -47,6 +54,11 @@ categories_data = [
 ]
 for c in categories_data:
     CourseCategory.objects.update_or_create(slug=c['slug'], defaults=c)
+# Remove old dumpy categories not in new list
+new_cat_slugs = {c['slug'] for c in categories_data}
+removed = CourseCategory.objects.exclude(slug__in=new_cat_slugs).delete()[0]
+if removed:
+    print(f"      Removed {removed} old category(ies)")
 print(f"      {CourseCategory.objects.count()} categories ready")
 
 courses_data = [
