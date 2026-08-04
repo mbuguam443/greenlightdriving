@@ -1,0 +1,96 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Edit Practical Lesson - Green Light Driving School{% endblock %}
+
+{% block page_title %}Edit Practical Lesson{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-pencil me-2"></i>Edit: {{ form.instance.lesson_item.name }} — {{ form.instance.student.user.full_name }}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_student" class="form-label fw-semibold">Student</label>
+                            <select name="student" id="id_student" class="form-select">
+                                {% for student in students %}
+                                <option value="{{ student.id }}" {% if form.student.value|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ student.user.full_name }} ({{ student.student_number }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_lesson_item" class="form-label fw-semibold">Lesson Item</label>
+                            <select name="lesson_item" id="id_lesson_item" class="form-select">
+                                {% for item in lesson_items %}
+                                <option value="{{ item.id }}" {% if form.lesson_item.value|stringformat:"s" == item.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ item.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_instructor" class="form-label fw-semibold">Instructor</label>
+                            <select name="instructor" id="id_instructor" class="form-select">
+                                <option value="">Select</option>
+                                {% for instructor in instructors %}
+                                <option value="{{ instructor.id }}" {% if form.instructor.value|stringformat:"s" == instructor.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ instructor.user.full_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_vehicle" class="form-label fw-semibold">Vehicle</label>
+                            <select name="vehicle" id="id_vehicle" class="form-select">
+                                <option value="">Select</option>
+                                {% for vehicle in vehicles %}
+                                <option value="{{ vehicle.id }}" {% if form.vehicle.value|stringformat:"s" == vehicle.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ vehicle.registration_number }} ({{ vehicle.category }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_date" class="form-label fw-semibold">Date</label>
+                            <input type="date" name="date" id="id_date" class="form-control" value="{{ form.date.value|date:'Y-m-d'|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_status" class="form-label fw-semibold">Status</label>
+                            <select name="status" id="id_status" class="form-select">
+                                {% for value, label in form.fields.status.choices %}
+                                <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="id_remarks" class="form-label fw-semibold">Remarks</label>
+                            <textarea name="remarks" id="id_remarks" class="form-control" rows="3">{{ form.remarks.value|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'lessons:list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                            <i class="bi bi-check-lg me-1"></i>Update Lesson
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

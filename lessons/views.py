@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from django.views import View
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from django.db import models
 from django.utils import timezone
@@ -138,3 +139,46 @@ class TheoryLessonCreateView(StaffTestMixin, CreateView):
                 initial['instructor'] = student.instructor_id
                 initial['date'] = timezone.now().date() + timedelta(days=1)
         return initial
+
+
+
+class PracticalLessonUpdateView(StaffTestMixin, UpdateView):
+    model = PracticalLesson
+    form_class = PracticalLessonForm
+    template_name = 'lessons/lesson_update.html'
+    success_url = reverse_lazy('lessons:list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+        from instructors.models import Instructor
+        from vehicles.models import Vehicle
+        context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        context['instructors'] = Instructor.objects.select_related('user')
+        context['vehicles'] = Vehicle.objects.filter(is_available=True)
+        context['lesson_items'] = LessonItem.objects.filter(is_active=True)
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Lesson updated successfully.')
+        return super().form_valid(form)
+
+
+class TheoryLessonUpdateView(StaffTestMixin, UpdateView):
+    model = TheoryLesson
+    form_class = TheoryLessonForm
+    template_name = 'lessons/theory_update.html'
+    success_url = reverse_lazy('lessons:theory_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+        from instructors.models import Instructor
+        context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        context['instructors'] = Instructor.objects.select_related('user')
+        return context
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        messages.success(self.request, 'Theory lesson updated successfully.')
+        return super().form_valid(form)

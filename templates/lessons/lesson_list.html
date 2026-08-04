@@ -101,6 +101,7 @@
                                     <th>Vehicle</th>
                                     <th>Date</th>
                                     <th>Status</th>
+                                    <th class="text-end pe-3"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -126,6 +127,11 @@
                                         {% elif lesson.status == 'NEEDS_PRACTICE' %}
                                         <span class="badge bg-info text-dark">Needs Practice</span>
                                         {% endif %}
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a href="{% url 'lessons:practical_update' lesson.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% endfor %}
