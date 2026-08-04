@@ -138,6 +138,9 @@
                     <i class="bi bi-graph-up me-2" style="color: #2E7D32;"></i>Lesson Progress
                 </h6>
                 <div class="d-flex gap-2">
+                    <a href="{% url 'students:generate_lessons' student.pk %}" class="btn btn-sm fw-semibold text-white" style="background-color: #2E7D32;" onclick="return confirm('Generate all missing lessons for this student?')">
+                        <i class="bi bi-lightning me-1"></i>Generate Lessons
+                    </a>
                     <a href="{% url 'lessons:practical_create' %}?student={{ student.pk }}" class="btn btn-sm fw-semibold text-white" style="background-color: #2E7D32;">
                         <i class="bi bi-plus me-1"></i>Add Practical
                     </a>

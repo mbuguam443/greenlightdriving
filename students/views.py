@@ -5,6 +5,8 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import models as db_models
+from django.utils import timezone
+from datetime import timedelta
 from .models import Student
 from .forms import StudentForm
 
@@ -185,3 +187,42 @@ class IndexView(LoginRequiredMixin, View):
             'course_data': course_data,
         }
         return render(request, 'students/dashboard.html', context)
+
+
+
+class GenerateLessonsView(StaffTestMixin, View):
+
+    def get(self, request, pk):
+        from lessons.models import PracticalLesson, TheoryLesson, LessonItem
+        student = get_object_or_404(Student, pk=pk)
+        package_lesson_map = {
+            'TEST': LessonItem.objects.filter(is_active=True, lesson_type='THEORY'),
+            'HALF': LessonItem.objects.filter(is_active=True).exclude(
+                lesson_type__in=['ASSESSMENT']).exclude(order__gte=11),
+            'FULL': LessonItem.objects.filter(is_active=True),
+        }
+        lesson_items = package_lesson_map.get(student.package_choice, [])
+        lesson_date = timezone.now().date() + timedelta(days=1)
+        created = 0
+        for item in lesson_items:
+            if item.lesson_type == 'PRACTICAL':
+                if not PracticalLesson.objects.filter(student=student, lesson_item=item).exists():
+                    PracticalLesson.objects.create(
+                        student=student, lesson_item=item,
+                        instructor=student.instructor, vehicle=student.vehicle,
+                        date=lesson_date, status='NOT_STARTED',
+                    )
+                    lesson_date += timedelta(days=2)
+                    created += 1
+            else:
+                if not TheoryLesson.objects.filter(student=student, lesson_item=item).exists():
+                    TheoryLesson.objects.create(
+                        student=student, lesson_item=item, topic=item.name,
+                        instructor=student.instructor, date=lesson_date,
+                        time_start='08:00', time_end='09:00', status='NOT_STARTED',
+                    )
+                    lesson_date += timedelta(days=1)
+                    created += 1
+
+        messages.success(request, f'{created} lessons generated for {student.user.full_name}.')
+        return redirect('students:detail', pk=student.pk)
