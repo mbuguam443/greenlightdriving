@@ -121,9 +121,11 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
         from django.contrib import messages
         from django.db import IntegrityError
         try:
-            return super().form_valid(form)
+            response = super().form_valid(form)
+            messages.success(self.request, 'Lesson saved successfully.')
+            return response
         except IntegrityError:
-            messages.error(self.request, 'This lesson already exists for this student. Use the edit pencil instead.')
+            messages.error(self.request, 'This lesson already exists for this student.')
             return self.form_invalid(form)
 
 
@@ -152,6 +154,12 @@ class TheoryLessonCreateView(StaffTestMixin, CreateView):
                 initial['instructor'] = student.instructor_id
                 initial['date'] = timezone.now().date() + timedelta(days=1)
         return initial
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        response = super().form_valid(form)
+        messages.success(self.request, 'Theory lesson saved successfully.')
+        return response
 
 
 
