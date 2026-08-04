@@ -143,7 +143,10 @@ print("      Database repair done")
 
 # 3. Migrations
 print("\n[2/6] Running migrations...")
-call_command('makemigrations', interactive=False, verbosity=1)
+try:
+    call_command('makemigrations', interactive=False, verbosity=1)
+except Exception:
+    call_command('makemigrations', '--merge', interactive=False, verbosity=1)
 call_command('migrate', interactive=False, verbosity=1)
 print("      Done!")
 
