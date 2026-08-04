@@ -164,6 +164,20 @@ class PracticalLessonUpdateView(StaffTestMixin, UpdateView):
         return super().form_valid(form)
 
 
+class PracticalLessonQuickStatusView(StaffTestMixin, View):
+    def post(self, request, pk):
+        lesson = get_object_or_404(PracticalLesson, pk=pk)
+        new_status = request.POST.get('status', '')
+        if new_status in dict(PracticalLesson.STATUS_CHOICES):
+            lesson.status = new_status
+            if new_status == 'COMPLETED':
+                from django.utils import timezone
+                lesson.completed_at = timezone.now()
+            lesson.save()
+            messages.success(request, f'{lesson.lesson_item.name} → {lesson.get_status_display()}')
+        return redirect('lessons:list')
+
+
 class TheoryLessonUpdateView(StaffTestMixin, UpdateView):
     model = TheoryLesson
     form_class = TheoryLessonForm
