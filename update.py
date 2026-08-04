@@ -234,34 +234,37 @@ try:
     from instructors.models import Instructor
     from accounts.models import User
 
-    Instructor.objects.all().delete()
-    print("      Cleared all existing instructors")
+    if Instructor.objects.filter(user__first_name='Simon', user__last_name='Mureithi').exists():
+        print("      Simon Mureithi already exists")
+    else:
+        Instructor.objects.all().delete()
+        print("      Cleared all existing instructors")
 
-    simon_user, created = User.objects.get_or_create(
-        username='simon@greenlight.com',
-        defaults={
-            'email': 'simon@greenlight.com',
-            'first_name': 'Simon',
-            'last_name': 'Mureithi',
-            'role': 'INSTRUCTOR',
-        }
-    )
-    if created:
-        simon_user.set_password('simon123')
-        simon_user.save()
-        print(f"      Created user: simon@greenlight.com / simon123")
+        simon_user, created = User.objects.get_or_create(
+            username='simon@greenlight.com',
+            defaults={
+                'email': 'simon@greenlight.com',
+                'first_name': 'Simon',
+                'last_name': 'Mureithi',
+                'role': 'INSTRUCTOR',
+            }
+        )
+        if created:
+            simon_user.set_password('simon123')
+            simon_user.save()
+            print(f"      Created user: simon@greenlight.com / simon123")
 
-    Instructor.objects.update_or_create(
-        user=simon_user,
-        defaults={
-            'license_number': 'INS-SM001',
-            'license_class': 'ALL',
-            'experience_years': 10,
-            'phone': '+254 700 000 000',
-            'is_active': True,
-        }
-    )
-    print("      Simon Mureithi set as instructor")
+        Instructor.objects.update_or_create(
+            user=simon_user,
+            defaults={
+                'license_number': 'INS-SM001',
+                'license_class': 'ALL',
+                'experience_years': 10,
+                'phone': '+254 700 000 000',
+                'is_active': True,
+            }
+        )
+        print("      Simon Mureithi set as instructor")
 except Exception as e:
     print(f"      Error: {e}")
 
