@@ -30,10 +30,10 @@ class PracticalLesson(models.Model):
     
     student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='practical_lessons')
     lesson_item = models.ForeignKey(LessonItem, on_delete=models.CASCADE)
-    instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True)
-    vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, null=True)
+    instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True, blank=True)
+    vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_STARTED')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_STARTED', blank=True)
     remarks = models.TextField(blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
