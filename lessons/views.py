@@ -110,8 +110,12 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
 
     def form_valid(self, form):
         from django.contrib import messages
-        messages.success(self.request, 'Lesson scheduled successfully.')
-        return super().form_valid(form)
+        from django.db import IntegrityError
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            messages.error(self.request, 'This lesson already exists for this student. Use the edit pencil instead.')
+            return self.form_invalid(form)
 
 
 class TheoryLessonCreateView(StaffTestMixin, CreateView):
