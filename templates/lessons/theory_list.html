@@ -96,7 +96,7 @@
                             <br><small class="text-muted">{{ lesson.notes|truncatewords:10 }}</small>
                             {% endif %}
                         </td>
-                        <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
+                        <td>{% if lesson.instructor %}{{ lesson.instructor.user.full_name }}{% else %}—{% endif %}</td>
                         <td>{{ lesson.date|date:"d M Y" }}</td>
                         <td>{{ lesson.time_start|time:"H:i" }} - {{ lesson.time_end|time:"H:i" }}</td>
                         <td>
