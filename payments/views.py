@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import models
 from django.db.models import Sum
@@ -121,6 +121,18 @@ class ReceiptView(StaffTestMixin, View):
             'payment': payment,
             'logo_url': request.build_absolute_uri(static('images/logo.png')),
         })
+
+
+class PaymentDeleteView(StaffTestMixin, DeleteView):
+    model = Payment
+    success_url = reverse_lazy('payments:list')
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Payment deleted.')
+        return super().form_valid(form)
 
 
 # ==================== M-PESA STAFF VIEWS ====================

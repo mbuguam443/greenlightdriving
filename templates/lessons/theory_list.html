@@ -112,6 +112,10 @@
                             <a href="{% url 'lessons:theory_update' lesson.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            <a href="{% url 'lessons:theory_delete' lesson.pk %}" class="btn btn-sm btn-outline-danger"
+                               title="Delete" onclick="return confirm('Delete this theory lesson?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     {% empty %}

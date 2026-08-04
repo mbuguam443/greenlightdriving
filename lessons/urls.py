@@ -9,6 +9,8 @@ urlpatterns = [
     path('practical/create/', views.PracticalLessonCreateView.as_view(), name='practical_create'),
     path('practical/<int:pk>/update/', views.PracticalLessonUpdateView.as_view(), name='practical_update'),
     path('practical/<int:pk>/quick-status/', views.PracticalLessonQuickStatusView.as_view(), name='practical_quick_status'),
+    path('practical/<int:pk>/delete/', views.PracticalLessonDeleteView.as_view(), name='practical_delete'),
     path('theory/create/', views.TheoryLessonCreateView.as_view(), name='theory_create'),
     path('theory/<int:pk>/update/', views.TheoryLessonUpdateView.as_view(), name='theory_update'),
+    path('theory/<int:pk>/delete/', views.TheoryLessonDeleteView.as_view(), name='theory_delete'),
 ]

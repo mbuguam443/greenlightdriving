@@ -137,6 +137,10 @@
                                         <a href="{% url 'lessons:practical_update' lesson.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <a href="{% url 'lessons:practical_delete' lesson.pk %}" class="btn btn-sm btn-outline-danger"
+                                           title="Delete" onclick="return confirm('Delete this lesson?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% endfor %}

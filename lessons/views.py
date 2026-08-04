@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views import View
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import models
 from django.utils import timezone
@@ -222,4 +222,29 @@ class TheoryLessonUpdateView(StaffTestMixin, UpdateView):
     def form_valid(self, form):
         from django.contrib import messages
         messages.success(self.request, 'Theory lesson updated successfully.')
+        return super().form_valid(form)
+
+
+
+class PracticalLessonDeleteView(StaffTestMixin, DeleteView):
+    model = PracticalLesson
+    success_url = reverse_lazy('lessons:list')
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Lesson deleted.')
+        return super().form_valid(form)
+
+
+class TheoryLessonDeleteView(StaffTestMixin, DeleteView):
+    model = TheoryLesson
+    success_url = reverse_lazy('lessons:theory_list')
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Theory lesson deleted.')
         return super().form_valid(form)
