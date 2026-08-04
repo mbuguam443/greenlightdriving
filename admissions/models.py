@@ -69,3 +69,22 @@ class Admission(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+
+class WalkInInquiry(models.Model):
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(blank=True)
+    course = models.ForeignKey('website.Course', on_delete=models.SET_NULL, null=True, blank=True)
+    feedback = models.TextField(blank=True, help_text='What they said, interested in, etc.')
+    followed_up = models.BooleanField(default=False)
+    recorded_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Walk-in Inquiry'
+        verbose_name_plural = 'Walk-in Inquiries'
+
+    def __str__(self):
+        return f"{self.name} - {self.phone} ({self.created_at.strftime('%d/%m/%Y')})"

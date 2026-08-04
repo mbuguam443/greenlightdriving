@@ -221,3 +221,47 @@ class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View)
             return redirect('admissions:detail', pk=admission.pk)
         messages.error(request, 'Please correct the errors below.')
         return render(request, 'admissions/internal_admission_form.html', {'form': form})
+
+
+
+class InquiryListView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def get(self, request):
+        from .models import WalkInInquiry
+        from .forms import InquiryForm
+        inquiries = WalkInInquiry.objects.select_related('course').all()
+        return render(request, 'admissions/inquiry_list.html', {
+            'inquiries': inquiries,
+            'inquiry_form': InquiryForm(),
+        })
+
+
+class InquiryCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def post(self, request):
+        from .forms import InquiryForm
+        form = InquiryForm(request.POST)
+        if form.is_valid():
+            inquiry = form.save(commit=False)
+            inquiry.recorded_by = request.user
+            inquiry.save()
+            messages.success(request, f'Inquiry for {inquiry.name} recorded.')
+        else:
+            messages.error(request, 'Please fix the errors.')
+        return redirect('admissions:inquiry_list')
+
+
+class InquiryToggleView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def get(self, request, pk):
+        from .models import WalkInInquiry
+        inquiry = get_object_or_404(WalkInInquiry, pk=pk)
+        inquiry.followed_up = not inquiry.followed_up
+        inquiry.save(update_fields=['followed_up'])
+        return redirect('admissions:inquiry_list')

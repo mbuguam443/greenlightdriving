@@ -1,5 +1,5 @@
 from django import forms
-from .models import Admission
+from .models import Admission, WalkInInquiry
 from website.models import CourseCategory, Course
 
 
@@ -128,3 +128,22 @@ class InternalAdmissionForm(forms.ModelForm):
             self.fields['course'].queryset = Course.objects.filter(
                 category=self.instance.category, is_active=True
             )
+
+
+
+class InquiryForm(forms.ModelForm):
+    class Meta:
+        model = WalkInInquiry
+        fields = ['name', 'phone', 'email', 'course', 'feedback']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full name'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone number'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email (optional)'}),
+            'course': forms.Select(attrs={'class': 'form-select'}),
+            'feedback': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'What are they interested in? Any notes...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['course'].queryset = Course.objects.filter(is_active=True)
+        self.fields['course'].required = False

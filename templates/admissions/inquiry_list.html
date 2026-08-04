@@ -1,0 +1,118 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Walk-in Inquiries - Green Light School{% endblock %}
+
+{% block page_title %}Walk-in Inquiries{% endblock %}
+
+{% block nav_inquiries %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0">Record and track customer walk-in inquiries</p>
+    </div>
+    <button class="btn fw-semibold text-white" style="background-color: #2E7D32;" data-bs-toggle="modal" data-bs-target="#inquiryModal">
+        <i class="bi bi-plus-lg me-1"></i>New Inquiry
+    </button>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="ps-3">Date</th>
+                        <th>Name</th>
+                        <th>Contacts</th>
+                        <th>Course</th>
+                        <th>Feedback</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inquiry in inquiries %}
+                    <tr {% if not inquiry.followed_up %}class="table-warning"{% endif %}>
+                        <td class="ps-3">{{ inquiry.created_at|date:"d M Y" }}<br><small class="text-muted">{{ inquiry.created_at|time:"H:i" }}</small></td>
+                        <td class="fw-semibold">{{ inquiry.name }}</td>
+                        <td>
+                            {% if inquiry.phone %}<div><i class="bi bi-telephone me-1 text-muted small"></i>{{ inquiry.phone }}</div>{% endif %}
+                            {% if inquiry.email %}<div><i class="bi bi-envelope me-1 text-muted small"></i>{{ inquiry.email }}</div>{% endif %}
+                        </td>
+                        <td>{{ inquiry.course.name|default:"—" }}</td>
+                        <td><small>{{ inquiry.feedback|truncatechars:60|default:"—" }}</small></td>
+                        <td>
+                            {% if inquiry.followed_up %}
+                            <span class="badge bg-success">Followed Up</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'admissions:inquiry_toggle' inquiry.pk %}" class="btn btn-sm {% if inquiry.followed_up %}btn-outline-secondary{% else %}btn-outline-success{% endif %}">
+                                {% if inquiry.followed_up %}<i class="bi bi-arrow-counterclockwise"></i>{% else %}<i class="bi bi-check-lg"></i>{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-people" style="font-size:2.5rem;"></i>
+                            <p class="mt-2 mb-0">No inquiries yet</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="inquiryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'admissions:inquiry_create' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" style="color: #2E7D32;">
+                        <i class="bi bi-person-plus me-2"></i>New Walk-in Inquiry
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                            {{ inquiry_form.name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+                            {{ inquiry_form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            {{ inquiry_form.email }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Course Interested In</label>
+                            {{ inquiry_form.course }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Feedback / Notes</label>
+                            {{ inquiry_form.feedback }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                        <i class="bi bi-save me-1"></i>Save Inquiry
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

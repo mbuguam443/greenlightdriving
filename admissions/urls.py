@@ -11,4 +11,7 @@ urlpatterns = [
     path('', views.AdmissionListView.as_view(), name='list'),
     path('<int:pk>/', views.AdmissionDetailView.as_view(), name='detail'),
     path('<int:pk>/update/', views.AdmissionUpdateView.as_view(), name='update'),
+    path('inquiries/', views.InquiryListView.as_view(), name='inquiry_list'),
+    path('inquiries/create/', views.InquiryCreateView.as_view(), name='inquiry_create'),
+    path('inquiries/<int:pk>/toggle/', views.InquiryToggleView.as_view(), name='inquiry_toggle'),
 ]

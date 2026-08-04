@@ -119,6 +119,7 @@
 
             <div class="sb-section">Operations</div>
             <ul class="sb-nav">
+                <li><a class="{% block nav_inquiries %}{% endblock %}" href="{% url 'admissions:inquiry_list' %}"><i class="bi bi-person-lines-fill"></i><span>Inquiries</span></a></li>
                 <li><a class="{% block nav_vehicles %}{% endblock %}" href="{% url 'vehicles:list' %}"><i class="bi bi-truck"></i><span>Vehicles</span></a></li>
                 <li><a class="{% block nav_instructors %}{% endblock %}" href="{% url 'instructors:list' %}"><i class="bi bi-person-workspace"></i><span>Instructors</span></a></li>
                 <li><a class="{% block nav_ntsa %}{% endblock %}" href="{% url 'ntsa:list' %}"><i class="bi bi-patch-check"></i><span>NTSA</span></a></li>
