@@ -41,9 +41,9 @@
             <div class="col-md-2">
                 <select name="status" class="form-select">
                     <option value="">All Status</option>
-                    <option value="scheduled" {% if status_filter == 'scheduled' %}selected{% endif %}>Scheduled</option>
-                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
-                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    <option value="NOT_STARTED" {% if status_filter == 'NOT_STARTED' %}selected{% endif %}>Not Started</option>
+                    <option value="SCHEDULED" {% if status_filter == 'SCHEDULED' %}selected{% endif %}>Scheduled</option>
+                    <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -54,7 +54,7 @@
                     <option value="">All Instructors</option>
                     {% for instructor in instructors %}
                     <option value="{{ instructor.id }}" {% if instructor_filter == instructor.id %}selected{% endif %}>
-                        {{ instructor.get_full_name }}
+                        {{ instructor.user.full_name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -82,34 +82,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for lesson in theory_lessons %}
+                    {% for lesson in lessons %}
                     <tr>
                         <td class="ps-3">
                             <div>
-                                <span class="fw-semibold">{{ lesson.student.get_full_name }}</span>
+                                <span class="fw-semibold">{{ lesson.student.user.full_name }}</span>
                                 <br><small class="text-muted">{{ lesson.student.student_number }}</small>
                             </div>
                         </td>
                         <td>
                             <span class="fw-semibold">{{ lesson.topic }}</span>
-                            {% if lesson.description %}
-                            <br><small class="text-muted">{{ lesson.description|truncatewords:10 }}</small>
+                            {% if lesson.notes %}
+                            <br><small class="text-muted">{{ lesson.notes|truncatewords:10 }}</small>
                             {% endif %}
                         </td>
-                        <td>{{ lesson.instructor.get_full_name }}</td>
+                        <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
                         <td>{{ lesson.date|date:"d M Y" }}</td>
-                        <td>{{ lesson.start_time|time:"H:i" }} - {{ lesson.end_time|time:"H:i" }}</td>
+                        <td>{{ lesson.time_start|time:"H:i" }} - {{ lesson.time_end|time:"H:i" }}</td>
                         <td>
-                            {% if lesson.status == 'scheduled' %}
-                            <span class="badge" style="background-color: var(--primary-green);">Scheduled</span>
-                            {% elif lesson.status == 'completed' %}
-                            <span class="badge" style="background-color: #2E7D32;">Completed</span>
-                            {% elif lesson.status == 'cancelled' %}
-                            <span class="badge bg-danger">Cancelled</span>
+                            {% if lesson.status == 'NOT_STARTED' %}
+                            <span class="badge bg-secondary">Not Started</span>
+                            {% elif lesson.status == 'SCHEDULED' %}
+                            <span class="badge bg-warning text-dark">Scheduled</span>
+                            {% elif lesson.status == 'COMPLETED' %}
+                            <span class="badge bg-success">Completed</span>
                             {% endif %}
                         </td>
                         <td class="text-end pe-3">
-                            <a href="{% url 'lessons:theory_update' lesson.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                            <a href="{% url 'lessons:theory_update' lesson.pk %}" class="btn btn-sm btn-outline-success" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
                         </td>
@@ -127,26 +127,26 @@
         </div>
     </div>
 
-    {% if theory_lessons.has_other_pages %}
+    {% if lessons.has_other_pages %}
     <div class="card-footer bg-white border-top">
         <nav class="d-flex justify-content-between align-items-center">
             <small class="text-muted">
-                Showing {{ theory_lessons.start_index }} to {{ theory_lessons.end_index }} of {{ theory_lessons.paginator.count }} lessons
+                Showing {{ lessons.start_index }} to {{ lessons.end_index }} of {{ lessons.paginator.count }} lessons
             </small>
             <ul class="pagination pagination-sm mb-0">
-                {% if theory_lessons.has_previous %}
+                {% if lessons.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ theory_lessons.previous_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
+                    <a class="page-link" href="?page={{ lessons.previous_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Previous</a>
                 </li>
                 {% endif %}
-                {% for num in theory_lessons.paginator.page_range %}
-                <li class="page-item {% if theory_lessons.number == num %}active{% endif %}">
+                {% for num in lessons.paginator.page_range %}
+                <li class="page-item {% if lessons.number == num %}active{% endif %}">
                     <a class="page-link" href="?page={{ num }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">{{ num }}</a>
                 </li>
                 {% endfor %}
-                {% if theory_lessons.has_next %}
+                {% if lessons.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ theory_lessons.next_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
+                    <a class="page-link" href="?page={{ lessons.next_page_number }}&search={{ search_query|default:'' }}&status={{ status_filter|default:'' }}">Next</a>
                 </li>
                 {% endif %}
             </ul>

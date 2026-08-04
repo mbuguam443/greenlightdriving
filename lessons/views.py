@@ -75,7 +75,16 @@ class TheoryLessonListView(StaffTestMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return TheoryLesson.objects.select_related('student', 'student__user', 'instructor').all()
+        return TheoryLesson.objects.select_related(
+            'student', 'student__user', 'instructor', 'instructor__user'
+        ).all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from instructors.models import Instructor
+        context['instructors'] = Instructor.objects.select_related('user').all()
+        context['active_tab'] = 'theory'
+        return context
 
 
 class PracticalLessonCreateView(StaffTestMixin, CreateView):
