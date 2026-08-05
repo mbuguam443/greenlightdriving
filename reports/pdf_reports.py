@@ -1,11 +1,12 @@
 """Beautiful PDF report generation for Green Light Driving School."""
 import io
+import os
 from datetime import date
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable, Image
 
 GREEN = colors.HexColor('#2E7D32')
 GREEN_LIGHT = colors.HexColor('#E8F5E9')
@@ -13,6 +14,8 @@ GREEN_MED = colors.HexColor('#66BB6A')
 DARK = colors.HexColor('#1B5E20')
 WHITE = colors.white
 GREY = colors.HexColor('#666666')
+
+LOGO_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'images', 'logo.png')
 LIGHT_GREY = colors.HexColor('#F5F5F5')
 
 
@@ -63,10 +66,19 @@ def _make_table(data, col_widths, total_text=""):
 def _title(title_text, subtitle=""):
     styles = getSampleStyleSheet()
     els = []
-    els.append(Paragraph(title_text, ParagraphStyle(
-        'PDFTitle', parent=styles['Title'], fontSize=18, textColor=DARK,
-        spaceAfter=2, fontName='Helvetica-Bold'
-    )))
+    # Logo + title in a table
+    logo_table_data = [[
+        Image(LOGO_PATH, width=40, height=40) if os.path.isfile(LOGO_PATH) else Paragraph("", styles['Normal']),
+        Paragraph(title_text, ParagraphStyle('PDFTitle', parent=styles['Title'], fontSize=18, textColor=DARK,
+                                              spaceAfter=2, fontName='Helvetica-Bold'))
+    ]]
+    logo_table = Table(logo_table_data, colWidths=[50, None])
+    logo_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (0, 0), 10),
+    ]))
+    els.append(logo_table)
     if subtitle:
         els.append(Paragraph(subtitle, ParagraphStyle(
             'PDFSub', parent=styles['Normal'], fontSize=9, textColor=GREY, spaceAfter=8
