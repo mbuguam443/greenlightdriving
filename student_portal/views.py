@@ -39,7 +39,7 @@ class PortalDashboardView(StudentRequiredMixin, View):
 
             context['recent_payments'] = payments[:5]
             context['lessons'] = all_lessons[:10]
-            context['upcoming_lessons'] = all_lessons.filter(status='SCHEDULED')[:5]
+            context['upcoming_lessons'] = all_lessons.filter(date__gte=timezone.now().date()).order_by('date')[:5]
             context['ntsa'] = NTSARecord.objects.filter(student=student).first()
             context['lessons_completed'] = completed_lessons.count()
             context['progress_percentage'] = student.progress_percentage
