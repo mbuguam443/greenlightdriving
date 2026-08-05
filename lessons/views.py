@@ -263,3 +263,13 @@ class PracticalLessonAttendanceView(StaffTestMixin, View):
         lesson.save(update_fields=['attended', 'completed_at'])
         messages.success(request, f'{lesson.lesson_item.name} attendance: {"Present" if lesson.attended else "Absent"}')
         return redirect('lessons:list')
+
+
+
+class TheoryLessonAttendanceView(StaffTestMixin, View):
+    def get(self, request, pk):
+        lesson = get_object_or_404(TheoryLesson, pk=pk)
+        lesson.attended = not lesson.attended
+        lesson.save(update_fields=['attended'])
+        messages.success(request, f'Theory attendance: {"Present" if lesson.attended else "Absent"}')
+        return redirect('lessons:theory_list')

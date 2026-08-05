@@ -14,4 +14,5 @@ urlpatterns = [
     path('theory/create/', views.TheoryLessonCreateView.as_view(), name='theory_create'),
     path('theory/<int:pk>/update/', views.TheoryLessonUpdateView.as_view(), name='theory_update'),
     path('theory/<int:pk>/delete/', views.TheoryLessonDeleteView.as_view(), name='theory_delete'),
+    path('theory/<int:pk>/attendance/', views.TheoryLessonAttendanceView.as_view(), name='theory_attendance'),
 ]

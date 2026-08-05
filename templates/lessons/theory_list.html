@@ -78,6 +78,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Status</th>
+                        <th class="text-center">Att.</th>
                         <th class="text-end pe-3">Actions</th>
                     </tr>
                 </thead>
@@ -107,6 +108,15 @@
                             {% elif lesson.status == 'COMPLETED' %}
                             <span class="badge bg-success">Completed</span>
                             {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'lessons:theory_attendance' lesson.pk %}" title="Toggle attendance">
+                                {% if lesson.attended %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                {% else %}
+                                <i class="bi bi-circle text-muted"></i>
+                                {% endif %}
+                            </a>
                         </td>
                         <td class="text-end pe-3">
                             <a href="{% url 'lessons:theory_update' lesson.pk %}" class="btn btn-sm btn-outline-success" title="Edit">

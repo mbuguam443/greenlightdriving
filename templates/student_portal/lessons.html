@@ -92,6 +92,7 @@
                             <th class="ps-3">Topic</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Attended</th>
                             <th>Instructor</th>
                             <th>Status</th>
                         </tr>
@@ -102,6 +103,13 @@
                             <td class="ps-3 fw-semibold">{{ lesson.topic }}</td>
                             <td>{{ lesson.date|date:"d M Y" }}</td>
                             <td>{{ lesson.time_start|time:"H:i" }} - {{ lesson.time_end|time:"H:i" }}</td>
+                            <td>
+                                {% if lesson.attended %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                {% else %}
+                                <i class="bi bi-circle text-muted"></i>
+                                {% endif %}
+                            </td>
                             <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
                             <td>
                                 {% if lesson.status == 'COMPLETED' %}
@@ -114,7 +122,7 @@
                             </td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="5" class="text-center py-4 text-muted">No theory lessons yet</td></tr>
+                        <tr><td colspan="6" class="text-center py-4 text-muted">No theory lessons yet</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
