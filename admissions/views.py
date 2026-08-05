@@ -296,3 +296,24 @@ class InquiryConvertView(LoginRequiredMixin, UserPassesTestMixin, View):
             inquiry.followed_up = True
         inquiry.save(update_fields=['converted', 'followed_up'])
         return redirect('admissions:inquiry_list')
+
+
+
+class InquiryUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def post(self, request, pk):
+        from .models import WalkInInquiry
+        inquiry = get_object_or_404(WalkInInquiry, pk=pk)
+        inquiry.name = request.POST.get('name', inquiry.name)
+        inquiry.phone = request.POST.get('phone', inquiry.phone)
+        inquiry.email = request.POST.get('email', inquiry.email) or ''
+        inquiry.feedback = request.POST.get('feedback', '')
+        course_id = request.POST.get('course') or None
+        if course_id:
+            from website.models import Course
+            inquiry.course = Course.objects.filter(pk=course_id).first()
+        inquiry.save()
+        messages.success(request, f'Enquiry updated.')
+        return redirect('admissions:inquiry_list')

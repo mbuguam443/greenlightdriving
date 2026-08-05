@@ -66,7 +66,14 @@
                             {% if inquiry.email %}<div><i class="bi bi-envelope me-1 text-muted small"></i>{{ inquiry.email }}</div>{% endif %}
                         </td>
                         <td>{{ inquiry.course.name|default:"—" }}</td>
-                        <td><small>{{ inquiry.feedback|truncatechars:60|default:"—" }}</small></td>
+                        <td>
+                            <div class="d-flex align-items-start gap-1">
+                                <small style="flex:1;">{{ inquiry.feedback|default:"—" }}</small>
+                                <a href="#" class="text-muted small" data-bs-toggle="modal" data-bs-target="#inquiryModal"
+                                   onclick="editInquiry({{ inquiry.pk }}, '{{ inquiry.name|escapejs }}', '{{ inquiry.phone|escapejs }}', '{{ inquiry.email|escapejs }}', '{{ inquiry.feedback|escapejs|default:'' }}', '{{ inquiry.course_id|default:'' }}')"
+                                   title="Edit"><i class="bi bi-pencil-square"></i></a>
+                            </div>
+                        </td>
                         <td>
                             {% if inquiry.converted %}
                             <span class="badge bg-success"><i class="bi bi-person-check me-1"></i>Converted</span>
@@ -155,4 +162,32 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+var editMode = false;
+function editInquiry(id, name, phone, email, feedback, courseId) {
+    editMode = true;
+    var form = document.querySelector('#inquiryModal form');
+    form.action = '/admissions/inquiries/' + id + '/edit/';
+    form.querySelector('[name="name"]').value = name;
+    form.querySelector('[name="phone"]').value = phone;
+    form.querySelector('[name="email"]').value = email;
+    form.querySelector('[name="feedback"]').value = feedback;
+    form.querySelector('[name="course"]').value = courseId;
+    document.querySelector('#inquiryModal .modal-title').innerHTML = '<i class="bi bi-pencil me-2"></i>Edit Enquiry';
+    document.querySelector('#inquiryModal button[type=submit]').innerHTML = '<i class="bi bi-save me-1"></i>Update';
+}
+
+document.getElementById('inquiryModal').addEventListener('hidden.bs.modal', function() {
+    if (editMode) {
+        var form = this.querySelector('form');
+        form.action = '{% url "admissions:inquiry_create" %}';
+        form.reset();
+        document.querySelector('#inquiryModal .modal-title').innerHTML = '<i class="bi bi-person-plus me-2"></i>New Walk-in Inquiry';
+        document.querySelector('#inquiryModal button[type=submit]').innerHTML = '<i class="bi bi-save me-1"></i>Save Inquiry';
+        editMode = false;
+    }
+});
+</script>
 {% endblock %}
