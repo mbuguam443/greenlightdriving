@@ -73,17 +73,29 @@ class PortalScheduleView(StudentRequiredMixin, View):
 class PortalLessonsView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
-        from lessons.models import PracticalLesson
+        from lessons.models import PracticalLesson, TheoryLesson
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
-            student = None
+            return render(request, 'student_portal/lessons.html', {'lessons': [], 'student': None})
         
-        lessons = PracticalLesson.objects.filter(student=student).select_related('lesson_item', 'instructor') if student else []
+        practical = PracticalLesson.objects.filter(student=student).select_related('lesson_item', 'instructor__user', 'vehicle')
+        theory = TheoryLesson.objects.filter(student=student).select_related('instructor__user')
+        
+        completed_p = sum(1 for l in practical if l.status == 'COMPLETED')
+        total_p = practical.count() or 0
+        completed_t = sum(1 for l in theory if l.status == 'COMPLETED')
+        total_t = theory.count() or 0
+        total_all = total_p + total_t
+        completed_all = completed_p + completed_t
         
         return render(request, 'student_portal/lessons.html', {
-            'lessons': lessons,
             'student': student,
+            'practical_lessons': practical,
+            'theory_lessons': theory,
+            'completed_count': completed_all,
+            'total_count': total_all,
+            'progress_percentage': round((completed_all / total_all * 100)) if total_all else 0,
         })
 
 
