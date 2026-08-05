@@ -113,7 +113,7 @@ class PortalPaymentsView(StudentRequiredMixin, View):
 class PortalProgressView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
-        from lessons.models import PracticalLesson
+        from lessons.models import PracticalLesson, TheoryLesson
         from ntsa.models import NTSARecord
         try:
             student = Student.objects.get(user=request.user)
@@ -122,18 +122,23 @@ class PortalProgressView(StudentRequiredMixin, View):
         
         context = {'student': student}
         if student:
-            all_lessons = PracticalLesson.objects.filter(student=student).select_related('lesson_item')
-            completed = all_lessons.filter(status='COMPLETED')
-            total = all_lessons.count()
+            practical = PracticalLesson.objects.filter(student=student).select_related('lesson_item')
+            theory = TheoryLesson.objects.filter(student=student)
+            completed_p = practical.filter(status='COMPLETED').count()
+            total_p = practical.count()
+            completed_t = theory.filter(status='COMPLETED').count()
+            total_t = theory.count()
+            total_all = total_p + total_t
+            completed_all = completed_p + completed_t
             
-            context['lessons'] = all_lessons
-            context['lesson_progress'] = all_lessons
+            context['lessons'] = practical
+            context['lesson_progress'] = practical
             context['ntsa_status'] = NTSARecord.objects.filter(student=student).first()
-            context['completed_lessons'] = completed.count()
-            context['total_lessons'] = total
-            context['total_hours'] = sum(getattr(l, 'duration', 0) or 0 for l in completed)
-            context['lesson_completion_rate'] = round((completed.count() / total * 100)) if total else 0
-            context['overall_progress'] = student.progress_percentage
+            context['completed_lessons'] = completed_all
+            context['total_lessons'] = total_all
+            context['total_hours'] = completed_p
+            context['lesson_completion_rate'] = round((completed_all / total_all * 100)) if total_all else 0
+            context['overall_progress'] = context['lesson_completion_rate']
         
         return render(request, 'student_portal/progress.html', context)
 
