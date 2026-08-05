@@ -293,3 +293,108 @@ class LessonReportPDFView(StaffTestMixin, View):
         lessons = PracticalLesson.objects.select_related('student__user', 'lesson_item', 'instructor__user', 'vehicle').all()
         pdf = generate_lesson_report(lessons)
         return HttpResponse(pdf, content_type='application/pdf')
+
+
+
+class VehicleReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from vehicles.models import Vehicle
+        from .pdf_reports import generate_payment_report
+        from django.http import HttpResponse
+        import io
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+        vehicles = Vehicle.objects.select_related('assigned_instructor__user').all()
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=20*mm, rightMargin=20*mm, topMargin=30*mm)
+        styles = getSampleStyleSheet()
+        story = [Paragraph("Vehicle Report", ParagraphStyle('T', parent=styles['Title'], fontSize=16, textColor=colors.HexColor('#2E7D32'))), Spacer(1, 6*mm)]
+
+        data = [['Reg No.', 'Make', 'Model', 'Category', 'Year', 'Instructor', 'Available']]
+        for v in vehicles:
+            inst = v.assigned_instructor.user.full_name if v.assigned_instructor else '—'
+            data.append([v.registration_number, v.make, v.model_name, v.category, str(v.year), inst, 'Yes' if v.is_available else 'No'])
+
+        t = Table(data, colWidths=[70, 55, 65, 45, 40, 80, 45], repeatRows=1)
+        t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
+             ('GRID',(0,0),(-1,-1),0.5,colors.Color(0.9,0.9,0.9)), ('FONTSIZE',(0,0),(-1,-1),8),
+             ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.Color(0.95,0.97,0.95)])]))
+        story.append(t)
+        story.append(Spacer(1,4*mm))
+        story.append(Paragraph(f"<b>Total: {len(vehicles)} vehicle(s)</b>", styles['Normal']))
+        doc.build(story)
+        buf.seek(0)
+        return HttpResponse(buf, content_type='application/pdf')
+
+
+class InstructorReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from instructors.models import Instructor
+        from django.http import HttpResponse
+        import io
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+        instructors = Instructor.objects.select_related('user', 'branch').all()
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=20*mm, rightMargin=20*mm, topMargin=30*mm)
+        styles = getSampleStyleSheet()
+        story = [Paragraph("Instructor Report", ParagraphStyle('T', parent=styles['Title'], fontSize=16, textColor=colors.HexColor('#2E7D32'))), Spacer(1, 6*mm)]
+
+        data = [['Name', 'Phone', 'License No.', 'License Class', 'Experience', 'Branch', 'Active']]
+        for i in instructors:
+            br = i.branch.name if i.branch else '—'
+            data.append([i.user.full_name, i.phone or '—', i.license_number, i.get_license_class_display() or '—',
+                         f'{i.experience_years} yrs', br, 'Active' if i.is_active else 'Inactive'])
+
+        t = Table(data, colWidths=[80, 65, 65, 55, 45, 50, 40], repeatRows=1)
+        t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
+             ('GRID',(0,0),(-1,-1),0.5,colors.Color(0.9,0.9,0.9)), ('FONTSIZE',(0,0),(-1,-1),8),
+             ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.Color(0.95,0.97,0.95)])]))
+        story.append(t)
+        story.append(Spacer(1,4*mm))
+        story.append(Paragraph(f"<b>Total: {len(instructors)} instructor(s)</b>", styles['Normal']))
+        doc.build(story)
+        buf.seek(0)
+        return HttpResponse(buf, content_type='application/pdf')
+
+
+class AdmissionReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from admissions.models import Admission
+        from django.http import HttpResponse
+        import io
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+        admissions = Admission.objects.select_related('course').all()
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm, topMargin=30*mm)
+        styles = getSampleStyleSheet()
+        story = [Paragraph("Admission Report", ParagraphStyle('T', parent=styles['Title'], fontSize=16, textColor=colors.HexColor('#2E7D32'))), Spacer(1, 6*mm)]
+
+        data = [['Adm No.', 'Name', 'Phone', 'Course', 'Package', 'Status', 'Date']]
+        for a in admissions:
+            data.append([a.admission_number, a.full_name, a.phone, a.course.name if a.course else '—',
+                         a.get_package_choice_display(), a.get_status_display(), a.created_at.strftime('%d/%m/%Y')])
+
+        t = Table(data, colWidths=[55, 75, 65, 75, 45, 50, 55], repeatRows=1)
+        t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
+             ('GRID',(0,0),(-1,-1),0.5,colors.Color(0.9,0.9,0.9)), ('FONTSIZE',(0,0),(-1,-1),8),
+             ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.Color(0.95,0.97,0.95)])]))
+        story.append(t)
+        story.append(Spacer(1,4*mm))
+        story.append(Paragraph(f"<b>Total: {len(admissions)} admission(s)</b>", styles['Normal']))
+        doc.build(story)
+        buf.seek(0)
+        return HttpResponse(buf, content_type='application/pdf')

@@ -18,4 +18,7 @@ urlpatterns = [
     path('pdf/enquiries/', views.EnquiryReportPDFView.as_view(), name='pdf_enquiries'),
     path('pdf/students/', views.StudentReportPDFView.as_view(), name='pdf_students'),
     path('pdf/lessons/', views.LessonReportPDFView.as_view(), name='pdf_lessons'),
+    path('pdf/vehicles/', views.VehicleReportPDFView.as_view(), name='pdf_vehicles'),
+    path('pdf/instructors/', views.InstructorReportPDFView.as_view(), name='pdf_instructors'),
+    path('pdf/admissions/', views.AdmissionReportPDFView.as_view(), name='pdf_admissions'),
 ]
