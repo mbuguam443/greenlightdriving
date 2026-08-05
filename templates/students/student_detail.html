@@ -11,6 +11,9 @@
         <p class="text-muted mb-0">Student Number: <strong style="color: #2E7D32;">{{ student.student_number }}</strong></p>
     </div>
     <div class="d-flex gap-2">
+        <a href="{% url 'reports:pdf_student_attendance' student.pk %}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-file-pdf me-1"></i>Attendance PDF
+        </a>
         <a href="{% url 'students:generate_lessons' student.pk %}" class="btn btn-sm fw-semibold text-white" style="background-color: #2E7D32;"
            onclick="return confirm('Generate all missing lessons for this student?')">
             <i class="bi bi-lightning me-1"></i>Generate Lessons

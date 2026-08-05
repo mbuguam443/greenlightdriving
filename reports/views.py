@@ -451,8 +451,82 @@ class AdmissionReportPDFView(StaffTestMixin, View):
 
 class AttendanceReportPDFView(StaffTestMixin, View):
     def get(self, request):
-        from lessons.models import PracticalLesson
+        from lessons.models import PracticalLesson, TheoryLesson
         from django.http import HttpResponse
+        import io
+        from datetime import date
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+
+        practical = PracticalLesson.objects.select_related('student__user', 'lesson_item', 'instructor__user').all()
+        theory = TheoryLesson.objects.select_related('student__user', 'instructor__user').all()
+        
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=landscape(A4), leftMargin=15*mm, rightMargin=15*mm, topMargin=28*mm, bottomMargin=22*mm)
+        styles = getSampleStyleSheet()
+        story = [Paragraph("Attendance Report", ParagraphStyle('T', parent=styles['Title'], fontSize=18, textColor=colors.HexColor('#2E7D32'), fontName='Helvetica-Bold')),
+                 Paragraph(f'Generated: {date.today().strftime("%d %B %Y")}', ParagraphStyle('S', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#666666'))),
+                 HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#2E7D32'), spaceAfter=8)]
+
+        story.append(Paragraph("<b>Practical Lessons</b>", ParagraphStyle('H', parent=styles['Heading3'], fontSize=12, textColor=colors.HexColor('#2E7D32'))))
+        story.append(Spacer(1, 3*mm))
+
+        pdata = [['Student', 'Lesson Item', 'Date', 'Instructor', 'Attended', 'Status']]
+        for l in practical:
+            pdata.append([l.student.user.full_name if l.student else '-',
+                         l.lesson_item.name if l.lesson_item else '-',
+                         l.date.strftime('%d/%m/%y'),
+                         l.instructor.user.full_name if l.instructor else '-',
+                         'Present' if l.attended else 'Absent',
+                         l.get_status_display()])
+        t = Table(pdata, colWidths=[90, 110, 50, 90, 45, 60], repeatRows=1)
+        t.setStyle(TableStyle([
+            ('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
+            ('GRID',(0,0),(-1,-1),0.4,colors.Color(0.85,0.85,0.85)), ('FONTSIZE',(0,0),(-1,-1),7.5),
+            ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#E8F5E9')]),
+        ]))
+        story.append(t)
+        p_present = sum(1 for l in practical if l.attended)
+        story.append(Paragraph(f"Practical: {p_present}/{len(practical)} present", ParagraphStyle('Sum', parent=styles['Normal'], fontSize=8, textColor=colors.HexColor('#1B5E20'))))
+        story.append(Spacer(1, 5*mm))
+
+        story.append(Paragraph("<b>Theory Lessons</b>", ParagraphStyle('H', parent=styles['Heading3'], fontSize=12, textColor=colors.HexColor('#2E7D32'))))
+        story.append(Spacer(1, 3*mm))
+
+        tdata = [['Student', 'Topic', 'Date', 'Instructor', 'Attended', 'Status']]
+        for l in theory:
+            tdata.append([l.student.user.full_name if l.student else '-',
+                         l.topic, l.date.strftime('%d/%m/%y'),
+                         l.instructor.user.full_name if l.instructor else '-',
+                         'Present' if l.attended else 'Absent',
+                         l.get_status_display()])
+        t2 = Table(tdata, colWidths=[90, 130, 50, 90, 45, 60], repeatRows=1)
+        t2.setStyle(TableStyle([
+            ('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
+            ('GRID',(0,0),(-1,-1),0.4,colors.Color(0.85,0.85,0.85)), ('FONTSIZE',(0,0),(-1,-1),7.5),
+            ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#E8F5E9')]),
+        ]))
+        story.append(t2)
+        t_present = sum(1 for l in theory if l.attended)
+        story.append(Paragraph(f"Theory: {t_present}/{len(theory)} present", ParagraphStyle('Sum', parent=styles['Normal'], fontSize=8, textColor=colors.HexColor('#1B5E20'))))
+        story.append(Spacer(1, 4*mm))
+        story.append(Paragraph(f"<b>Total Attendance: {p_present+t_present}/{len(practical)+len(theory)} ({round((p_present+t_present)/(len(practical)+len(theory))*100) if (len(practical)+len(theory)) else 0}%)</b>",
+                               ParagraphStyle('Sum', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#1B5E20'))))
+        doc.build(story)
+        buf.seek(0)
+        return HttpResponse(buf, content_type='application/pdf')
+
+
+
+class StudentAttendancePDFView(StaffTestMixin, View):
+    def get(self, request, pk):
+        from students.models import Student
+        from lessons.models import PracticalLesson, TheoryLesson
+        from django.http import HttpResponse
+        from django.shortcuts import get_object_or_404
         import io
         from datetime import date
         from reportlab.lib.pagesizes import A4
@@ -461,35 +535,37 @@ class AttendanceReportPDFView(StaffTestMixin, View):
         from reportlab.lib.units import mm
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
 
-        lessons = PracticalLesson.objects.select_related('student__user', 'lesson_item', 'instructor__user').all().order_by('date')
-        
+        student = get_object_or_404(Student, pk=pk)
+        practical = PracticalLesson.objects.filter(student=student).select_related('lesson_item', 'instructor__user')
+        theory = TheoryLesson.objects.filter(student=student).select_related('instructor__user')
+
         buf = io.BytesIO()
-        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm, topMargin=28*mm, bottomMargin=22*mm)
+        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm, topMargin=28*mm, bottomMargin=22*mm)
         styles = getSampleStyleSheet()
-        story = [Paragraph("Attendance Report", ParagraphStyle('T', parent=styles['Title'], fontSize=18, textColor=colors.HexColor('#2E7D32'), fontName='Helvetica-Bold')),
-                 Paragraph(f'Generated: {date.today().strftime("%d %B %Y")}', ParagraphStyle('S', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#666666'))),
+
+        story = [Paragraph(f"Attendance - {student.user.full_name}", ParagraphStyle('T', parent=styles['Title'], fontSize=16, textColor=colors.HexColor('#2E7D32'), fontName='Helvetica-Bold')),
+                 Paragraph(f'{student.student_number} | Generated: {date.today().strftime("%d %B %Y")}', ParagraphStyle('S', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#666666'))),
                  HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#2E7D32'), spaceAfter=8)]
 
-        data = [['Student', 'Lesson', 'Date', 'Instructor', 'Attended', 'Status']]
-        for l in lessons:
-            data.append([l.student.user.full_name if l.student else '-',
-                         l.lesson_item.name if l.lesson_item else '-',
-                         l.date.strftime('%d/%m/%y'),
-                         l.instructor.user.full_name if l.instructor else '-',
-                         'Present' if l.attended else 'Absent',
-                         l.get_status_display()])
+        p_present = sum(1 for l in practical if l.attended)
+        story.append(Paragraph(f"<b>Practical: {p_present}/{practical.count()} attended</b> | <b>Theory: {sum(1 for l in theory if l.attended)}/{theory.count()} attended</b>",
+                               ParagraphStyle('Sum', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#1B5E20'))))
+        story.append(Spacer(1, 5*mm))
 
-        t = Table(data, colWidths=[85, 100, 48, 85, 45, 55], repeatRows=1)
+        pdata = [['Date', 'Lesson', 'Instructor', 'Attended', 'Status']]
+        for l in practical:
+            pdata.append([l.date.strftime('%d/%m/%y'), l.lesson_item.name if l.lesson_item else '-',
+                         l.instructor.user.full_name if l.instructor else '-',
+                         'Yes' if l.attended else 'No', l.get_status_display()])
+
+        t = Table(pdata, colWidths=[48, 140, 100, 45, 65], repeatRows=1)
         t.setStyle(TableStyle([
             ('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
             ('GRID',(0,0),(-1,-1),0.4,colors.Color(0.85,0.85,0.85)), ('FONTSIZE',(0,0),(-1,-1),7.5),
             ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#E8F5E9')]),
         ]))
         story.append(t)
-        story.append(Spacer(1,4*mm))
-        present = sum(1 for l in lessons if l.attended)
-        story.append(Paragraph(f"<b>Total: {len(lessons)} | Present: {present} | Absent: {len(lessons)-present}</b>",
-                               ParagraphStyle('Sum', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#1B5E20'))))
+
         doc.build(story)
         buf.seek(0)
         return HttpResponse(buf, content_type='application/pdf')
