@@ -472,10 +472,10 @@ class AttendanceReportPDFView(StaffTestMixin, View):
 
         data = [['Student', 'Lesson', 'Date', 'Instructor', 'Attended', 'Status']]
         for l in lessons:
-            data.append([l.student.user.full_name if l.student else '—',
-                         l.lesson_item.name if l.lesson_item else '—',
+            data.append([l.student.user.full_name if l.student else '-',
+                         l.lesson_item.name if l.lesson_item else '-',
                          l.date.strftime('%d/%m/%y'),
-                         l.instructor.user.full_name if l.instructor else '—',
+                         l.instructor.user.full_name if l.instructor else '-',
                          'Present' if l.attended else 'Absent',
                          l.get_status_display()])
 
