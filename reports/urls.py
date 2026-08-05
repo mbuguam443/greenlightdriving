@@ -12,5 +12,6 @@ urlpatterns = [
     path('vehicles/', views.VehicleUtilizationView.as_view(), name='vehicle_utilization'),
     path('branches/', views.BranchPerformanceView.as_view(), name='branch_performance'),
     path('students/', views.StudentProgressReportView.as_view(), name='student_progress'),
+    path('activity/', views.ActivityReportView.as_view(), name='activity'),
     path('backup/', views.BackupView.as_view(), name='backup'),
 ]

@@ -15,13 +15,24 @@ class ReportIndexView(StaffTestMixin, View):
     def get(self, request):
         from payments.models import Payment
         from students.models import Student
-        from admissions.models import Admission
+        from admissions.models import Admission, WalkInInquiry
         from instructors.models import Instructor
         from vehicles.models import Vehicle
+        from lessons.models import PracticalLesson, TheoryLesson
         from datetime import date
         
         today = date.today()
         month_start = today.replace(day=1)
+        
+        # Enquiry stats
+        enquiries = WalkInInquiry.objects.all()
+        enquiry_pending = enquiries.filter(followed_up=False, converted=False).count()
+        enquiry_converted = enquiries.filter(converted=True).count()
+        
+        # Lesson stats
+        lessons_today = PracticalLesson.objects.filter(date=today).count()
+        lessons_completed = PracticalLesson.objects.filter(status='COMPLETED').count()
+        lessons_total = PracticalLesson.objects.count()
         
         context = {
             'total_students': Student.objects.filter(status='ACTIVE').count(),
@@ -29,8 +40,14 @@ class ReportIndexView(StaffTestMixin, View):
             'month_revenue': Payment.objects.filter(status='COMPLETED', created_at__date__gte=month_start).aggregate(total=Sum('amount'))['total'] or 0,
             'total_admissions': Admission.objects.count(),
             'pending_admissions': Admission.objects.filter(status='PENDING').count(),
-            'total_instructors': Instructor.objects.count(),
+            'total_instructors': Instructor.objects.filter(is_active=True).count(),
             'total_vehicles': Vehicle.objects.count(),
+            'enquiry_total': enquiries.count(),
+            'enquiry_pending': enquiry_pending,
+            'enquiry_converted': enquiry_converted,
+            'lessons_today': lessons_today,
+            'lessons_completed': lessons_completed,
+            'lessons_total': lessons_total,
         }
         return render(request, 'reports/index.html', context)
 
@@ -178,6 +195,40 @@ class StudentProgressReportView(StaffTestMixin, View):
             'students': students,
         }
         return render(request, 'reports/student_progress.html', context)
+
+
+class ActivityReportView(StaffTestMixin, View):
+    def get(self, request):
+        from payments.models import Payment
+        from admissions.models import WalkInInquiry
+        from lessons.models import PracticalLesson, TheoryLesson
+        from students.models import Student
+        from datetime import date
+
+        # Recent payments
+        recent_payments = Payment.objects.select_related('student__user').order_by('-created_at')[:20]
+        
+        # Recent enquiries
+        recent_enquiries = WalkInInquiry.objects.all().order_by('-created_at')[:20]
+        
+        # Lessons per student (top 10)
+        student_lessons = Student.objects.filter(status='ACTIVE').annotate(
+            practical_count=Count('practical_lessons', distinct=True),
+            completed_count=Count('practical_lessons', filter=Q(practical_lessons__status='COMPLETED'), distinct=True),
+        ).order_by('-practical_count')[:10]
+        
+        # Payments per student
+        student_payments = Student.objects.filter(status='ACTIVE').annotate(
+            total_paid=Sum('payments__amount', filter=Q(payments__status='COMPLETED')),
+            payment_count=Count('payments', filter=Q(payments__status='COMPLETED')),
+        ).order_by('-total_paid')[:10]
+        
+        return render(request, 'reports/activity.html', {
+            'recent_payments': recent_payments,
+            'recent_enquiries': recent_enquiries,
+            'student_lessons': student_lessons,
+            'student_payments': student_payments,
+        })
 
 
 
