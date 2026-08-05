@@ -21,4 +21,5 @@ urlpatterns = [
     path('pdf/vehicles/', views.VehicleReportPDFView.as_view(), name='pdf_vehicles'),
     path('pdf/instructors/', views.InstructorReportPDFView.as_view(), name='pdf_instructors'),
     path('pdf/admissions/', views.AdmissionReportPDFView.as_view(), name='pdf_admissions'),
+    path('pdf/attendance/', views.AttendanceReportPDFView.as_view(), name='pdf_attendance'),
 ]

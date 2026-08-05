@@ -446,3 +446,50 @@ class AdmissionReportPDFView(StaffTestMixin, View):
         doc.build(story)
         buf.seek(0)
         return HttpResponse(buf, content_type='application/pdf')
+
+
+
+class AttendanceReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from lessons.models import PracticalLesson
+        from django.http import HttpResponse
+        import io
+        from datetime import date
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+
+        lessons = PracticalLesson.objects.select_related('student__user', 'lesson_item', 'instructor__user').all().order_by('date')
+        
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm, topMargin=28*mm, bottomMargin=22*mm)
+        styles = getSampleStyleSheet()
+        story = [Paragraph("Attendance Report", ParagraphStyle('T', parent=styles['Title'], fontSize=18, textColor=colors.HexColor('#2E7D32'), fontName='Helvetica-Bold')),
+                 Paragraph(f'Generated: {date.today().strftime("%d %B %Y")}', ParagraphStyle('S', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#666666'))),
+                 HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#2E7D32'), spaceAfter=8)]
+
+        data = [['Student', 'Lesson', 'Date', 'Instructor', 'Attended', 'Status']]
+        for l in lessons:
+            data.append([l.student.user.full_name if l.student else '—',
+                         l.lesson_item.name if l.lesson_item else '—',
+                         l.date.strftime('%d/%m/%y'),
+                         l.instructor.user.full_name if l.instructor else '—',
+                         'Present' if l.attended else 'Absent',
+                         l.get_status_display()])
+
+        t = Table(data, colWidths=[85, 100, 48, 85, 45, 55], repeatRows=1)
+        t.setStyle(TableStyle([
+            ('BACKGROUND',(0,0),(-1,0), colors.HexColor('#2E7D32')), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
+            ('GRID',(0,0),(-1,-1),0.4,colors.Color(0.85,0.85,0.85)), ('FONTSIZE',(0,0),(-1,-1),7.5),
+            ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#E8F5E9')]),
+        ]))
+        story.append(t)
+        story.append(Spacer(1,4*mm))
+        present = sum(1 for l in lessons if l.attended)
+        story.append(Paragraph(f"<b>Total: {len(lessons)} | Present: {present} | Absent: {len(lessons)-present}</b>",
+                               ParagraphStyle('Sum', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#1B5E20'))))
+        doc.build(story)
+        buf.seek(0)
+        return HttpResponse(buf, content_type='application/pdf')
