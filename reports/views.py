@@ -270,7 +270,7 @@ class PaymentReportPDFView(StaffTestMixin, View):
         if status:
             payments = payments.filter(status=status)
         payments = payments.order_by('-created_at')
-        pdf = generate_payment_report(payments)
+        pdf = generate_payment_report(payments, exported_by=request.user.full_name)
         return HttpResponse(pdf, content_type='application/pdf')
 
 
@@ -289,7 +289,7 @@ class EnquiryReportPDFView(StaffTestMixin, View):
         elif tab == 'converted':
             enquiries = enquiries.filter(converted=True)
         enquiries = enquiries.order_by('-created_at')
-        pdf = generate_enquiry_report(enquiries)
+        pdf = generate_enquiry_report(enquiries, exported_by=request.user.full_name)
         return HttpResponse(pdf, content_type='application/pdf')
 
 
@@ -311,7 +311,7 @@ class StudentReportPDFView(StaffTestMixin, View):
             )
         if status:
             students = students.filter(status=status)
-        pdf = generate_student_report(students)
+        pdf = generate_student_report(students, exported_by=request.user.full_name)
         return HttpResponse(pdf, content_type='application/pdf')
 
 
@@ -339,7 +339,7 @@ class LessonReportPDFView(StaffTestMixin, View):
             lessons = lessons.filter(date=date_f)
         if instructor_f:
             lessons = lessons.filter(instructor_id=instructor_f)
-        pdf = generate_lesson_report(lessons)
+        pdf = generate_lesson_report(lessons, exported_by=request.user.full_name)
         return HttpResponse(pdf, content_type='application/pdf')
 
 

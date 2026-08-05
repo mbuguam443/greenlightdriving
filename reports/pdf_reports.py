@@ -32,9 +32,20 @@ def _header_footer(canvas, doc):
     # Footer
     canvas.setFillColor(GREY)
     canvas.setFont('Helvetica', 7)
-    canvas.drawString(25, 15, "Generated: " + date.today().strftime('%d %B %Y'))
+    exported_by = getattr(canvas, '_exported_by', 'System')
+    canvas.drawString(25, 15, f"Generated: {date.today().strftime('%d %B %Y')} by {exported_by}")
     canvas.drawRightString(w - 25, 15, f"Page {canvas.getPageNumber()}")
     canvas.restoreState()
+
+
+class _ExportDocTemplate(SimpleDocTemplate):
+    def __init__(self, *args, exported_by='', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exported_by = exported_by
+
+    def handle_pageBegin(self):
+        super().handle_pageBegin()
+        self.canv._exported_by = self.exported_by
 
 
 def _make_table(data, col_widths, total_text=""):
@@ -87,9 +98,10 @@ def _title(title_text, subtitle=""):
     return els
 
 
-def generate_payment_report(payments):
+def generate_payment_report(payments, exported_by='System'):
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm, topMargin=28*mm, bottomMargin=22*mm)
+    doc = _ExportDocTemplate(buf, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm,
+                              topMargin=28*mm, bottomMargin=22*mm, exported_by=exported_by)
     story = _title("Payment Report", f"All recorded payments — {date.today().strftime('%d %B %Y')}")
 
     total = 0
@@ -111,9 +123,10 @@ def generate_payment_report(payments):
     return buf
 
 
-def generate_enquiry_report(enquiries):
+def generate_enquiry_report(enquiries, exported_by='System'):
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm, topMargin=28*mm, bottomMargin=22*mm)
+    doc = _ExportDocTemplate(buf, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm,
+                              topMargin=28*mm, bottomMargin=22*mm, exported_by=exported_by)
     story = _title("Walk-in Enquiry Report", f"All customer enquiries — {date.today().strftime('%d %B %Y')}")
 
     data = [['Date', 'Name', 'Phone', 'Course Interest', 'Status']]
@@ -135,9 +148,10 @@ def generate_enquiry_report(enquiries):
     return buf
 
 
-def generate_student_report(students):
+def generate_student_report(students, exported_by='System'):
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm, topMargin=28*mm, bottomMargin=22*mm)
+    doc = _ExportDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm,
+                              topMargin=28*mm, bottomMargin=22*mm, exported_by=exported_by)
     story = _title("Student Enrollment Report", f"All registered students — {date.today().strftime('%d %B %Y')}")
 
     data = [['Number', 'Name', 'Phone', 'Course', 'Package', 'Status', 'Enrolled']]
@@ -157,9 +171,10 @@ def generate_student_report(students):
     return buf
 
 
-def generate_lesson_report(lessons, title="Lesson Report"):
+def generate_lesson_report(lessons, title="Lesson Report", exported_by='System'):
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm, topMargin=28*mm, bottomMargin=22*mm)
+    doc = _ExportDocTemplate(buf, pagesize=A4, leftMargin=15*mm, rightMargin=15*mm,
+                              topMargin=28*mm, bottomMargin=22*mm, exported_by=exported_by)
     story = _title(title, f"All practical lessons — {date.today().strftime('%d %B %Y')}")
 
     data = [['Student', 'Lesson Item', 'Instructor', 'Vehicle', 'Date', 'Status']]
