@@ -148,12 +148,23 @@ class PortalCertificatesView(StudentRequiredMixin, View):
             student = None
         
         ntsa = None
+        licence_issued = False
+        licence_number = ''
+        licence_issue_date = None
+        
         if student:
-            ntsa = NTSARecord.objects.filter(student=student, licence_issued=True).first()
+            ntsa = NTSARecord.objects.filter(student=student).first()
+            if ntsa and ntsa.licence_issued:
+                licence_issued = True
+                licence_number = ntsa.licence_number
+                licence_issue_date = ntsa.licence_issue_date
         
         return render(request, 'student_portal/certificates.html', {
             'student': student,
             'ntsa': ntsa,
+            'licence_issued': licence_issued,
+            'licence_number': licence_number,
+            'licence_issue_date': licence_issue_date,
         })
 
 

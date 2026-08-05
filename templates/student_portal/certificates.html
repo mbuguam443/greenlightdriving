@@ -30,7 +30,7 @@
                     
                     <h6 class="text-muted mb-4">This is to certify that</h6>
                     
-                    <h3 class="mb-3" style="color: var(--primary-green);">{{ user.get_full_name }}</h3>
+                    <h3 class="mb-3" style="color: var(--primary-green);">{{ student.user.full_name }}</h3>
                     
                     <p class="mb-4">has successfully completed the driving course and is hereby issued with</p>
                     
@@ -38,7 +38,7 @@
                         <h4 class="fw-bold" style="color: #2E7D32;">Driving Licence</h4>
                         <p class="text-muted mb-1">Licence Number: <strong>{{ licence_number }}</strong></p>
                         <p class="text-muted mb-1">Date of Issue: <strong>{{ licence_issue_date|date:"d M Y" }}</strong></p>
-                        <p class="text-muted mb-0">Licence Class: <strong>{{ licence_class|default:"B" }}</strong></p>
+                        <p class="text-muted mb-0">Licence Class: <strong>{{ student.course.category.name|default:"—" }}</strong></p>
                     </div>
 
                     <div class="row mt-4">
@@ -55,14 +55,9 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-center gap-3">
-                    {% if certificate_file %}
-                        <a href="{{ certificate_file.url }}" class="btn btn-primary px-4" style="background-color: #2E7D32; border-color: #2E7D32;" download>
-                            <i class="bi bi-download me-1"></i> Download Certificate
-                        </a>
-                    {% endif %}
-                    <button onclick="window.print()" class="btn btn-outline-primary px-4">
-                        <i class="bi bi-printer me-1"></i> Print
+                <div class="d-flex justify-content-center">
+                    <button onclick="window.print()" class="btn text-white px-4" style="background-color: #2E7D32;">
+                        <i class="bi bi-printer me-1"></i> Print Certificate
                     </button>
                 </div>
             </div>
