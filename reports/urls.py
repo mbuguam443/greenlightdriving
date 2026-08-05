@@ -14,4 +14,8 @@ urlpatterns = [
     path('students/', views.StudentProgressReportView.as_view(), name='student_progress'),
     path('activity/', views.ActivityReportView.as_view(), name='activity'),
     path('backup/', views.BackupView.as_view(), name='backup'),
+    path('pdf/payments/', views.PaymentReportPDFView.as_view(), name='pdf_payments'),
+    path('pdf/enquiries/', views.EnquiryReportPDFView.as_view(), name='pdf_enquiries'),
+    path('pdf/students/', views.StudentReportPDFView.as_view(), name='pdf_students'),
+    path('pdf/lessons/', views.LessonReportPDFView.as_view(), name='pdf_lessons'),
 ]

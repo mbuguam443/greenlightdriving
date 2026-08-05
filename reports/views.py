@@ -248,3 +248,48 @@ class BackupView(StaffTestMixin, View):
         response['Content-Disposition'] = f'attachment; filename="greenlight_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
         messages.success(request, 'Backup downloaded successfully.')
         return response
+
+
+
+class PaymentReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from payments.models import Payment
+        from .pdf_reports import generate_payment_report
+        from django.http import HttpResponse
+        
+        payments = Payment.objects.select_related('student__user').all().order_by('-created_at')
+        pdf = generate_payment_report(payments)
+        return HttpResponse(pdf, content_type='application/pdf')
+
+
+class EnquiryReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from admissions.models import WalkInInquiry
+        from .pdf_reports import generate_enquiry_report
+        from django.http import HttpResponse
+        
+        enquiries = WalkInInquiry.objects.all().order_by('-created_at')
+        pdf = generate_enquiry_report(enquiries)
+        return HttpResponse(pdf, content_type='application/pdf')
+
+
+class StudentReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from students.models import Student
+        from .pdf_reports import generate_student_report
+        from django.http import HttpResponse
+        
+        students = Student.objects.select_related('user', 'course').all()
+        pdf = generate_student_report(students)
+        return HttpResponse(pdf, content_type='application/pdf')
+
+
+class LessonReportPDFView(StaffTestMixin, View):
+    def get(self, request):
+        from lessons.models import PracticalLesson
+        from .pdf_reports import generate_lesson_report
+        from django.http import HttpResponse
+        
+        lessons = PracticalLesson.objects.select_related('student__user', 'lesson_item', 'instructor__user', 'vehicle').all()
+        pdf = generate_lesson_report(lessons)
+        return HttpResponse(pdf, content_type='application/pdf')
