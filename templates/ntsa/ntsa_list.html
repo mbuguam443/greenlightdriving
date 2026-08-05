@@ -28,10 +28,9 @@
             <div class="col-md-3">
                 <select name="pdl_status" class="form-select">
                     <option value="">All PDL Status</option>
-                    <option value="approved" {% if request.GET.pdl_status == 'approved' %}selected{% endif %}>Approved</option>
-                    <option value="pending" {% if request.GET.pdl_status == 'pending' %}selected{% endif %}>Pending</option>
-                    <option value="rejected" {% if request.GET.pdl_status == 'rejected' %}selected{% endif %}>Rejected</option>
-                    <option value="not_started" {% if request.GET.pdl_status == 'not_started' %}selected{% endif %}>Not Started</option>
+                    <option value="NOT_APPLIED" {% if request.GET.pdl_status == 'NOT_APPLIED' %}selected{% endif %}>Not Applied</option>
+                    <option value="APPLIED" {% if request.GET.pdl_status == 'APPLIED' %}selected{% endif %}>Applied</option>
+                    <option value="ISSUED" {% if request.GET.pdl_status == 'ISSUED' %}selected{% endif %}>Issued</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -80,22 +79,14 @@
                             </div>
                         </td>
                         <td>
-                            {% if record.pdl_status == 'approved' %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-check-circle me-1"></i> Approved
-                                </span>
-                            {% elif record.pdl_status == 'pending' %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-clock me-1"></i> Pending
-                                </span>
-                            {% elif record.pdl_status == 'rejected' %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-x-circle me-1"></i> Rejected
-                                </span>
+                            {% if record.pdl_status == 'ISSUED' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Issued</span>
+                            {% elif record.pdl_status == 'APPLIED' %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Applied</span>
+                            {% elif record.pdl_status == 'NOT_APPLIED' %}
+                                <span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i> Not Applied</span>
                             {% else %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-dash-circle me-1"></i> Not Started
-                                </span>
+                                <span class="badge bg-secondary">{{ record.get_pdl_status_display }}</span>
                             {% endif %}
                         </td>
                         <td>
