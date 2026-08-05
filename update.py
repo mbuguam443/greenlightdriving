@@ -125,6 +125,13 @@ with connection.cursor() as c:
         c.execute("ALTER TABLE admissions_walkininquiry ADD COLUMN converted TINYINT(1) DEFAULT 0 NOT NULL")
         print("      Added missing column admissions_walkininquiry.converted")
 
+    # Ensure attended columns exist
+    for table in ['lessons_practicallesson', 'lessons_theorylesson']:
+        c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='{table}' AND column_name='attended'")
+        if not c.fetchone()[0]:
+            c.execute(f"ALTER TABLE {table} ADD COLUMN attended TINYINT(1) DEFAULT 0 NOT NULL")
+            print(f"      Added missing column {table}.attended")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1
