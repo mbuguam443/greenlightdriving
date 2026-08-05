@@ -102,6 +102,7 @@
                                     <th>Vehicle</th>
                                     <th>Date</th>
                                     <th>Status</th>
+                                    <th class="text-center">Att.</th>
                                     <th class="text-end pe-3"></th>
                                 </tr>
                             </thead>
@@ -133,6 +134,15 @@
                                                 <option value="NEEDS_PRACTICE" {% if lesson.status == 'NEEDS_PRACTICE' %}selected{% endif %}>Needs Practice</option>
                                             </select>
                                         </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'lessons:practical_attendance' lesson.pk %}" title="Toggle attendance">
+                                            {% if lesson.attended %}
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            {% else %}
+                                            <i class="bi bi-circle text-muted"></i>
+                                            {% endif %}
+                                        </a>
                                     </td>
                                     <td class="text-end pe-3">
                                         <a href="{% url 'lessons:practical_update' lesson.pk %}" class="btn btn-sm btn-outline-success" title="Edit">

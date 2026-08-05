@@ -35,6 +35,7 @@ class PracticalLesson(models.Model):
     date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_STARTED', blank=True)
     remarks = models.TextField(blank=True)
+    attended = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -62,6 +63,7 @@ class TheoryLesson(models.Model):
     time_end = models.TimeField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_STARTED', blank=True)
     notes = models.TextField(blank=True)
+    attended = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

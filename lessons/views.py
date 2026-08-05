@@ -248,3 +248,18 @@ class TheoryLessonDeleteView(StaffTestMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Theory lesson deleted.')
         return super().form_valid(form)
+
+
+
+class PracticalLessonAttendanceView(StaffTestMixin, View):
+    def get(self, request, pk):
+        lesson = get_object_or_404(PracticalLesson, pk=pk)
+        lesson.attended = not lesson.attended
+        if lesson.attended:
+            from django.utils import timezone
+            lesson.completed_at = timezone.now()
+        else:
+            lesson.completed_at = None
+        lesson.save(update_fields=['attended', 'completed_at'])
+        messages.success(request, f'{lesson.lesson_item.name} attendance: {"Present" if lesson.attended else "Absent"}')
+        return redirect('lessons:list')
