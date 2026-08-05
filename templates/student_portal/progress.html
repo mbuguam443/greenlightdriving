@@ -138,70 +138,70 @@
             </div>
             <div class="card-body">
                 <div class="timeline">
-                    <div class="timeline-item {% if ntsa_status.pdl_approved %}completed{% endif %}">
-                        <div class="timeline-marker {% if ntsa_status.pdl_approved %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                    {% if ntsa_status %}
+                    <div class="timeline-item {% if ntsa_status.pdl_status == 'ISSUED' %}completed{% endif %}">
+                        <div class="timeline-marker {% if ntsa_status.pdl_status == 'ISSUED' %}bg-success{% elif ntsa_status.pdl_status == 'APPLIED' %}bg-warning{% else %}bg-secondary{% endif %}"></div>
                         <div class="timeline-content">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h6 class="mb-0">Provisional Driving Licence</h6>
                                     <small class="text-muted">PDL Application & Approval</small>
                                 </div>
-                                {% if ntsa_status.pdl_approved %}
-                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Approved</span>
+                                {% if ntsa_status.pdl_status == 'ISSUED' %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Issued</span>
+                                {% elif ntsa_status.pdl_status == 'APPLIED' %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Applied</span>
                                 {% else %}
-                                    <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
+                                    <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Not Applied</span>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <div class="timeline-item {% if ntsa_status.theory_passed %}completed{% endif %}">
-                        <div class="timeline-marker {% if ntsa_status.theory_passed %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                    <div class="timeline-item {% if ntsa_status.theory_exam_status == 'PASSED' %}completed{% endif %}">
+                        <div class="timeline-marker {% if ntsa_status.theory_exam_status == 'PASSED' %}bg-success{% elif ntsa_status.theory_exam_status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}"></div>
                         <div class="timeline-content">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h6 class="mb-0">Theory Test</h6>
                                     <small class="text-muted">Written Examination</small>
                                 </div>
-                                {% if ntsa_status.theory_passed %}
-                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Passed</span>
-                                {% else %}
-                                    <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
-                                {% endif %}
+                                <span class="badge {% if ntsa_status.theory_exam_status == 'PASSED' %}bg-success{% elif ntsa_status.theory_exam_status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    <i class="bi {% if ntsa_status.theory_exam_status == 'PASSED' %}bi-check-circle{% elif ntsa_status.theory_exam_status == 'FAILED' %}bi-x-circle{% else %}bi-dash-circle{% endif %} me-1"></i>
+                                    {{ ntsa_status.get_theory_exam_status_display }}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="timeline-item {% if ntsa_status.practical_passed %}completed{% endif %}">
-                        <div class="timeline-marker {% if ntsa_status.practical_passed %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                    <div class="timeline-item {% if ntsa_status.practical_exam_status == 'PASSED' %}completed{% endif %}">
+                        <div class="timeline-marker {% if ntsa_status.practical_exam_status == 'PASSED' %}bg-success{% elif ntsa_status.practical_exam_status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}"></div>
                         <div class="timeline-content">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h6 class="mb-0">Practical Test</h6>
                                     <small class="text-muted">Driving Assessment</small>
                                 </div>
-                                {% if ntsa_status.practical_passed %}
-                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Passed</span>
-                                {% else %}
-                                    <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
-                                {% endif %}
+                                <span class="badge {% if ntsa_status.practical_exam_status == 'PASSED' %}bg-success{% elif ntsa_status.practical_exam_status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    <i class="bi {% if ntsa_status.practical_exam_status == 'PASSED' %}bi-check-circle{% elif ntsa_status.practical_exam_status == 'FAILED' %}bi-x-circle{% else %}bi-dash-circle{% endif %} me-1"></i>
+                                    {{ ntsa_status.get_practical_exam_status_display }}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="timeline-item {% if ntsa_status.driving_test_passed %}completed{% endif %}">
-                        <div class="timeline-marker {% if ntsa_status.driving_test_passed %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                    <div class="timeline-item {% if ntsa_status.driving_test_status == 'PASSED' %}completed{% endif %}">
+                        <div class="timeline-marker {% if ntsa_status.driving_test_status == 'PASSED' %}bg-success{% elif ntsa_status.driving_test_status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}"></div>
                         <div class="timeline-content">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h6 class="mb-0">Driving Test</h6>
                                     <small class="text-muted">On-Road Examination</small>
                                 </div>
-                                {% if ntsa_status.driving_test_passed %}
-                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Passed</span>
-                                {% else %}
-                                    <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i> Pending</span>
-                                {% endif %}
+                                <span class="badge {% if ntsa_status.driving_test_status == 'PASSED' %}bg-success{% elif ntsa_status.driving_test_status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    <i class="bi {% if ntsa_status.driving_test_status == 'PASSED' %}bi-check-circle{% elif ntsa_status.driving_test_status == 'FAILED' %}bi-x-circle{% else %}bi-dash-circle{% endif %} me-1"></i>
+                                    {{ ntsa_status.get_driving_test_status_display }}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -222,6 +222,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endwith %}
                 </div>
             </div>
         </div>
