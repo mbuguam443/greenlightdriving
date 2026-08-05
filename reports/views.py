@@ -256,8 +256,20 @@ class PaymentReportPDFView(StaffTestMixin, View):
         from payments.models import Payment
         from .pdf_reports import generate_payment_report
         from django.http import HttpResponse
+        from django.db.models import Q
         
-        payments = Payment.objects.select_related('student__user').all().order_by('-created_at')
+        payments = Payment.objects.select_related('student__user').all()
+        search = request.GET.get('search', '').strip()
+        status = request.GET.get('status', '')
+        if search:
+            payments = payments.filter(
+                Q(receipt_number__icontains=search) |
+                Q(student__user__first_name__icontains=search) |
+                Q(student__user__last_name__icontains=search)
+            )
+        if status:
+            payments = payments.filter(status=status)
+        payments = payments.order_by('-created_at')
         pdf = generate_payment_report(payments)
         return HttpResponse(pdf, content_type='application/pdf')
 
@@ -268,7 +280,15 @@ class EnquiryReportPDFView(StaffTestMixin, View):
         from .pdf_reports import generate_enquiry_report
         from django.http import HttpResponse
         
-        enquiries = WalkInInquiry.objects.all().order_by('-created_at')
+        enquiries = WalkInInquiry.objects.all()
+        tab = request.GET.get('tab', '')
+        if tab == 'pending':
+            enquiries = enquiries.filter(followed_up=False, converted=False)
+        elif tab == 'followed':
+            enquiries = enquiries.filter(followed_up=True, converted=False)
+        elif tab == 'converted':
+            enquiries = enquiries.filter(converted=True)
+        enquiries = enquiries.order_by('-created_at')
         pdf = generate_enquiry_report(enquiries)
         return HttpResponse(pdf, content_type='application/pdf')
 
@@ -278,8 +298,19 @@ class StudentReportPDFView(StaffTestMixin, View):
         from students.models import Student
         from .pdf_reports import generate_student_report
         from django.http import HttpResponse
+        from django.db.models import Q
         
         students = Student.objects.select_related('user', 'course').all()
+        search = request.GET.get('search', '').strip()
+        status = request.GET.get('status', '')
+        if search:
+            students = students.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(student_number__icontains=search)
+            )
+        if status:
+            students = students.filter(status=status)
         pdf = generate_student_report(students)
         return HttpResponse(pdf, content_type='application/pdf')
 
@@ -289,8 +320,25 @@ class LessonReportPDFView(StaffTestMixin, View):
         from lessons.models import PracticalLesson
         from .pdf_reports import generate_lesson_report
         from django.http import HttpResponse
+        from django.db.models import Q
         
         lessons = PracticalLesson.objects.select_related('student__user', 'lesson_item', 'instructor__user', 'vehicle').all()
+        search = request.GET.get('search', '').strip()
+        status = request.GET.get('status', '')
+        date_f = request.GET.get('date', '')
+        instructor_f = request.GET.get('instructor', '')
+        if search:
+            lessons = lessons.filter(
+                Q(student__user__first_name__icontains=search) |
+                Q(student__user__last_name__icontains=search) |
+                Q(student__student_number__icontains=search)
+            )
+        if status:
+            lessons = lessons.filter(status=status)
+        if date_f:
+            lessons = lessons.filter(date=date_f)
+        if instructor_f:
+            lessons = lessons.filter(instructor_id=instructor_f)
         pdf = generate_lesson_report(lessons)
         return HttpResponse(pdf, content_type='application/pdf')
 
@@ -316,7 +364,7 @@ class VehicleReportPDFView(StaffTestMixin, View):
 
         data = [['Reg No.', 'Make', 'Model', 'Category', 'Year', 'Instructor', 'Available']]
         for v in vehicles:
-            inst = v.assigned_instructor.user.full_name if v.assigned_instructor else '—'
+            inst = v.assigned_instructor.user.full_name if v.assigned_instructor else 'ï¿½'
             data.append([v.registration_number, v.make, v.model_name, v.category, str(v.year), inst, 'Yes' if v.is_available else 'No'])
 
         t = Table(data, colWidths=[70, 55, 65, 45, 40, 80, 45], repeatRows=1)
@@ -350,8 +398,8 @@ class InstructorReportPDFView(StaffTestMixin, View):
 
         data = [['Name', 'Phone', 'License No.', 'License Class', 'Experience', 'Branch', 'Active']]
         for i in instructors:
-            br = i.branch.name if i.branch else '—'
-            data.append([i.user.full_name, i.phone or '—', i.license_number, i.get_license_class_display() or '—',
+            br = i.branch.name if i.branch else 'ï¿½'
+            data.append([i.user.full_name, i.phone or 'ï¿½', i.license_number, i.get_license_class_display() or 'ï¿½',
                          f'{i.experience_years} yrs', br, 'Active' if i.is_active else 'Inactive'])
 
         t = Table(data, colWidths=[80, 65, 65, 55, 45, 50, 40], repeatRows=1)
@@ -385,7 +433,7 @@ class AdmissionReportPDFView(StaffTestMixin, View):
 
         data = [['Adm No.', 'Name', 'Phone', 'Course', 'Package', 'Status', 'Date']]
         for a in admissions:
-            data.append([a.admission_number, a.full_name, a.phone, a.course.name if a.course else '—',
+            data.append([a.admission_number, a.full_name, a.phone, a.course.name if a.course else 'ï¿½',
                          a.get_package_choice_display(), a.get_status_display(), a.created_at.strftime('%d/%m/%Y')])
 
         t = Table(data, colWidths=[55, 75, 65, 75, 45, 50, 55], repeatRows=1)
