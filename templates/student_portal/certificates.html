@@ -79,53 +79,53 @@
                     Keep working hard on your driving lessons!
                 </p>
                 
-                <div class="card bg-light border-0 mb-4">
-                    <div class="card-body">
-                        <h6 class="mb-3">Requirements to complete:</h6>
-                        <div class="text-start">
-                            <div class="d-flex align-items-center mb-2">
-                                {% if requirements.pdl_approved %}
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {% else %}
-                                    <i class="bi bi-circle text-muted me-2"></i>
-                                {% endif %}
-                                <span>Provisional Driving Licence (PDL)</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                {% if requirements.theory_passed %}
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {% else %}
-                                    <i class="bi bi-circle text-muted me-2"></i>
-                                {% endif %}
-                                <span>Theory Test</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                {% if requirements.practical_passed %}
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {% else %}
-                                    <i class="bi bi-circle text-muted me-2"></i>
-                                {% endif %}
-                                <span>Practical Test</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                {% if requirements.driving_test_passed %}
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {% else %}
-                                    <i class="bi bi-circle text-muted me-2"></i>
-                                {% endif %}
-                                <span>Driving Test</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                {% if requirements.all_lessons_completed %}
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {% else %}
-                                    <i class="bi bi-circle text-muted me-2"></i>
-                                {% endif %}
-                                <span>All Lessons Completed</span>
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body">
+                            <h6 class="mb-3">Requirements to complete:</h6>
+                            <div class="text-start">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if requirements.pdl_issued %}
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle text-muted me-2"></i>
+                                    {% endif %}
+                                    <span>Provisional Driving Licence (PDL)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if requirements.theory_passed %}
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle text-muted me-2"></i>
+                                    {% endif %}
+                                    <span>Theory Test</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if requirements.practical_passed %}
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle text-muted me-2"></i>
+                                    {% endif %}
+                                    <span>Practical Test</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if requirements.driving_test_passed %}
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle text-muted me-2"></i>
+                                    {% endif %}
+                                    <span>Driving Test</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    {% if requirements.all_lessons_completed %}
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle text-muted me-2"></i>
+                                    {% endif %}
+                                    <span>All Lessons Completed</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
                 <a href="{% url 'student_portal:progress' %}" class="btn btn-primary" style="background-color: #2E7D32; border-color: #2E7D32;">
                     <i class="bi bi-graph-up me-1"></i> View My Progress

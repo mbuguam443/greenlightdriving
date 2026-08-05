@@ -142,29 +142,45 @@ class PortalCertificatesView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
         from ntsa.models import NTSARecord
+        from lessons.models import PracticalLesson
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
             student = None
         
-        ntsa = None
         licence_issued = False
         licence_number = ''
         licence_issue_date = None
+        requirements = {
+            'pdl_issued': False,
+            'theory_passed': False,
+            'practical_passed': False,
+            'driving_test_passed': False,
+            'all_lessons_completed': False,
+        }
         
         if student:
             ntsa = NTSARecord.objects.filter(student=student).first()
-            if ntsa and ntsa.licence_issued:
-                licence_issued = True
-                licence_number = ntsa.licence_number
-                licence_issue_date = ntsa.licence_issue_date
+            if ntsa:
+                requirements['pdl_issued'] = ntsa.pdl_status == 'ISSUED'
+                requirements['theory_passed'] = ntsa.theory_exam_status == 'PASSED'
+                requirements['practical_passed'] = ntsa.practical_exam_status == 'PASSED'
+                requirements['driving_test_passed'] = ntsa.driving_test_status == 'PASSED'
+                if ntsa.licence_issued:
+                    licence_issued = True
+                    licence_number = ntsa.licence_number
+                    licence_issue_date = ntsa.licence_issue_date
+            
+            total = PracticalLesson.objects.filter(student=student).count()
+            completed = PracticalLesson.objects.filter(student=student, status='COMPLETED').count()
+            requirements['all_lessons_completed'] = total > 0 and completed == total
         
         return render(request, 'student_portal/certificates.html', {
             'student': student,
-            'ntsa': ntsa,
             'licence_issued': licence_issued,
             'licence_number': licence_number,
             'licence_issue_date': licence_issue_date,
+            'requirements': requirements,
         })
 
 
