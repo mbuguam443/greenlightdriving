@@ -13,6 +13,7 @@
     <a href="{% url 'students:create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
         <i class="bi bi-plus-lg me-1"></i>Add Student
     </a>
+    <a href="{% url 'reports:pdf_students' %}?search={{ search_query|default:'' }}&status={{ current_status|default:'' }}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf me-1"></i>PDF</a>
 </div>
 
 <div class="card border-0 shadow-sm">

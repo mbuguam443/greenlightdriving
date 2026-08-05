@@ -15,6 +15,7 @@
     <button class="btn fw-semibold text-white" style="background-color: #2E7D32;" data-bs-toggle="modal" data-bs-target="#inquiryModal">
         <i class="bi bi-plus-lg me-1"></i>New Inquiry
     </button>
+    <a href="{% url 'reports:pdf_enquiries' %}?tab={{ filter_tab }}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf me-1"></i>PDF</a>
 </div>
 
 <ul class="nav nav-tabs mb-4">
