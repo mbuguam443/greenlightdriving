@@ -54,11 +54,12 @@
                 <thead style="background-color: #f8f9fa;">
                     <tr>
                         <th class="ps-3">Student</th>
-                        <th>PDL Status</th>
-                        <th>Theory Test</th>
-                        <th>Practical Test</th>
-                        <th>Driving Test</th>
+                        <th>PDL</th>
+                        <th>Theory</th>
+                        <th>Practical</th>
+                        <th>Driving</th>
                         <th>Licence</th>
+                        <th>Progress</th>
                         <th class="text-end pe-3">Actions</th>
                     </tr>
                 </thead>
@@ -90,48 +91,36 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if record.theory_test_passed %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-check-circle me-1"></i> Passed
-                                </span>
-                            {% elif record.theory_test_date %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-clock me-1"></i> {{ record.theory_test_date|date:"d M Y" }}
-                                </span>
+                            {% if record.theory_exam_status == 'PASSED' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Passed</span>
+                            {% elif record.theory_exam_status == 'FAILED' %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                            {% elif record.theory_exam_status == 'SCHEDULED' %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Scheduled</span>
                             {% else %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-dash-circle me-1"></i> Pending
-                                </span>
+                                <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i>Pending</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if record.practical_test_passed %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-check-circle me-1"></i> Passed
-                                </span>
-                            {% elif record.practical_test_date %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-clock me-1"></i> {{ record.practical_test_date|date:"d M Y" }}
-                                </span>
+                            {% if record.practical_exam_status == 'PASSED' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Passed</span>
+                            {% elif record.practical_exam_status == 'FAILED' %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                            {% elif record.practical_exam_status == 'SCHEDULED' %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Scheduled</span>
                             {% else %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-dash-circle me-1"></i> Pending
-                                </span>
+                                <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i>Pending</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if record.driving_test_passed %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-check-circle me-1"></i> Passed
-                                </span>
-                            {% elif record.driving_test_date %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-clock me-1"></i> {{ record.driving_test_date|date:"d M Y" }}
-                                </span>
+                            {% if record.driving_test_status == 'PASSED' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Passed</span>
+                            {% elif record.driving_test_status == 'FAILED' %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                            {% elif record.driving_test_status == 'SCHEDULED' %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Scheduled</span>
                             {% else %}
-                                <span class="badge" style="background-color: rgba(46,125,50,0.1); color: #2E7D32;">
-                                    <i class="bi bi-dash-circle me-1"></i> Pending
-                                </span>
+                                <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i>Pending</span>
                             {% endif %}
                         </td>
                         <td>
@@ -144,6 +133,13 @@
                                     <i class="bi bi-dash-circle me-1"></i> Not Issued
                                 </span>
                             {% endif %}
+                        </td>
+                        <td>
+                            <div class="progress" style="height:6px;width:60px;">
+                                <div class="progress-bar {% if record.overall_progress >= 5 %}bg-success{% elif record.overall_progress >= 3 %}bg-warning{% else %}bg-secondary{% endif %}"
+                                     style="width:{% widthratio record.overall_progress 5 100 %}%"></div>
+                            </div>
+                            <small class="text-muted">{{ record.overall_progress }}/5</small>
                         </td>
                         <td class="text-end pe-3">
                             <a href="{% url 'ntsa:detail' record.pk %}" class="btn btn-sm btn-outline-success" title="View">
