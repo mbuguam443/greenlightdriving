@@ -374,6 +374,21 @@ class PortalEnrollmentReportPDFView(StudentRequiredMixin, View):
         return response
 
 
+class PortalAttendanceReportPDFView(StudentRequiredMixin, View):
+    def get(self, request):
+        from students.models import Student
+        from django.http import HttpResponse
+        from .pdf_utils import generate_attendance_report
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return HttpResponse("No student profile", status=404)
+        pdf = generate_attendance_report(student)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="attendance_report_{student.student_number}.pdf"'
+        return response
+
+
 # ==================== EVENT MANAGEMENT (Staff) ====================
 
 class EventListView(StaffMixin, View):

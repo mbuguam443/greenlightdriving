@@ -15,6 +15,7 @@ urlpatterns = [
     path('reports/progress/', views.PortalProgressReportPDFView.as_view(), name='report_progress'),
     path('reports/payment/', views.PortalPaymentReportPDFView.as_view(), name='report_payment'),
     path('reports/enrollment/', views.PortalEnrollmentReportPDFView.as_view(), name='report_enrollment'),
+    path('reports/attendance/', views.PortalAttendanceReportPDFView.as_view(), name='report_attendance'),
     path('profile/', views.PortalProfileView.as_view(), name='profile'),
     path('manage/documents/', views.DocListView.as_view(), name='manage_documents'),
     path('manage/documents/add/', views.DocCreateView.as_view(), name='manage_document_add'),

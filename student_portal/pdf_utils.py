@@ -1,5 +1,6 @@
 import io
 import os
+from django.utils import timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm, cm
 from reportlab.lib.colors import HexColor
@@ -287,6 +288,55 @@ def generate_enrollment_report(student):
             ('PDL Status:', ntsa.get_pdl_status_display() if hasattr(ntsa, 'get_pdl_status_display') else ntsa.pdl_status),
             ('Licence Issued:', 'Yes' if ntsa.licence_issued else 'No'),
         ]))
+
+    story.extend(_footer(styles))
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
+
+
+def generate_attendance_report(student):
+    from lessons.models import PracticalLesson, TheoryLesson
+    import io
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=50, bottomMargin=50)
+    styles = _get_styles()
+    story = _header(styles, f'Attendance Report - {student.user.full_name}')
+    story.append(_info_table(styles, [
+        ('Student:', student.user.full_name),
+        ('Number:', student.student_number),
+        ('Course:', student.course.name if student.course else 'N/A'),
+        ('Date:', timezone.now().strftime('%d %B %Y')),
+    ]))
+    story.append(Spacer(1, 6))
+
+    practical = PracticalLesson.objects.filter(student=student).select_related('lesson_item', 'instructor__user')
+    total_p = practical.count()
+    present_p = sum(1 for l in practical if l.attended)
+    story.append(Paragraph(f'Practical Attendance: {present_p}/{total_p}', styles['SectionHead']))
+    pdata = [['Date', 'Lesson', 'Instructor', 'Present', 'Status']]
+    for l in practical:
+        pdata.append([l.date.strftime('%d/%m/%y'), l.lesson_item.name if l.lesson_item else '-',
+                      l.instructor.user.full_name if l.instructor else '-', 'Yes' if l.attended else 'No',
+                      l.get_status_display()])
+    story.append(_table(pdata[0], pdata[1:], [45, 150, 110, 40, 60]))
+    story.append(Spacer(1, 6))
+
+    theory = TheoryLesson.objects.filter(student=student).select_related('instructor__user')
+    total_t = theory.count()
+    present_t = sum(1 for l in theory if l.attended)
+    story.append(Paragraph(f'Theory Attendance: {present_t}/{total_t}', styles['SectionHead']))
+    tdata = [['Date', 'Topic', 'Instructor', 'Present', 'Status']]
+    for l in theory:
+        tdata.append([l.date.strftime('%d/%m/%y'), l.topic,
+                      l.instructor.user.full_name if l.instructor else '-', 'Yes' if l.attended else 'No',
+                      l.get_status_display()])
+    story.append(_table(tdata[0], tdata[1:], [45, 150, 110, 40, 60]))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph(f'Overall: {present_p + present_t}/{total_p + total_t} attended', styles['SectionHead']))
 
     story.extend(_footer(styles))
     doc.build(story)
