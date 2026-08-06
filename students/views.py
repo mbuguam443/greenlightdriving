@@ -242,5 +242,15 @@ class ToggleReminderView(StaffTestMixin, View):
         student.payment_reminder = not student.payment_reminder
         student.save(update_fields=['payment_reminder'])
         status = 'ON' if student.payment_reminder else 'OFF'
+
+        if student.payment_reminder and student.balance > 0:
+            from student_portal.models import Notification
+            Notification.objects.create(
+                student=student,
+                title='Payment Reminder',
+                message=f'Your outstanding balance is KES {student.balance:,.0f}. Please clear it to proceed with lessons and exams.',
+                notification_type='payment',
+            )
+
         messages.success(request, f'Payment reminder {status} for {student.user.full_name}.')
         return redirect('students:detail', pk=student.pk)

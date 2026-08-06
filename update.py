@@ -145,6 +145,23 @@ with connection.cursor() as c:
             c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('students', '0003_student_payment_reminder', NOW())")
             print("      Faked migration students.0003_student_payment_reminder")
 
+    # Ensure notification table exists
+    c.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='student_portal_notification'")
+    if not c.fetchone()[0]:
+        c.execute("""
+            CREATE TABLE student_portal_notification (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id INT NOT NULL,
+                title VARCHAR(300) NOT NULL,
+                message LONGTEXT NOT NULL,
+                notification_type VARCHAR(20) DEFAULT 'general',
+                is_read TINYINT(1) DEFAULT 0,
+                created_at DATETIME(6) DEFAULT NOW(),
+                CONSTRAINT fk_notification_student FOREIGN KEY (student_id) REFERENCES students_student(id) ON DELETE CASCADE
+            )
+        """)
+        print("      Created student_portal_notification table")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1

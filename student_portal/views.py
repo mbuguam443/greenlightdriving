@@ -89,6 +89,10 @@ class PortalLessonsView(StudentRequiredMixin, View):
         total_all = total_p + total_t
         completed_all = completed_p + completed_t
         
+        # Auto-mark lesson notifications as read
+        from .models import Notification
+        Notification.objects.filter(student=student, notification_type='lesson', is_read=False).update(is_read=True)
+        
         return render(request, 'student_portal/lessons.html', {
             'student': student,
             'practical_lessons': practical,
@@ -387,6 +391,32 @@ class PortalAttendanceReportPDFView(StudentRequiredMixin, View):
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="attendance_report_{student.student_number}.pdf"'
         return response
+
+
+class PortalNotificationsView(StudentRequiredMixin, View):
+    def get(self, request):
+        from students.models import Student
+        from .models import Notification
+        try:
+            student = Student.objects.get(user=request.user)
+            notifications = Notification.objects.filter(student=student)
+        except Student.DoesNotExist:
+            notifications = []
+        return render(request, 'student_portal/notifications.html', {'notifications': notifications})
+
+
+class ReadNotificationView(StudentRequiredMixin, View):
+    def get(self, request, pk):
+        from .models import Notification
+        from students.models import Student
+        try:
+            student = Student.objects.get(user=request.user)
+            notification = get_object_or_404(Notification, pk=pk, student=student)
+        except Student.DoesNotExist:
+            return redirect('student_portal:dashboard')
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+        return redirect('student_portal:notifications')
 
 
 # ==================== EVENT MANAGEMENT (Staff) ====================

@@ -142,11 +142,21 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
 
         try:
             response = super().form_valid(form)
+            self._notify(form.instance, 'created')
             messages.success(self.request, 'Lesson saved successfully.')
             return response
         except IntegrityError:
             messages.error(self.request, 'This lesson already exists for this student.')
             return self.form_invalid(form)
+
+    def _notify(self, lesson, action):
+        from student_portal.models import Notification
+        Notification.objects.create(
+            student=lesson.student,
+            title=f'New Lesson: {lesson.lesson_item.name}',
+            message=f'A new practical lesson "{lesson.lesson_item.name}" has been added for {lesson.date.strftime("%d %b %Y")}.',
+            notification_type='lesson',
+        )
 
 
 class TheoryLessonCreateView(StaffTestMixin, CreateView):

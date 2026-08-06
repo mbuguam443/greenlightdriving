@@ -94,3 +94,24 @@ class Event(models.Model):
     def days_until(self):
         delta = self.event_date - timezone.now().date()
         return delta.days if delta.days >= 0 else 0
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('lesson', 'Lesson Update'),
+        ('payment', 'Payment Reminder'),
+        ('general', 'General'),
+    ]
+
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=300)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='general')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.student.student_number} - {self.title}"
