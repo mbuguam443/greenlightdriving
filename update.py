@@ -161,6 +161,10 @@ with connection.cursor() as c:
             )
         """)
         print("      Created student_portal_notification table")
+        c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='student_portal' AND name='0005_notification'")
+        if not c.fetchone()[0]:
+            c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('student_portal', '0005_notification', NOW())")
+            print("      Faked migration student_portal.0005_notification")
 
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
