@@ -156,7 +156,7 @@ with connection.cursor() as c:
                 message LONGTEXT NOT NULL,
                 notification_type VARCHAR(20) DEFAULT 'general',
                 is_read TINYINT(1) DEFAULT 0,
-                created_at DATETIME(6) DEFAULT NOW(),
+                created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
                 CONSTRAINT fk_notification_student FOREIGN KEY (student_id) REFERENCES students_student(id) ON DELETE CASCADE
             )
         """)
