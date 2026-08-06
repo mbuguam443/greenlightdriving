@@ -120,6 +120,26 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
     def form_valid(self, form):
         from django.contrib import messages
         from django.db import IntegrityError
+
+        if self.request.POST.get('bulk'):
+            student_ids = self.request.POST.getlist('students')
+            if not student_ids:
+                messages.error(self.request, 'Select at least one student.')
+                return self.form_invalid(form)
+            created = 0
+            skipped = 0
+            for sid in student_ids:
+                try:
+                    lesson = form.save(commit=False)
+                    lesson.pk = None
+                    lesson.student_id = int(sid)
+                    lesson.save()
+                    created += 1
+                except IntegrityError:
+                    skipped += 1
+            messages.success(self.request, f'{created} lessons created. {skipped} skipped (already existed).')
+            return redirect(self.success_url)
+
         try:
             response = super().form_valid(form)
             messages.success(self.request, 'Lesson saved successfully.')

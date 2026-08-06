@@ -14,7 +14,7 @@
                 </h5>
             </div>
             <div class="card-body p-4">
-                <form method="post" novalidate>
+                <form method="post" novalidate id="lessonForm">
                     {% csrf_token %}
 
                     {% if form.non_field_errors %}
@@ -22,21 +22,65 @@
                     {% endif %}
 
                     <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="bulkMode" onchange="toggleBulk()">
+                                <label class="form-check-label fw-semibold" for="bulkMode">
+                                    Assign to multiple students at once
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="singleStudent">
+                            <label for="{{ form.student.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.student.label }}{% if form.student.field.required %} <span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ form.student }}
+                            {% if form.student.errors %}<div class="text-danger small mt-1">{{ form.student.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12" id="multiStudent" style="display:none;">
+                            <label class="form-label fw-semibold">Select Students <span class="text-danger">*</span></label>
+                            <div class="border rounded p-3" style="max-height:250px;overflow-y:auto;">
+                                <div class="row g-2">
+                                    {% for student in students %}
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="students" value="{{ student.id }}" id="s{{ student.id }}">
+                                            <label class="form-check-label" for="s{{ student.id }}" style="font-size:0.9rem;">
+                                                {{ student.user.full_name }} <small class="text-muted">({{ student.student_number }})</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mt-1">
+                                <button type="button" class="btn btn-sm btn-link p-0" onclick="selectAll(true)">Select All</button> |
+                                <button type="button" class="btn btn-sm btn-link p-0" onclick="selectAll(false)">Deselect All</button>
+                                <span class="ms-2 text-muted small">Selected: <span id="selectedCount">0</span></span>
+                            </div>
+                        </div>
+
                         {% for field in form %}
+                        {% if field.name != 'student' %}
                         <div class="col-md-6">
                             <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
                                 {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                             </label>
                             {{ field }}
                             {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
-                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
                         </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a href="{% url 'lessons:list' %}" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
+                        <button type="submit" name="bulk" value="1" class="btn fw-semibold text-white d-none" style="background-color: #2E7D32;" id="bulkBtn">
+                            <i class="bi bi-check-lg me-1"></i>Create for <span id="bulkCount">0</span> students
+                        </button>
+                        <button type="submit" class="btn fw-semibold text-white" style="background-color: #2E7D32;" id="singleBtn">
                             <i class="bi bi-check-lg me-1"></i>Save Lesson
                         </button>
                     </div>
@@ -45,4 +89,31 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleBulk() {
+    var bulk = document.getElementById('bulkMode').checked;
+    document.getElementById('singleStudent').style.display = bulk ? 'none' : '';
+    document.getElementById('multiStudent').style.display = bulk ? '' : 'none';
+    document.getElementById('singleBtn').classList.toggle('d-none', bulk);
+    document.getElementById('bulkBtn').classList.toggle('d-none', !bulk);
+    updateCount();
+}
+function updateCount() {
+    var c = document.querySelectorAll('#multiStudent input[type=checkbox]:checked').length;
+    document.getElementById('selectedCount').textContent = c;
+    document.getElementById('bulkCount').textContent = c;
+}
+function selectAll(v) {
+    document.querySelectorAll('#multiStudent input[type=checkbox]').forEach(function(cb) { cb.checked = v; });
+    updateCount();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#multiStudent input[type=checkbox]').forEach(function(cb) {
+        cb.addEventListener('change', updateCount);
+    });
+});
+</script>
 {% endblock %}

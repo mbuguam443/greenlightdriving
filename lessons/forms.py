@@ -16,6 +16,10 @@ class PracticalLessonForm(forms.ModelForm):
             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['student'].required = False
+
 
 class TheoryLessonForm(forms.ModelForm):
     class Meta:
