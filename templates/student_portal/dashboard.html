@@ -89,7 +89,19 @@
                         <div class="text-center">
                             <div class="small fw-bold" style="color: #2E7D32;">{{ lesson.date|date:"d" }}</div>
                             <div class="small text-muted">{{ lesson.date|date:"M" }}</div>
-                        </div>
+</div>
+
+{% if balance and balance > 0 %}
+<div class="alert border-0 text-white d-flex align-items-center justify-content-between mb-4" style="background:linear-gradient(135deg,#dc3545,#c82333);border-radius:10px;">
+    <div>
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Outstanding Balance: KES {{ balance|floatformat:0 }}</strong> — Your practical lessons and exams are on hold until payment is cleared.
+    </div>
+    <a href="{% url 'payments:mpesa' %}" class="btn btn-sm btn-light fw-semibold flex-shrink-0 ms-3">
+        <i class="bi bi-phone-vibrate me-1"></i>Pay Now
+    </a>
+</div>
+{% endif %}
                     </div>
                     <div class="flex-grow-1">
                         <div class="fw-semibold">{{ lesson.lesson_type }}</div>
