@@ -491,3 +491,40 @@ class EventDeleteView(StaffMixin, View):
         event.delete()
         messages.success(request, 'Event deleted successfully.')
         return redirect('student_portal:manage_events')
+
+
+class NotificationCreateView(StaffMixin, View):
+    def get(self, request):
+        from students.models import Student
+        students = Student.objects.filter(status='ACTIVE').select_related('user')
+        return render(request, 'student_portal/manage/notification_form.html', {'students': students})
+
+    def post(self, request):
+        from students.models import Student
+        from .models import Notification
+        from django.contrib import messages
+
+        title = request.POST.get('title', '').strip()
+        message = request.POST.get('message', '').strip()
+        ntype = request.POST.get('notification_type', 'general')
+        send_to_all = request.POST.get('send_to_all') == '1'
+
+        if not title or not message:
+            messages.error(request, 'Title and message are required.')
+            return redirect('student_portal:manage_notification')
+
+        if send_to_all:
+            students = Student.objects.filter(status='ACTIVE')
+            for s in students:
+                Notification.objects.create(student=s, title=title, message=message, notification_type=ntype)
+            messages.success(request, f'Notification sent to {students.count()} students.')
+        else:
+            student_id = request.POST.get('student')
+            if not student_id:
+                messages.error(request, 'Please select a student.')
+                return redirect('student_portal:manage_notification')
+            student = get_object_or_404(Student, pk=student_id)
+            Notification.objects.create(student=student, title=title, message=message, notification_type=ntype)
+            messages.success(request, f'Notification sent to {student.user.full_name}.')
+
+        return redirect('student_portal:manage_notification')
