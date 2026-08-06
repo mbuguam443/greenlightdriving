@@ -133,10 +133,17 @@ with connection.cursor() as c:
             print(f"      Added missing column {table}.attended")
 
     # Ensure payment_reminder column exists
-    c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
-    if not c.fetchone()[0]:
+    c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
+    col_exists = c.fetchone()[0]
+    if not col_exists:
         c.execute("ALTER TABLE students_student ADD COLUMN payment_reminder TINYINT(1) DEFAULT 0 NOT NULL")
         print("      Added missing column students_student.payment_reminder")
+    else:
+        # Fake the payment_reminder migration if column already exists (avoids duplicate error)
+        c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='students' AND name='0003_student_payment_reminder'")
+        if not c.fetchone()[0]:
+            c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('students', '0003_student_payment_reminder', NOW())")
+            print("      Faked migration students.0003_student_payment_reminder")
 
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
