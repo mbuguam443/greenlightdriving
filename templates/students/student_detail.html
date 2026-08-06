@@ -14,6 +14,10 @@
         <a href="{% url 'reports:pdf_student_attendance' student.pk %}" class="btn btn-sm btn-outline-success">
             <i class="bi bi-file-pdf me-1"></i>Attendance PDF
         </a>
+        <a href="{% url 'students:toggle_reminder' student.pk %}" class="btn btn-sm {% if student.payment_reminder %}btn-outline-danger{% else %}btn-outline-warning{% endif %}">
+            <i class="bi bi-{% if student.payment_reminder %}bell-slash{% else %}bell{% endif %} me-1"></i>
+            {% if student.payment_reminder %}Stop Reminder{% else %}Remind to Pay{% endif %}
+        </a>
         <a href="{% url 'students:generate_lessons' student.pk %}" class="btn btn-sm fw-semibold text-white" style="background-color: #2E7D32;"
            onclick="return confirm('Generate all missing lessons for this student?')">
             <i class="bi bi-lightning me-1"></i>Generate Lessons

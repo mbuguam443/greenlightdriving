@@ -27,6 +27,7 @@ class Student(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
     enrollment_date = models.DateField(auto_now_add=True)
     expected_graduation = models.DateField(null=True, blank=True)
+    payment_reminder = models.BooleanField(default=False, help_text='Show balance alert to student')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

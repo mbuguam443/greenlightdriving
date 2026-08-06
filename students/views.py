@@ -233,3 +233,14 @@ class GenerateLessonsView(StaffTestMixin, View):
 
         messages.success(request, f'{created} lessons generated for {student.user.full_name}.')
         return redirect('students:detail', pk=student.pk)
+
+
+
+class ToggleReminderView(StaffTestMixin, View):
+    def get(self, request, pk):
+        student = get_object_or_404(Student, pk=pk)
+        student.payment_reminder = not student.payment_reminder
+        student.save(update_fields=['payment_reminder'])
+        status = 'ON' if student.payment_reminder else 'OFF'
+        messages.success(request, f'Payment reminder {status} for {student.user.full_name}.')
+        return redirect('students:detail', pk=student.pk)

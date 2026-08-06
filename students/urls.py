@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:pk>/update/', views.StudentUpdateView.as_view(), name='update'),
     path('<int:pk>/delete/', views.StudentDeleteView.as_view(), name='delete'),
     path('<int:pk>/generate-lessons/', views.GenerateLessonsView.as_view(), name='generate_lessons'),
+    path('<int:pk>/toggle-reminder/', views.ToggleReminderView.as_view(), name='toggle_reminder'),
 ]

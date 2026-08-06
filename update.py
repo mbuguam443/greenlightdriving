@@ -132,6 +132,12 @@ with connection.cursor() as c:
             c.execute(f"ALTER TABLE {table} ADD COLUMN attended TINYINT(1) DEFAULT 0 NOT NULL")
             print(f"      Added missing column {table}.attended")
 
+    # Ensure payment_reminder column exists
+    c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
+    if not c.fetchone()[0]:
+        c.execute("ALTER TABLE students_student ADD COLUMN payment_reminder TINYINT(1) DEFAULT 0 NOT NULL")
+        print("      Added missing column students_student.payment_reminder")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1

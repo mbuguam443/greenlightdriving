@@ -91,7 +91,7 @@
                             <div class="small text-muted">{{ lesson.date|date:"M" }}</div>
 </div>
 
-{% if balance and balance > 0 %}
+{% if show_reminder and balance and balance > 0 %}
 <div class="alert border-0 text-white d-flex align-items-center justify-content-between mb-4" style="background:linear-gradient(135deg,#dc3545,#c82333);border-radius:10px;">
     <div>
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -268,7 +268,7 @@
 </div>
 {% endif %}
 
-{% if balance and balance > 0 %}
+{% if show_reminder and balance and balance > 0 %}
 <div class="modal fade" id="balanceAlert" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
