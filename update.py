@@ -150,8 +150,8 @@ with connection.cursor() as c:
     if not c.fetchone()[0]:
         c.execute("""
             CREATE TABLE student_portal_notification (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id INT NOT NULL,
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                student_id BIGINT NOT NULL,
                 title VARCHAR(300) NOT NULL,
                 message LONGTEXT NOT NULL,
                 notification_type VARCHAR(20) DEFAULT 'general',
