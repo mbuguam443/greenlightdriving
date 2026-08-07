@@ -508,6 +508,7 @@ class NotificationCreateView(StaffMixin, View):
         message = request.POST.get('message', '').strip()
         ntype = request.POST.get('notification_type', 'general')
         send_to_all = request.POST.get('send_to_all') == '1'
+        student_ids = request.POST.getlist('student_ids')
 
         if not title or not message:
             messages.error(request, 'Title and message are required.')
@@ -518,6 +519,11 @@ class NotificationCreateView(StaffMixin, View):
             for s in students:
                 Notification.objects.create(student=s, title=title, message=message, notification_type=ntype)
             messages.success(request, f'Notification sent to {students.count()} students.')
+        elif student_ids:
+            students = Student.objects.filter(pk__in=student_ids)
+            for s in students:
+                Notification.objects.create(student=s, title=title, message=message, notification_type=ntype)
+            messages.success(request, f'Notification sent to {students.count()} selected students.')
         else:
             student_id = request.POST.get('student')
             if not student_id:
