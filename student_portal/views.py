@@ -534,3 +534,11 @@ class NotificationCreateView(StaffMixin, View):
             messages.success(request, f'Notification sent to {student.user.full_name}.')
 
         return redirect('student_portal:manage_notification')
+
+
+
+class NotificationHistoryView(StaffMixin, View):
+    def get(self, request):
+        from .models import Notification
+        notifications = Notification.objects.select_related('student__user').all()[:50]
+        return render(request, 'student_portal/manage/notification_history.html', {'notifications': notifications})

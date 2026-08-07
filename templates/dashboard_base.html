@@ -139,6 +139,7 @@
             <div class="sb-section">Student Portal</div>
             <ul class="sb-nav">
                 <li><a href="{% url 'student_portal:manage_notification' %}"><i class="bi bi-bell"></i><span>Send Notification</span></a></li>
+                <li><a href="{% url 'student_portal:manage_notification_history' %}"><i class="bi bi-clock-history"></i><span>Notification History</span></a></li>
                 <li><a class="{% block nav_manage_documents %}{% endblock %}" href="{% url 'student_portal:manage_documents' %}"><i class="bi bi-file-earmark-arrow-down"></i><span>Documents</span></a></li>
                 <li><a class="{% block nav_manage_events %}{% endblock %}" href="{% url 'student_portal:manage_events' %}"><i class="bi bi-calendar-event"></i><span>Events</span></a></li>
             </ul>

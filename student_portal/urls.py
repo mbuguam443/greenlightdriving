@@ -28,4 +28,5 @@ urlpatterns = [
     path('manage/events/<int:pk>/edit/', views.EventUpdateView.as_view(), name='manage_event_edit'),
     path('manage/events/<int:pk>/delete/', views.EventDeleteView.as_view(), name='manage_event_delete'),
     path('manage/notification/', views.NotificationCreateView.as_view(), name='manage_notification'),
+    path('manage/notification/history/', views.NotificationHistoryView.as_view(), name='manage_notification_history'),
 ]
