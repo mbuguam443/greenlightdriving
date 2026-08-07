@@ -135,7 +135,38 @@
                                 <li class="breadcrumb-item active">{% block breadcrumb_active %}Dashboard{% endblock %}</li>
                             </ol>
                         </nav>
-                        {% endblock %}
+{% endblock %}
+
+{% if unread_notifications > 0 %}
+{% with recent_unread=unread_notifications %}
+<div class="modal fade" id="notifyPopup" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white" style="background-color:#2E7D32;">
+                <h5 class="modal-title"><i class="bi bi-bell-fill me-2"></i>{{ unread_notifications }} New Notification{{ unread_notifications|pluralize }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">You have {{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}. Please check your notifications.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <a href="{% url 'student_portal:notifications' %}" class="btn text-white fw-semibold" style="background-color:#2E7D32;">
+                    <i class="bi bi-envelope-open me-1"></i>View Notifications
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Later</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new bootstrap.Modal(document.getElementById('notifyPopup')).show();
+});
+</script>
+{% endwith %}
+{% endif %}
+
+{% block extra_js %}{% endblock %}
                     </div>
                 </div>
                 <div class="tb-right">
@@ -210,3 +241,30 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+
+{% if unread_notifications > 0 %}
+<div class="modal fade" id="notifyPopup" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white" style="background-color:#2E7D32;">
+                <h5 class="modal-title"><i class="bi bi-bell-fill me-2"></i>{{ unread_notifications }} New Notification{{ unread_notifications|pluralize }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                You have {{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}. Check your notifications.
+            </div>
+            <div class="modal-footer border-0">
+                <a href="{% url 'student_portal:notifications' %}" class="btn text-white fw-semibold" style="background-color:#2E7D32;">
+                    <i class="bi bi-envelope-open me-1"></i>View Notifications
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Later</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new bootstrap.Modal(document.getElementById('notifyPopup')).show();
+});
+</script>
+{% endif %}
