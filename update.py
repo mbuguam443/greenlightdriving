@@ -132,6 +132,18 @@ with connection.cursor() as c:
             c.execute(f"ALTER TABLE {table} ADD COLUMN attended TINYINT(1) DEFAULT 0 NOT NULL")
             print(f"      Added missing column {table}.attended")
 
+    # Ensure submitted_by_student column
+    c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='lessons_practicallesson' AND column_name='submitted_by_student'")
+    if not c.fetchone()[0]:
+        c.execute("ALTER TABLE lessons_practicallesson ADD COLUMN submitted_by_student TINYINT(1) DEFAULT 0 NOT NULL")
+        print("      Added missing column lessons_practicallesson.submitted_by_student")
+
+    # Ensure is_approved column
+    c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='lessons_practicallesson' AND column_name='is_approved'")
+    if not c.fetchone()[0]:
+        c.execute("ALTER TABLE lessons_practicallesson ADD COLUMN is_approved TINYINT(1) DEFAULT 0 NOT NULL")
+        print("      Added missing column lessons_practicallesson.is_approved")
+
     # Ensure payment_reminder column exists
     c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
     col_exists = c.fetchone()[0]
@@ -311,7 +323,17 @@ try:
 except Exception as e:
     print(f"      Error: {e}")
 
-# 9. Seed study materials
+# 9. Purge dummy seed data (safe — only removes @student.com, @greenlight.com, seed vehicles)
+print("\n[8/6] Purging dummy data...")
+purge_script = os.path.join(project_dir, 'purge_dummy.py')
+if os.path.isfile(purge_script):
+    import subprocess as sp
+    sp.run([sys.executable, purge_script], cwd=project_dir)
+    print("      Done!")
+else:
+    print("      purge_dummy.py not found")
+
+# 10. Seed study materials
 print("\n[7/6] Seeding study materials...")
 material_script = os.path.join(project_dir, 'seed_materials.py')
 if os.path.isfile(material_script):

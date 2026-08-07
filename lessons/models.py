@@ -36,6 +36,8 @@ class PracticalLesson(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_STARTED', blank=True)
     remarks = models.TextField(blank=True)
     attended = models.BooleanField(default=False)
+    submitted_by_student = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,0 +1,40 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Lesson Approval - Green Light School{% endblock %}
+{% block page_title %}Lesson Approvals{% endblock %}
+
+{% block dashboard_content %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Student</th>
+                        <th>Lesson</th>
+                        <th>Date Submitted</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in pending_lessons %}
+                    <tr>
+                        <td class="ps-3">{{ l.student.user.full_name }}</td>
+                        <td>{{ l.lesson_item.name }}</td>
+                        <td>{{ l.date|date:"d M Y" }}</td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'student_portal:approve_lesson' l.pk %}" class="btn btn-sm btn-success">
+                                <i class="bi bi-check-lg me-1"></i>Approve
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center py-4 text-muted">No pending lesson requests</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

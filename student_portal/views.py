@@ -542,3 +542,48 @@ class NotificationHistoryView(StaffMixin, View):
         from .models import Notification
         notifications = Notification.objects.select_related('student__user').all()[:50]
         return render(request, 'student_portal/manage/notification_history.html', {'notifications': notifications})
+
+
+
+class StudentLessonRequestView(StudentRequiredMixin, View):
+    def post(self, request):
+        from students.models import Student
+        from lessons.models import PracticalLesson, LessonItem
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return redirect('student_portal:lessons')
+        
+        item_id = request.POST.get('lesson_item')
+        if not item_id:
+            messages.error(request, 'Please select a lesson.')
+            return redirect('student_portal:lessons')
+        
+        item = get_object_or_404(LessonItem, pk=item_id, is_active=True)
+        if PracticalLesson.objects.filter(student=student, lesson_item=item).exists():
+            messages.warning(request, 'This lesson already exists.')
+            return redirect('student_portal:lessons')
+        
+        PracticalLesson.objects.create(
+            student=student, lesson_item=item, date=timezone.now().date(),
+            status='NOT_STARTED', submitted_by_student=True, is_approved=False,
+        )
+        messages.success(request, f'Lesson "{item.name}" submitted for approval.')
+        return redirect('student_portal:lessons')
+
+
+class LessonApprovalView(StaffMixin, View):
+    def get(self, request):
+        from lessons.models import PracticalLesson
+        pending = PracticalLesson.objects.filter(submitted_by_student=True, is_approved=False).select_related('student__user', 'lesson_item')
+        return render(request, 'student_portal/manage/lesson_approval.html', {'pending_lessons': pending})
+
+
+class ApproveLessonView(StaffMixin, View):
+    def get(self, request, pk):
+        from lessons.models import PracticalLesson
+        lesson = get_object_or_404(PracticalLesson, pk=pk, submitted_by_student=True)
+        lesson.is_approved = True
+        lesson.save(update_fields=['is_approved'])
+        messages.success(request, f'Lesson "{lesson.lesson_item.name}" approved for {lesson.student.user.full_name}.')
+        return redirect('student_portal:lesson_approval')

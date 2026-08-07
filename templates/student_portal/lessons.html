@@ -22,6 +22,10 @@
     </div>
 </div>
 
+<button class="btn btn-sm text-white mb-4" style="background-color:#2E7D32;" data-bs-toggle="modal" data-bs-target="#submitLessonModal">
+    <i class="bi bi-plus-circle me-1"></i>Submit Completed Lesson
+</button>
+
 <ul class="nav nav-tabs mb-4">
     <li class="nav-item">
         <a class="nav-link active fw-semibold" data-bs-toggle="tab" href="#practical" style="color: #2E7D32;">
@@ -128,6 +132,34 @@
                 </table>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="modal fade" id="submitLessonModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" action="{% url 'student_portal:lesson_request' %}">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header" style="background-color:#2E7D32;color:#fff;">
+                    <h5 class="modal-title"><i class="bi bi-check-circle me-1"></i>Submit Completed Lesson</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-semibold">Select Lesson Done</label>
+                    <select name="lesson_item" class="form-select" required>
+                        <option value="">Choose...</option>
+                        {% for item in lesson_items %}
+                        <option value="{{ item.id }}">{{ item.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted mt-2 d-block">Your instructor will verify and approve this submission.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white" style="background-color:#2E7D32;">Submit for Approval</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
