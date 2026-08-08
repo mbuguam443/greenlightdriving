@@ -623,8 +623,8 @@ class ArrearsReportPDFView(StaffTestMixin, View):
 
         data = [['Student', 'Number', 'Course', 'Phone', 'Paid', 'Balance']]
         for s in arrears:
-            data.append([s.user.full_name, s.student_number, s.course.name if s.course else '—',
-                         s.user.phone or '—', f'{s.amount_paid:,.0f}', f'{s.balance:,.0f}'])
+            data.append([s.user.full_name, s.student_number, s.course.name if s.course else '-',
+                         s.user.phone or '-', f'{s.amount_paid:,.0f}', f'{s.balance:,.0f}'])
 
         t = Table(data, colWidths=[90, 60, 80, 70, 55, 55], repeatRows=1)
         t.setStyle(TableStyle([
