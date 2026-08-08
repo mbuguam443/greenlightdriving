@@ -182,6 +182,10 @@ with connection.cursor() as c:
             )
         """)
         print("      Created core_dailylog table")
+        c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='core' AND name='0002_dailylog'")
+        if not c.fetchone()[0]:
+            c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('core', '0002_dailylog', NOW())")
+            print("      Faked migration core.0002_dailylog")
 
     # Ensure payment_reminder column exists
     c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
