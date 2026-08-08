@@ -141,6 +141,60 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-bottom">
                 <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-list-check me-2" style="color: #2E7D32;"></i>Practical Lessons ({{ practical_total }})
+                </h6>
+            </div>
+            <div class="card-body p-0" style="max-height:400px;overflow-y:auto;">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light"><tr><th class="ps-3">Lesson</th><th>Date</th><th>Status</th><th>Att.</th><th class="text-end pe-3"></th></tr></thead>
+                    <tbody>
+                        {% for l in practical_lessons %}
+                        <tr>
+                            <td class="ps-3">{{ l.lesson_item.name }}</td>
+                            <td>{{ l.date|date:"d M Y" }}</td>
+                            <td>{% if l.status == 'COMPLETED' %}<span class="badge bg-success">Done</span>{% elif l.status == 'IN_PROGRESS' %}<span class="badge bg-warning text-dark">In Progress</span>{% elif l.status == 'NEEDS_PRACTICE' %}<span class="badge bg-info text-dark">Needs Practice</span>{% else %}<span class="badge bg-secondary">Pending</span>{% endif %}</td>
+                            <td>{% if l.attended and l.is_approved %}<i class="bi bi-check-circle-fill text-success"></i>{% elif l.attended %}<i class="bi bi-clock text-warning"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}</td>
+                            <td class="text-end pe-3">
+                                <a href="{% url 'lessons:practical_update' l.pk %}" class="btn btn-sm btn-outline-success" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'lessons:practical_delete' l.pk %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this lesson?')"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="text-center py-3 text-muted">No practical lessons</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-journal-text me-2" style="color: #2E7D32;"></i>Theory Lessons ({{ theory_total }})
+                </h6>
+            </div>
+            <div class="card-body p-0" style="max-height:400px;overflow-y:auto;">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light"><tr><th class="ps-3">Topic</th><th>Date</th><th>Status</th><th>Att.</th><th class="text-end pe-3"></th></tr></thead>
+                    <tbody>
+                        {% for l in theory_lessons %}
+                        <tr>
+                            <td class="ps-3">{{ l.topic }}</td>
+                            <td>{{ l.date|date:"d M Y" }}</td>
+                            <td>{% if l.status == 'COMPLETED' %}<span class="badge bg-success">Done</span>{% elif l.status == 'SCHEDULED' %}<span class="badge bg-warning text-dark">Scheduled</span>{% else %}<span class="badge bg-secondary">Pending</span>{% endif %}</td>
+                            <td>{% if l.attended %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}</td>
+                            <td class="text-end pe-3">
+                                <a href="{% url 'lessons:theory_update' l.pk %}" class="btn btn-sm btn-outline-success" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'lessons:theory_delete' l.pk %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this lesson?')"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="text-center py-3 text-muted">No theory lessons</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
                     <i class="bi bi-cash-stack me-2" style="color: #2E7D32;"></i>Financial Summary
                 </h6>
             </div>

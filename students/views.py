@@ -58,13 +58,13 @@ class StudentDetailView(StaffTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         student = self.object
         from payments.models import Payment
-        from lessons.models import PracticalLesson
+        from lessons.models import PracticalLesson, TheoryLesson
         context['payments'] = Payment.objects.filter(student=student)[:10]
-        context['lessons'] = PracticalLesson.objects.filter(student=student).order_by('-date')[:10]
+        context['practical_lessons'] = PracticalLesson.objects.filter(student=student).select_related('lesson_item', 'instructor__user', 'vehicle').order_by('lesson_item__order')
+        context['theory_lessons'] = TheoryLesson.objects.filter(student=student).select_related('instructor__user').order_by('date')
         context['practical_completed'] = PracticalLesson.objects.filter(student=student, status='COMPLETED').count()
         context['practical_total'] = PracticalLesson.objects.filter(student=student).count()
         context['practical_percentage'] = int((context['practical_completed'] / context['practical_total'] * 100) if context['practical_total'] else 0)
-        from lessons.models import TheoryLesson
         context['theory_completed'] = TheoryLesson.objects.filter(student=student, status='COMPLETED').count()
         context['theory_total'] = TheoryLesson.objects.filter(student=student).count()
         context['theory_percentage'] = int((context['theory_completed'] / context['theory_total'] * 100) if context['theory_total'] else 0)
