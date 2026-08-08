@@ -73,7 +73,7 @@ class PortalScheduleView(StudentRequiredMixin, View):
 class PortalLessonsView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
-        from lessons.models import PracticalLesson, TheoryLesson
+        from lessons.models import PracticalLesson, TheoryLesson, LessonItem
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
