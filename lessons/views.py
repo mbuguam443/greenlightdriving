@@ -197,7 +197,11 @@ class PracticalLessonUpdateView(StaffTestMixin, UpdateView):
     model = PracticalLesson
     form_class = PracticalLessonForm
     template_name = 'lessons/lesson_update.html'
-    success_url = reverse_lazy('lessons:list')
+
+    def get_success_url(self):
+        if self.object and self.object.student:
+            return reverse_lazy('students:detail', kwargs={'pk': self.object.student.pk})
+        return reverse_lazy('lessons:list')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -207,13 +211,7 @@ class PracticalLessonUpdateView(StaffTestMixin, UpdateView):
         context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
         context['instructors'] = Instructor.objects.select_related('user')
         context['vehicles'] = Vehicle.objects.filter(is_available=True)
-
-        lesson_items = LessonItem.objects.filter(is_active=True)
-        student_id = self.request.GET.get('student') or (self.request.POST.get('student') if self.request.method == 'POST' else None)
-        if student_id:
-            existing = PracticalLesson.objects.filter(student_id=student_id).values_list('lesson_item_id', flat=True)
-            lesson_items = lesson_items.exclude(id__in=existing)
-        context['lesson_items'] = lesson_items
+        context['lesson_items'] = LessonItem.objects.filter(is_active=True)
         return context
 
     def form_valid(self, form):
@@ -239,7 +237,11 @@ class TheoryLessonUpdateView(StaffTestMixin, UpdateView):
     model = TheoryLesson
     form_class = TheoryLessonForm
     template_name = 'lessons/theory_update.html'
-    success_url = reverse_lazy('lessons:theory_list')
+
+    def get_success_url(self):
+        if self.object and self.object.student:
+            return reverse_lazy('students:detail', kwargs={'pk': self.object.student.pk})
+        return reverse_lazy('lessons:theory_list')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
