@@ -14,12 +14,15 @@ class StaffMixin(LoginRequiredMixin, UserPassesTestMixin):
 class DailyLogListView(StaffMixin, View):
     def get(self, request):
         from datetime import date
+        from django.core.paginator import Paginator
         logs = DailyLog.objects.select_related('recorded_by').all()
         filter_date = request.GET.get('date', '')
         if filter_date:
             logs = logs.filter(log_date=filter_date)
+        paginator = Paginator(logs, 15)
+        page = request.GET.get('page', 1)
         return render(request, 'core/daily_log_list.html', {
-            'logs': logs[:50],
+            'logs': paginator.get_page(page),
             'filter_date': filter_date or str(date.today()),
         })
 
