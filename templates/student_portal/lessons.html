@@ -59,10 +59,14 @@
                             <td class="ps-3 fw-semibold">{{ lesson.lesson_item.name }}</td>
                             <td>{{ lesson.date|date:"d M Y" }}</td>
                             <td>
-                                {% if lesson.attended %}
-                                <i class="bi bi-check-circle-fill text-success"></i>
+                                {% if lesson.is_approved and lesson.attended %}
+                                <i class="bi bi-check-circle-fill text-success" title="Approved"></i>
+                                {% elif lesson.attended and not lesson.is_approved %}
+                                <i class="bi bi-clock text-warning" title="Pending approval"></i>
                                 {% else %}
-                                <i class="bi bi-circle text-muted"></i>
+                                <a href="{% url 'student_portal:mark_attended' lesson.pk %}" class="text-muted" title="Mark as attended">
+                                    <i class="bi bi-circle"></i>
+                                </a>
                                 {% endif %}
                             </td>
                             <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>

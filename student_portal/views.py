@@ -576,7 +576,11 @@ class LessonApprovalView(StaffMixin, View):
     def get(self, request):
         from lessons.models import PracticalLesson
         pending = PracticalLesson.objects.filter(submitted_by_student=True, is_approved=False).select_related('student__user', 'lesson_item')
-        return render(request, 'student_portal/manage/lesson_approval.html', {'pending_lessons': pending})
+        attendance = PracticalLesson.objects.filter(attended=True, is_approved=False).select_related('student__user', 'lesson_item')
+        return render(request, 'student_portal/manage/lesson_approval.html', {
+            'pending_lessons': pending,
+            'attendance_requests': attendance,
+        })
 
 
 class ApproveLessonView(StaffMixin, View):
@@ -586,4 +590,44 @@ class ApproveLessonView(StaffMixin, View):
         lesson.is_approved = True
         lesson.save(update_fields=['is_approved'])
         messages.success(request, f'Lesson "{lesson.lesson_item.name}" approved for {lesson.student.user.full_name}.')
+        return redirect('student_portal:lesson_approval')
+
+
+
+class MarkAttendedView(StudentRequiredMixin, View):
+    def get(self, request, pk):
+        from lessons.models import PracticalLesson
+        from students.models import Student
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return redirect('student_portal:lessons')
+        lesson = get_object_or_404(PracticalLesson, pk=pk, student=student)
+        lesson.attended = True
+        lesson.is_approved = False
+        lesson.save(update_fields=['attended', 'is_approved'])
+        messages.success(request, 'Attendance submitted for approval.')
+        return redirect('student_portal:lessons')
+
+
+
+class ApproveAttendanceView(StaffMixin, View):
+    def get(self, request, pk):
+        from lessons.models import PracticalLesson
+        lesson = get_object_or_404(PracticalLesson, pk=pk)
+        lesson.is_approved = True
+        lesson.status = 'COMPLETED'
+        lesson.save(update_fields=['is_approved', 'status'])
+        messages.success(request, f'Attendance approved for {lesson.student.user.full_name} - {lesson.lesson_item.name}.')
+        return redirect('student_portal:lesson_approval')
+
+
+class RejectAttendanceView(StaffMixin, View):
+    def get(self, request, pk):
+        from lessons.models import PracticalLesson
+        lesson = get_object_or_404(PracticalLesson, pk=pk)
+        lesson.attended = False
+        lesson.is_approved = False
+        lesson.save(update_fields=['attended', 'is_approved'])
+        messages.success(request, f'Attendance rejected for {lesson.student.user.full_name}.')
         return redirect('student_portal:lesson_approval')
