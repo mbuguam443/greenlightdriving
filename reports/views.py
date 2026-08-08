@@ -569,3 +569,14 @@ class StudentAttendancePDFView(StaffTestMixin, View):
         doc.build(story)
         buf.seek(0)
         return HttpResponse(buf, content_type='application/pdf')
+
+
+
+class PurgeDummyView(StaffTestMixin, View):
+    def get(self, request):
+        import subprocess, os, sys
+        script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'purge_dummy.py')
+        if os.path.isfile(script):
+            subprocess.run([sys.executable, script])
+        messages.success(request, 'Dummy data purged. Real data untouched.')
+        return redirect('reports:index')
