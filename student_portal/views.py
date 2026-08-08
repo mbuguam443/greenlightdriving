@@ -74,6 +74,7 @@ class PortalLessonsView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
         from lessons.models import PracticalLesson, TheoryLesson, LessonItem
+        from django.contrib import messages
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
