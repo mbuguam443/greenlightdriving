@@ -637,18 +637,23 @@ class ApproveLessonView(StaffMixin, View):
 
 class MarkAttendedView(StudentRequiredMixin, View):
     def get(self, request, pk):
-        from lessons.models import PracticalLesson
+        from lessons.models import PracticalLesson, TheoryLesson
         from students.models import Student
-        from django.contrib import messages
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
             return redirect('student_portal:lessons')
-        lesson = get_object_or_404(PracticalLesson, pk=pk, student=student)
-        lesson.attended = True
-        lesson.is_approved = False
-        lesson.save(update_fields=['attended', 'is_approved'])
-        messages.success(request, 'Attendance submitted for approval.')
+        lesson = PracticalLesson.objects.filter(pk=pk, student=student).first()
+        if lesson:
+            lesson.attended = not lesson.attended
+            lesson.is_approved = False
+            lesson.save(update_fields=['attended', 'is_approved'])
+            messages.success(request, 'Attendance submitted for approval.')
+        else:
+            lesson = get_object_or_404(TheoryLesson, pk=pk, student=student)
+            lesson.attended = not lesson.attended
+            lesson.save(update_fields=['attended'])
+            messages.success(request, 'Attendance recorded.')
         return redirect('student_portal:lessons')
 
 

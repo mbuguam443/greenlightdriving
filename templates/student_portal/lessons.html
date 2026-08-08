@@ -115,7 +115,9 @@
                                 {% if lesson.attended %}
                                 <i class="bi bi-check-circle-fill text-success"></i>
                                 {% else %}
-                                <i class="bi bi-circle text-muted"></i>
+                                <a href="{% url 'student_portal:mark_attended' lesson.pk %}" class="text-muted" title="Mark as attended">
+                                    <i class="bi bi-circle"></i>
+                                </a>
                                 {% endif %}
                             </td>
                             <td>{{ lesson.instructor.user.full_name|default:"—" }}</td>
