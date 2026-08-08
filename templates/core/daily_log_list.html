@@ -18,14 +18,13 @@
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light"><tr><th class="ps-3">Time</th><th>Title</th><th>Description</th><th>By</th><th class="text-end pe-3"></th></tr></thead>
+                <thead class="table-light"><tr><th class="ps-3">Time</th><th>Title</th><th>Description</th><th class="text-end pe-3"></th></tr></thead>
             <tbody>
                 {% for l in logs %}
                 <tr>
                     <td class="ps-3">{{ l.created_at|time:"H:i" }}</td>
                     <td class="fw-semibold">{{ l.title }}</td>
                     <td><small>{{ l.description|truncatechars:80|default:"—" }}</small></td>
-                    <td>{{ l.recorded_by.full_name|default:"—" }}</td>
                     <td class="text-end pe-3">
                         <a href="#" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#logModal"
                            onclick="editLog({{ l.pk }}, '{{ l.title|escapejs }}', '{{ l.description|escapejs|default:'' }}', '{{ l.log_date|date:'Y-m-d' }}')">
@@ -36,7 +35,7 @@
                         </a>
                     </td>
                 </tr>
-                {% empty %}<tr><td colspan="5" class="text-center py-4 text-muted">No activities logged for this date</td></tr>{% endfor %}
+                {% empty %}<tr><td colspan="4" class="text-center py-4 text-muted">No activities logged for this date</td></tr>{% endfor %}
             </tbody>
         </table>
         {% if logs.paginator.num_pages > 1 %}

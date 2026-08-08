@@ -176,12 +176,17 @@ with connection.cursor() as c:
                 title VARCHAR(300) NOT NULL,
                 description LONGTEXT,
                 log_date DATE NOT NULL,
-                recorded_by_id BIGINT NULL,
-                created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
-                CONSTRAINT fk_dailylog_user FOREIGN KEY (recorded_by_id) REFERENCES accounts_user(id) ON DELETE SET NULL
+                created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)
             )
         """)
         print("      Created core_dailylog table")
+    else:
+        # Drop FK column if it exists (simplified model)
+        c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='core_dailylog' AND column_name='recorded_by_id'")
+        if c.fetchone()[0]:
+            c.execute("ALTER TABLE core_dailylog DROP FOREIGN KEY fk_dailylog_user")
+            c.execute("ALTER TABLE core_dailylog DROP COLUMN recorded_by_id")
+            print("      Dropped recorded_by_id from core_dailylog")
 
     # Fake the daily log migration if table exists
     c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='core' AND name='0002_dailylog'")

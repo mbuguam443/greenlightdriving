@@ -57,8 +57,7 @@ class SiteSettings(models.Model):
 class DailyLog(models.Model):
     title = models.CharField(max_length=300)
     description = models.TextField(blank=True)
-    log_date = models.DateField(default=lambda: __import__('datetime').date.today())
-    recorded_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
+    log_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
