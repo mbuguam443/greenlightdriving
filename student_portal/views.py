@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from django.views import View
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -638,6 +639,7 @@ class MarkAttendedView(StudentRequiredMixin, View):
     def get(self, request, pk):
         from lessons.models import PracticalLesson
         from students.models import Student
+        from django.contrib import messages
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
