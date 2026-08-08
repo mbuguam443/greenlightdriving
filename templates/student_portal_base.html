@@ -242,22 +242,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 
 {% if unread_notifications > 0 %}
-<div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
-    <div class="toast show" role="alert" id="notifyToast">
-        <div class="toast-header text-white" style="background-color:#2E7D32;">
-            <i class="bi bi-bell-fill me-2"></i>
-            <strong class="me-auto">{{ unread_notifications }} New Notification{{ unread_notifications|pluralize }}</strong>
-            <a href="{% url 'student_portal:notifications' %}" class="btn btn-sm btn-light fw-semibold me-1">View</a>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-        </div>
-    </div>
+<div class="alert alert-success alert-dismissible fade show mb-0 border-0 text-white d-flex align-items-center" role="alert"
+     style="background-color:#2E7D32;border-radius:0;">
+    <i class="bi bi-bell-fill me-2 fs-5"></i>
+    <strong>{{ unread_notifications }} new notification{{ unread_notifications|pluralize }}</strong>
+    <span class="ms-2">— you have unread messages.</span>
+    <a href="{% url 'student_portal:notifications' %}" class="btn btn-sm btn-light fw-semibold ms-auto">View</a>
+    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="alert"></button>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var t = document.getElementById('notifyToast');
-    if (t) {
-        new bootstrap.Toast(t, {autohide: false}).show();
-    }
-});
-</script>
 {% endif %}
