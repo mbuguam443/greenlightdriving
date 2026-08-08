@@ -66,7 +66,7 @@ class DailyLogPDFView(StaffMixin, View):
         from reportlab.lib.units import mm
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable, Image, PageBreak
 
-        logs = DailyLog.objects.select_related('recorded_by').all()
+        logs = DailyLog.objects.all()
         filter_date = request.GET.get('date', '')
         if filter_date:
             logs = logs.filter(log_date=filter_date)
