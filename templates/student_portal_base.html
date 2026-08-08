@@ -242,28 +242,22 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 
 {% if unread_notifications > 0 %}
-<div class="modal fade" id="notifyPopup" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header text-white" style="background-color:#2E7D32;">
-                <h5 class="modal-title"><i class="bi bi-bell-fill me-2"></i>{{ unread_notifications }} New Notification{{ unread_notifications|pluralize }}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                You have {{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}. Check your notifications.
-            </div>
-            <div class="modal-footer border-0">
-                <a href="{% url 'student_portal:notifications' %}" class="btn text-white fw-semibold" style="background-color:#2E7D32;">
-                    <i class="bi bi-envelope-open me-1"></i>View Notifications
-                </a>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Later</button>
-            </div>
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
+    <div class="toast show" role="alert" id="notifyToast">
+        <div class="toast-header text-white" style="background-color:#2E7D32;">
+            <i class="bi bi-bell-fill me-2"></i>
+            <strong class="me-auto">{{ unread_notifications }} New Notification{{ unread_notifications|pluralize }}</strong>
+            <a href="{% url 'student_portal:notifications' %}" class="btn btn-sm btn-light fw-semibold me-1">View</a>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
         </div>
     </div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    new bootstrap.Modal(document.getElementById('notifyPopup')).show();
+    var t = document.getElementById('notifyToast');
+    if (t) {
+        new bootstrap.Toast(t, {autohide: false}).show();
+    }
 });
 </script>
 {% endif %}
