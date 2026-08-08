@@ -78,29 +78,30 @@ print("\n[3/7] Lesson Items...")
 from lessons.models import LessonItem
 
 lessons_data = [
-    ('Introduction', 'THEORY', ['test', 'half', 'full']),
-    ('Theory Board Lanes', 'THEORY', ['test', 'half', 'full']),
-    ('Theory Model Town Board', 'THEORY', ['test', 'half', 'full']),
-    ('Identification of Road Signs', 'THEORY', ['test', 'half', 'full']),
-    ('Starting the Car Drill', 'PRACTICAL', ['half', 'full']),
-    ('Gear Changing Up and Down', 'PRACTICAL', ['half', 'full']),
-    ('Road Positioning', 'PRACTICAL', ['half', 'full']),
-    ('Turning Left', 'PRACTICAL', ['half', 'full']),
-    ('Turning Right Procedure', 'PRACTICAL', ['half', 'full']),
-    ('Hand Signal', 'PRACTICAL', ['half', 'full']),
-    ('Clutch Control', 'PRACTICAL', ['full']),
-    ('Three Point Turn', 'PRACTICAL', ['full']),
-    ('Steering Control', 'PRACTICAL', ['full']),
-    ('Reversing', 'PRACTICAL', ['full']),
-    ('Hill Start', 'PRACTICAL', ['full']),
-    ('Angle Parking', 'PRACTICAL', ['full']),
-    ('Flash Parking', 'PRACTICAL', ['full']),
-    ('Basic Mechanical', 'THEORY', ['test', 'half', 'full']),
-    ('First Aid on Road', 'THEORY', ['test', 'half', 'full']),
-    ('Assessment', 'ASSESSMENT', ['half', 'full']),
+    ('Introduction', 'THEORY'),
+    ('Theory Board Lanes', 'THEORY'),
+    ('Theory Model Town Board', 'THEORY'),
+    ('Identification of Road Signs', 'THEORY'),
+    ('Starting the Car Drill', 'PRACTICAL'),
+    ('Gear Changing Up and Down', 'PRACTICAL'),
+    ('Road Positioning', 'PRACTICAL'),
+    ('Turning Left', 'PRACTICAL'),
+    ('Turning Right Procedure', 'PRACTICAL'),
+    ('Hand Signal', 'PRACTICAL'),
+    ('Clutch Control', 'PRACTICAL'),
+    ('Three Point Turn', 'PRACTICAL'),
+    ('Steering Control', 'PRACTICAL'),
+    ('Reversing', 'PRACTICAL'),
+    ('Hill Start', 'PRACTICAL'),
+    ('Angle Parking', 'PRACTICAL'),
+    ('Flash Parking', 'PRACTICAL'),
+    ('Basic Mechanical', 'PRACTICAL'),
+    ('First Aid on Road', 'PRACTICAL'),
+    ('Assessment', 'PRACTICAL'),
 ]
-for i, (name, ltype, _pkgs) in enumerate(lessons_data):
-    LessonItem.objects.get_or_create(name=name, defaults={'order': i + 1, 'lesson_type': ltype})
+]
+for i, (name, ltype) in enumerate(lessons_data):
+    LessonItem.objects.update_or_create(name=name, defaults={'order': i + 1, 'lesson_type': ltype})
 print(f"      {LessonItem.objects.count()} lesson items ready")
 
 # 4. FAQs
