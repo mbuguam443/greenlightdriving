@@ -149,14 +149,20 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <label class="form-label fw-semibold">Select Lesson Done</label>
-                    <select name="lesson_item" class="form-select" required>
-                        <option value="">Choose...</option>
-                        {% for item in lesson_items %}
-                        <option value="{{ item.id }}">{{ item.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <small class="text-muted mt-2 d-block">Your instructor will verify and approve this submission.</small>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Lesson Done</label>
+                        <select name="lesson_item" class="form-select" required>
+                            <option value="">Choose...</option>
+                            {% for item in lesson_items %}
+                            <option value="{{ item.id }}">{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date Completed</label>
+                        <input type="date" name="lesson_date" class="form-control" value="{% now 'Y-m-d' %}" required>
+                    </div>
+                    <small class="text-muted d-block">Your instructor will verify and approve this submission.</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>

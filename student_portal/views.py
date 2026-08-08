@@ -565,7 +565,8 @@ class StudentLessonRequestView(StudentRequiredMixin, View):
             return redirect('student_portal:lessons')
         
         PracticalLesson.objects.create(
-            student=student, lesson_item=item, date=timezone.now().date(),
+            student=student, lesson_item=item,
+            date=request.POST.get('lesson_date', timezone.now().date()),
             status='NOT_STARTED', submitted_by_student=True, is_approved=False,
         )
         messages.success(request, f'Lesson "{item.name}" submitted for approval.')
