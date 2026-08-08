@@ -113,7 +113,7 @@
                             <td>{{ lesson.time_start|time:"H:i" }} - {{ lesson.time_end|time:"H:i" }}</td>
                             <td>
                                 {% if lesson.attended %}
-                                <i class="bi bi-check-circle-fill text-success"></i>
+                                <i class="bi bi-check-circle-fill text-success" title="Attended"></i>
                                 {% else %}
                                 <a href="{% url 'student_portal:mark_attended' lesson.pk %}" class="text-muted" title="Mark as attended">
                                     <i class="bi bi-circle"></i>
