@@ -52,3 +52,17 @@ class SiteSettings(models.Model):
     def load(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class DailyLog(models.Model):
+    title = models.CharField(max_length=300)
+    description = models.TextField(blank=True)
+    log_date = models.DateField(default=lambda: __import__('datetime').date.today())
+    recorded_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-log_date', '-created_at']
+
+    def __str__(self):
+        return f"{self.log_date} - {self.title}"

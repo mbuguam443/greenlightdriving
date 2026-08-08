@@ -167,6 +167,22 @@ with connection.cursor() as c:
         c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('lessons', '0006_practicallesson_is_approved_and_more', NOW())")
         print("      Faked migration lessons.0006_practicallesson_is_approved_and_more")
 
+    # Ensure daily log table exists
+    c.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='core_dailylog'")
+    if not c.fetchone()[0]:
+        c.execute("""
+            CREATE TABLE core_dailylog (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(300) NOT NULL,
+                description LONGTEXT,
+                log_date DATE NOT NULL,
+                recorded_by_id BIGINT NULL,
+                created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+                CONSTRAINT fk_dailylog_user FOREIGN KEY (recorded_by_id) REFERENCES accounts_user(id) ON DELETE SET NULL
+            )
+        """)
+        print("      Created core_dailylog table")
+
     # Ensure payment_reminder column exists
     c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
     col_exists = c.fetchone()[0]
