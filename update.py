@@ -143,11 +143,12 @@ with connection.cursor() as c:
     if not c.fetchone()[0]:
         c.execute("ALTER TABLE lessons_practicallesson ADD COLUMN is_approved TINYINT(1) DEFAULT 0 NOT NULL")
         print("      Added missing column lessons_practicallesson.is_approved")
-        # Fake migration since columns already exist
-        c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='lessons' AND name='0006_practicallesson_is_approved_and_more'")
-        if not c.fetchone()[0]:
-            c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('lessons', '0006_practicallesson_is_approved_and_more', NOW())")
-            print("      Faked migration lessons.0006_practicallesson_is_approved_and_more")
+
+    # Fake lessons migration if columns exist
+    c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='lessons' AND name='0006_practicallesson_is_approved_and_more'")
+    if not c.fetchone()[0]:
+        c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('lessons', '0006_practicallesson_is_approved_and_more', NOW())")
+        print("      Faked migration lessons.0006_practicallesson_is_approved_and_more")
 
     # Ensure payment_reminder column exists
     c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='payment_reminder'")
