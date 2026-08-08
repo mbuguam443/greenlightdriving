@@ -99,7 +99,6 @@ lessons_data = [
     ('First Aid on Road', 'PRACTICAL'),
     ('Assessment', 'PRACTICAL'),
 ]
-]
 for i, (name, ltype) in enumerate(lessons_data):
     LessonItem.objects.update_or_create(name=name, defaults={'order': i + 1, 'lesson_type': ltype})
 print(f"      {LessonItem.objects.count()} lesson items ready")
