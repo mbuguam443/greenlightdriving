@@ -144,6 +144,23 @@ with connection.cursor() as c:
         c.execute("ALTER TABLE lessons_practicallesson ADD COLUMN is_approved TINYINT(1) DEFAULT 0 NOT NULL")
         print("      Added missing column lessons_practicallesson.is_approved")
 
+    # Convert theory lessons that should now be practical (after lesson type update)
+    c.execute("""
+        SELECT tl.id, tl.student_id, tl.lesson_item_id, tl.instructor_id, tl.date, tl.time_start, tl.time_end, tl.status, tl.notes
+        FROM lessons_theorylesson tl
+        INNER JOIN lessons_lessonitem li ON tl.lesson_item_id = li.id
+        WHERE li.lesson_type = 'PRACTICAL'
+    """)
+    bad_theory = c.fetchall()
+    if bad_theory:
+        for row in bad_theory:
+            c.execute("""
+                INSERT IGNORE INTO lessons_practicallesson (student_id, lesson_item_id, instructor_id, vehicle_id, date, status, remarks, attended, submitted_by_student, is_approved, created_at, completed_at)
+                VALUES (%s, %s, %s, NULL, %s, %s, %s, 0, 0, 0, NOW(), NULL)
+            """, [row[1], row[2], row[3], row[4], row[7], row[8] or ''])
+            c.execute("DELETE FROM lessons_theorylesson WHERE id = %s", [row[0]])
+        print(f"      Converted {len(bad_theory)} theory lessons to practical (type mismatch)")
+
     # Fake lessons migration if columns exist
     c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='lessons' AND name='0006_practicallesson_is_approved_and_more'")
     if not c.fetchone()[0]:
