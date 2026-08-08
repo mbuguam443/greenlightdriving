@@ -100,7 +100,44 @@ class PortalLessonsView(StudentRequiredMixin, View):
             'completed_count': completed_all,
             'total_count': total_all,
             'progress_percentage': round((completed_all / total_all * 100)) if total_all else 0,
+            'lesson_items': LessonItem.objects.filter(is_active=True),
         })
+
+    def post(self, request):
+        from students.models import Student
+        from lessons.models import PracticalLesson, TheoryLesson, LessonItem
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return redirect('student_portal:lessons')
+        
+        item_id = request.POST.get('lesson_item')
+        lesson_date = request.POST.get('lesson_date', timezone.now().date())
+        if not item_id:
+            messages.error(request, 'Please select a lesson.')
+            return redirect('student_portal:lessons')
+        
+        item = get_object_or_404(LessonItem, pk=item_id, is_active=True)
+        
+        if item.lesson_type == 'PRACTICAL':
+            if PracticalLesson.objects.filter(student=student, lesson_item=item).exists():
+                messages.warning(request, 'This practical lesson already exists.')
+                return redirect('student_portal:lessons')
+            PracticalLesson.objects.create(
+                student=student, lesson_item=item, date=lesson_date,
+                status='NOT_STARTED', submitted_by_student=True, is_approved=False,
+            )
+        else:
+            if TheoryLesson.objects.filter(student=student, lesson_item=item).exists():
+                messages.warning(request, 'This theory lesson already exists.')
+                return redirect('student_portal:lessons')
+            TheoryLesson.objects.create(
+                student=student, lesson_item=item, topic=item.name, date=lesson_date,
+                time_start='08:00', time_end='09:00', status='NOT_STARTED',
+            )
+        
+        messages.success(request, f'"{item.name}" submitted for approval.')
+        return redirect('student_portal:lessons')
 
 
 class PortalPaymentsView(StudentRequiredMixin, View):
