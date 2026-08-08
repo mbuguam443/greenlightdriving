@@ -242,12 +242,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 
 {% if unread_notifications > 0 %}
+<a href="{% url 'student_portal:notifications' %}" class="text-decoration-none">
 <div class="alert alert-success alert-dismissible fade show mb-0 border-0 text-white d-flex align-items-center" role="alert"
-     style="background-color:#2E7D32;border-radius:0;">
+     style="background-color:#2E7D32;border-radius:0;cursor:pointer;">
     <i class="bi bi-bell-fill me-2 fs-5"></i>
     <strong>{{ unread_notifications }} new notification{{ unread_notifications|pluralize }}</strong>
-    <span class="ms-2">— you have unread messages.</span>
-    <a href="{% url 'student_portal:notifications' %}" class="btn btn-sm btn-light fw-semibold ms-auto">View</a>
-    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="alert"></button>
+    <span class="ms-2">— tap to view</span>
+    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" onclick="event.stopPropagation();event.preventDefault();"></button>
 </div>
+</a>
 {% endif %}
