@@ -258,10 +258,14 @@ class TheoryLessonUpdateView(StaffTestMixin, UpdateView):
 
 class PracticalLessonDeleteView(StaffTestMixin, DeleteView):
     model = PracticalLesson
-    success_url = reverse_lazy('lessons:list')
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        if self.object and self.object.student:
+            return reverse_lazy('students:detail', kwargs={'pk': self.object.student.pk})
+        return reverse_lazy('lessons:list')
 
     def form_valid(self, form):
         messages.success(self.request, 'Lesson deleted.')
@@ -270,10 +274,14 @@ class PracticalLessonDeleteView(StaffTestMixin, DeleteView):
 
 class TheoryLessonDeleteView(StaffTestMixin, DeleteView):
     model = TheoryLesson
-    success_url = reverse_lazy('lessons:theory_list')
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        if self.object and self.object.student:
+            return reverse_lazy('students:detail', kwargs={'pk': self.object.student.pk})
+        return reverse_lazy('lessons:theory_list')
 
     def form_valid(self, form):
         messages.success(self.request, 'Theory lesson deleted.')
