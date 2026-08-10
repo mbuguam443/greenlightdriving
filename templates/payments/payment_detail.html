@@ -6,6 +6,7 @@
 {% block page_title %}Payment Details{% endblock %}
 
 {% block dashboard_content %}
+<a href="{% url 'payments:list' %}" class="text-muted text-decoration-none mb-3 d-inline-block"><i class="bi bi-arrow-left me-1"></i>Back</a>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <p class="text-muted mb-0">Receipt: <strong style="color: #2E7D32;">{{ payment.receipt_number }}</strong></p>

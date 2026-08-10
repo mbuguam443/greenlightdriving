@@ -6,6 +6,7 @@
 {% block page_title %}Student Details{% endblock %}
 
 {% block dashboard_content %}
+<a href="{% url 'students:list' %}" class="text-muted text-decoration-none mb-3 d-inline-block"><i class="bi bi-arrow-left me-1"></i>Back</a>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <p class="text-muted mb-0">Student Number: <strong style="color: #2E7D32;">{{ student.student_number }}</strong></p>

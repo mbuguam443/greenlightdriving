@@ -8,6 +8,7 @@
 {% block page_title %}Admission Details{% endblock %}
 
 {% block dashboard_content %}
+<a href="{% url 'admissions:list' %}" class="text-muted text-decoration-none mb-3 d-inline-block"><i class="bi bi-arrow-left me-1"></i>Back</a>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <p class="text-muted mb-0">Admission Number: <strong style="color: #2E7D32;">{{ admission.admission_number }}</strong></p>
