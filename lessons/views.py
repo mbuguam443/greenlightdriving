@@ -141,7 +141,7 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
                 from core.models import DailyLog
                 from django.utils import timezone
                 item = form.cleaned_data.get('lesson_item')
-                DailyLog.objects.create(title=f'Bulk Lesson: {item.name if item else "N/A"}', description=f'{created} students assigned. {skipped} skipped.', log_date=timezone.now().date())
+                DailyLog.objects.create(title=f'Bulk Lesson: {item.name if item else "N/A"}', description=f'{created} students assigned. {skipped} skipped.', log_date=timezone.now().date(), created_by=self.request.user)
             messages.success(self.request, f'{created} lessons created. {skipped} skipped (already existed).')
             return redirect(self.success_url)
 
@@ -151,7 +151,7 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
             from core.models import DailyLog
             from django.utils import timezone
             l = form.instance
-            DailyLog.objects.create(title=f'New Lesson: {l.student.user.full_name}', description=f'Lesson: {l.lesson_item.name}. Date: {l.date}', log_date=timezone.now().date())
+            DailyLog.objects.create(title=f'New Lesson: {l.student.user.full_name}', description=f'Lesson: {l.lesson_item.name}. Date: {l.date}', log_date=timezone.now().date(), created_by=self.request.user)
             messages.success(self.request, 'Lesson saved successfully.')
             return response
         except IntegrityError:

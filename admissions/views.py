@@ -37,7 +37,7 @@ class OnlineAdmissionView(LoginRequiredMixin, View):
             messages.success(request, f'Application submitted successfully! Your admission number is {admission.admission_number}.')
 
             from core.models import DailyLog
-            DailyLog.objects.create(title=f'New Admission: {admission.full_name}', description=f'Course: {admission.course.name}. Phone: {admission.phone}', log_date=timezone.now().date())
+            DailyLog.objects.create(title=f'New Admission: {admission.full_name}', description=f'Course: {admission.course.name}. Phone: {admission.phone}', log_date=timezone.now().date(), created_by=request.user)
 
         return redirect('admissions:confirmation', pk=admission.pk)
         messages.error(request, 'Please correct the errors below.')

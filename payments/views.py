@@ -93,7 +93,7 @@ class PaymentCreateView(StaffTestMixin, CreateView):
         from core.models import DailyLog
         from django.utils import timezone
         p = form.instance
-        DailyLog.objects.create(title=f'Payment: {p.student.user.full_name}', description=f'KES {p.amount:,.0f} via {p.get_method_display()}. Receipt: {p.receipt_number}', log_date=timezone.now().date())
+        DailyLog.objects.create(title=f'Payment: {p.student.user.full_name}', description=f'KES {p.amount:,.0f} via {p.get_method_display()}. Receipt: {p.receipt_number}', log_date=timezone.now().date(), created_by=self.request.user)
         messages.success(self.request, 'Payment recorded successfully.')
         return response
 

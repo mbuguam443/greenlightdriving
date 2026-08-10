@@ -187,6 +187,11 @@ with connection.cursor() as c:
             c.execute("ALTER TABLE core_dailylog DROP FOREIGN KEY fk_dailylog_user")
             c.execute("ALTER TABLE core_dailylog DROP COLUMN recorded_by_id")
             print("      Dropped recorded_by_id from core_dailylog")
+        # Ensure created_by_id column
+        c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='core_dailylog' AND column_name='created_by_id'")
+        if not c.fetchone()[0]:
+            c.execute("ALTER TABLE core_dailylog ADD COLUMN created_by_id BIGINT NULL, ADD CONSTRAINT fk_dailylog_user FOREIGN KEY (created_by_id) REFERENCES accounts_user(id) ON DELETE SET NULL")
+            print("      Added created_by_id column to core_dailylog")
 
     # Ensure exam_fee column exists
     c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='core_sitesettings' AND column_name='exam_fee'")

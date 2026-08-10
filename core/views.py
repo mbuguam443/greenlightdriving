@@ -15,7 +15,7 @@ class DailyLogListView(StaffMixin, View):
     def get(self, request):
         from datetime import date
         from django.core.paginator import Paginator
-        logs = DailyLog.objects.all()
+        logs = DailyLog.objects.select_related('created_by').all()
         filter_date = request.GET.get('date', '')
         if filter_date:
             logs = logs.filter(log_date=filter_date)
@@ -66,7 +66,7 @@ class DailyLogPDFView(StaffMixin, View):
         from reportlab.lib.units import mm
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable, Image, PageBreak
 
-        logs = DailyLog.objects.all()
+        logs = DailyLog.objects.select_related('created_by').all()
         filter_date = request.GET.get('date', '')
         if filter_date:
             logs = logs.filter(log_date=filter_date)
@@ -153,3 +153,4 @@ class SiteSettingsView(StaffMixin, View):
         settings.save(update_fields=['exam_fee'])
         messages.success(request, f'Exam fee updated to KES {settings.exam_fee}.')
         return redirect('core:site_settings')
+
