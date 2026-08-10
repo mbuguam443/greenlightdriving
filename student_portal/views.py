@@ -263,14 +263,35 @@ class PortalProfileView(StudentRequiredMixin, View):
         user.phone = request.POST.get('phone', user.phone)
         user.save(update_fields=['first_name', 'last_name', 'phone'])
 
-        if student.admission:
-            student.admission.national_id = request.POST.get('national_id', student.admission.national_id)
-            student.admission.address = request.POST.get('address', student.admission.address)
-            student.admission.date_of_birth = request.POST.get('date_of_birth') or student.admission.date_of_birth
-            student.admission.gender = request.POST.get('gender', student.admission.gender)
-            student.admission.save(update_fields=['national_id', 'address', 'date_of_birth', 'gender'])
+        national_id = request.POST.get('national_id', '')
+        address = request.POST.get('address', '')
+        dob = request.POST.get('date_of_birth') or None
+        gender = request.POST.get('gender', '')
 
-        messages.success(request, 'Profile updated.')
+        if national_id or address or dob or gender:
+            admission = student.admission
+            if not admission:
+                admission = Admission(
+                    first_name=user.first_name, last_name=user.last_name,
+                    email=user.email, phone=user.phone or '',
+                    date_of_birth=dob or '2000-01-01',
+                    gender=gender or 'M',
+                    national_id=national_id, address=address,
+                    category=student.category, course=student.course,
+                    branch=student.branch, status='ENROLLED',
+                )
+            else:
+                admission.national_id = national_id or admission.national_id
+                admission.address = address or admission.address
+                admission.date_of_birth = dob or admission.date_of_birth
+                admission.gender = gender or admission.gender
+            admission.save()
+            student.admission = admission
+            student.save(update_fields=['admission'])
+            messages.success(request, 'Admission profile completed. Thank you!')
+        else:
+            messages.success(request, 'Profile updated.')
+
         return redirect('student_portal:profile')
 
 
