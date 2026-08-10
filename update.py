@@ -192,6 +192,12 @@ with connection.cursor() as c:
         if not c.fetchone()[0]:
             c.execute("ALTER TABLE core_dailylog ADD COLUMN created_by_id BIGINT NULL, ADD CONSTRAINT fk_dailylog_user FOREIGN KEY (created_by_id) REFERENCES accounts_user(id) ON DELETE SET NULL")
             print("      Added created_by_id column to core_dailylog")
+        else:
+            # Fake migration
+            c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='core' AND name='0004_dailylog_created_by'")
+            if not c.fetchone()[0]:
+                c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('core', '0004_dailylog_created_by', NOW())")
+                print("      Faked migration core.0004_dailylog_created_by")
 
     # Ensure exam_fee column exists
     c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='core_sitesettings' AND column_name='exam_fee'")
