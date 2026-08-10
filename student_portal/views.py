@@ -225,7 +225,27 @@ class PortalCertificatesView(StudentRequiredMixin, View):
 
 class PortalProfileView(StudentRequiredMixin, View):
     def get(self, request):
-        return render(request, 'student_portal/profile.html', {'user': request.user})
+        from students.models import Student
+        try:
+            student = Student.objects.select_related('user', 'course', 'branch', 'instructor__user').get(user=request.user)
+        except Student.DoesNotExist:
+            student = None
+        return render(request, 'student_portal/profile.html', {'student_profile': student, 'user': request.user})
+
+    def post(self, request):
+        from students.models import Student
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return redirect('student_portal:profile')
+
+        user = request.user
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.phone = request.POST.get('phone', user.phone)
+        user.save(update_fields=['first_name', 'last_name', 'phone'])
+        messages.success(request, 'Profile updated.')
+        return redirect('student_portal:profile')
 
 
 class PortalDocumentsView(StudentRequiredMixin, View):
