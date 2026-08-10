@@ -36,6 +36,8 @@ class SiteSettings(models.Model):
     working_hours = models.CharField(max_length=200, blank=True)
     logo = models.ImageField(upload_to="site/", blank=True)
     favicon = models.ImageField(upload_to="site/", blank=True)
+    exam_fee = models.DecimalField(max_digits=10, decimal_places=2, default=3100,
+                                    help_text="Exam booking fee applied to all students (KES)")
 
     class Meta:
         verbose_name = "Site Settings"

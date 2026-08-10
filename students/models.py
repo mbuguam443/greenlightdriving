@@ -64,14 +64,22 @@ class Student(models.Model):
 
     @property
     def total_fees(self):
+        course_fee = 0
         if self.course:
             prices = {
                 'FULL': self.course.full_course_price,
                 'HALF': self.course.half_course_price,
                 'TEST': self.course.test_only_price,
             }
-            return prices.get(self.package_choice, 0)
-        return 0
+            course_fee = prices.get(self.package_choice, 0)
+        # Add exam fee from school settings
+        from core.models import SiteSettings
+        try:
+            settings = SiteSettings.load()
+            course_fee += settings.exam_fee
+        except Exception:
+            pass
+        return course_fee
 
     @property
     def amount_paid(self):
