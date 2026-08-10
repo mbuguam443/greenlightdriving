@@ -167,7 +167,7 @@
                 <h5 class="mb-0 fw-semibold" style="color: var(--primary-green);">
                     <i class="bi bi-clock-history me-2" style="color: #2E7D32;"></i>Recent Activity
                 </h5>
-                <a href="#" class="text-decoration-none small" style="color: #2E7D32;">View All</a>
+                <a href="{% url 'core:daily_log' %}" class="text-decoration-none small" style="color: #2E7D32;">View All</a>
             </div>
             <div class="card-body p-0">
                 {% if recent_activities %}
