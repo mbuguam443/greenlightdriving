@@ -100,7 +100,7 @@ class RegisterView(View):
             except Exception:
                 pass
             request.session['verify_email'] = user.email
-            messages.success(request, 'Account created! Check email for code.')
+                messages.success(request, 'Account created! Check the sent_emails/ folder for your verification code.')
             return redirect('accounts:verify_otp')
         return render(request, 'accounts/register.html', {'form': form})
 
