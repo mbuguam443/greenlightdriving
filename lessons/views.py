@@ -239,6 +239,10 @@ class PracticalLessonQuickStatusView(StaffTestMixin, View):
                 lesson.completed_at = timezone.now()
             lesson.save()
             messages.success(request, f'{lesson.lesson_item.name} → {lesson.get_status_display()}')
+        # Redirect back to student detail if that's where we came from
+        referer = request.META.get('HTTP_REFERER', '')
+        if '/students/' in referer:
+            return redirect('students:detail', pk=lesson.student.pk)
         return redirect('lessons:list')
 
 

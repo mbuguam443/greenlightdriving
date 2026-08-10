@@ -163,7 +163,22 @@
                                 <tr>
                                     <td class="ps-3">{{ l.lesson_item.name }}</td>
                                     <td>{{ l.date|date:"d M Y" }}</td>
-                                    <td>{% if l.status == 'COMPLETED' %}<span class="badge bg-success">Done</span>{% elif l.status == 'IN_PROGRESS' %}<span class="badge bg-warning text-dark">In Progress</span>{% elif l.status == 'NEEDS_PRACTICE' %}<span class="badge bg-info text-dark">Needs Practice</span>{% else %}<span class="badge bg-secondary">Pending</span>{% endif %}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'lessons:practical_quick_status' l.pk %}" onchange="this.submit()">
+                                            {% csrf_token %}
+                                            <select name="status" class="form-select form-select-sm py-0" style="font-size:0.8rem;width:auto;min-width:110px;
+                                                {% if l.status == 'NOT_STARTED' %}background:#6c757d;color:#fff;
+                                                {% elif l.status == 'IN_PROGRESS' %}background:#ffc107;color:#333;
+                                                {% elif l.status == 'COMPLETED' %}background:#198754;color:#fff;
+                                                {% elif l.status == 'NEEDS_PRACTICE' %}background:#0dcaf0;color:#333;
+                                                {% endif %}">
+                                                <option value="NOT_STARTED" {% if l.status == 'NOT_STARTED' %}selected{% endif %}>Not Started</option>
+                                                <option value="IN_PROGRESS" {% if l.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                                <option value="COMPLETED" {% if l.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                                                <option value="NEEDS_PRACTICE" {% if l.status == 'NEEDS_PRACTICE' %}selected{% endif %}>Needs Practice</option>
+                                            </select>
+                                        </form>
+                                    </td>
                                     <td>{% if l.attended and l.is_approved %}<i class="bi bi-check-circle-fill text-success"></i>{% elif l.attended %}<i class="bi bi-clock text-warning"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}</td>
                                     <td class="text-end pe-3">
                                         <a href="{% url 'lessons:practical_update' l.pk %}" class="btn btn-sm btn-outline-success" title="Edit"><i class="bi bi-pencil"></i></a>
