@@ -332,3 +332,15 @@ class InquiryUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
         inquiry.save()
         messages.success(request, f'Enquiry updated.')
         return redirect('admissions:inquiry_list')
+
+
+
+class InquiryDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def get(self, request, pk):
+        from .models import WalkInInquiry
+        get_object_or_404(WalkInInquiry, pk=pk).delete()
+        messages.success(request, 'Enquiry deleted.')
+        return redirect('admissions:inquiry_list')

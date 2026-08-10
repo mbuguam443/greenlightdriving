@@ -112,6 +112,9 @@
                                     <i class="bi bi-arrow-counterclockwise"></i>
                                 </a>
                                 {% endif %}
+                                <a href="{% url 'admissions:inquiry_delete' inquiry.pk %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this enquiry?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
