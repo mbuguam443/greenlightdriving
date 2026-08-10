@@ -155,8 +155,8 @@ class PortalPaymentsView(StudentRequiredMixin, View):
         except Student.DoesNotExist:
             student = None
 
-        payments = Payment.objects.filter(student=student, status='COMPLETED') if student else []
-        total_paid = sum(p.amount for p in payments) if student else 0
+        payments = Payment.objects.filter(student=student) if student else []
+        total_paid = sum(p.amount for p in payments.filter(status='COMPLETED')) if student else 0
         total_fees = student.total_fees if student else 0
         balance = total_fees - total_paid
         # Get exam fee for breakdown
