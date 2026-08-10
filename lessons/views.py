@@ -315,6 +315,9 @@ class PracticalLessonAttendanceView(StaffTestMixin, View):
             lesson.completed_at = None
         lesson.save(update_fields=['attended', 'completed_at'])
         messages.success(request, f'{lesson.lesson_item.name} attendance: {"Present" if lesson.attended else "Absent"}')
+        referer = request.META.get('HTTP_REFERER', '')
+        if '/students/' in referer:
+            return redirect('students:detail', pk=lesson.student.pk)
         return redirect('lessons:list')
 
 
@@ -325,6 +328,9 @@ class TheoryLessonAttendanceView(StaffTestMixin, View):
         lesson.attended = not lesson.attended
         lesson.save(update_fields=['attended'])
         messages.success(request, f'Theory attendance: {"Present" if lesson.attended else "Absent"}')
+        referer = request.META.get('HTTP_REFERER', '')
+        if '/students/' in referer:
+            return redirect('students:detail', pk=lesson.student.pk)
         return redirect('lessons:theory_list')
 
 
