@@ -157,6 +157,14 @@ class PortalPaymentsView(StudentRequiredMixin, View):
         total_paid = sum(p.amount for p in payments) if student else 0
         total_fees = student.total_fees if student else 0
         balance = total_fees - total_paid
+        # Get exam fee for breakdown
+        from core.models import SiteSettings
+        exam_fee = 0
+        try:
+            exam_fee = SiteSettings.load().exam_fee
+        except Exception:
+            pass
+        course_fee = total_fees - exam_fee
 
         return render(request, 'student_portal/payments.html', {
             'payments': payments,
@@ -164,6 +172,8 @@ class PortalPaymentsView(StudentRequiredMixin, View):
             'total_paid': total_paid,
             'total_fees': total_fees,
             'balance': balance,
+            'course_fee': course_fee,
+            'exam_fee': exam_fee,
         })
 
 
