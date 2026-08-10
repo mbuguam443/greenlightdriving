@@ -323,15 +323,14 @@ if os.path.isfile(passenger_file):
 else:
     print("      passenger_wsgi.py not found — skipping restart")
 
-# 7. Seed course data
-print("\n[6/6] Updating course pricing & categories...")
-seed_script = os.path.join(project_dir, 'seed.py')
-if os.path.isfile(seed_script):
-    import subprocess as sp
-    sp.run([sys.executable, seed_script], cwd=project_dir)
-    print("      Done!")
-else:
-    print("      seed.py not found")
+# 7. Seed course data (skip in production — run manually if needed)
+# seed_script = os.path.join(project_dir, 'seed.py')
+# if os.path.isfile(seed_script):
+#     import subprocess as sp
+#     sp.run([sys.executable, seed_script], cwd=project_dir)
+#     print("      Done!")
+# else:
+#     print("      seed.py not found")
 
 # 8. Setup Simon Mureithi as instructor
 print("\n[7/6] Setting up Simon Mureithi as instructor...")
@@ -373,15 +372,15 @@ try:
 except Exception as e:
     print(f"      Error: {e}")
 
-# 9. Purge dummy seed data (safe — only removes @student.com, @greenlight.com, seed vehicles)
-print("\n[8/6] Purging dummy data...")
-purge_script = os.path.join(project_dir, 'purge_dummy.py')
-if os.path.isfile(purge_script):
-    import subprocess as sp
-    sp.run([sys.executable, purge_script], cwd=project_dir)
-    print("      Done!")
-else:
-    print("      purge_dummy.py not found")
+# $9. Purge dummy seed data (disabled — production mode)
+# print("\n[8/6] Purging dummy data...")
+# purge_script = os.path.join(project_dir, 'purge_dummy.py')
+# if os.path.isfile(purge_script):
+#     import subprocess as sp
+#     sp.run([sys.executable, purge_script], cwd=project_dir)
+#     print("      Done!")
+# else:
+#     print("      purge_dummy.py not found")
 
 # 10. Seed study materials
 print("\n[7/6] Seeding study materials...")
