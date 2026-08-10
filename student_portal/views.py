@@ -15,6 +15,7 @@ class StudentRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 class PortalDashboardView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
+        from admissions.models import Admission
         from lessons.models import PracticalLesson, TheoryLesson, LessonItem
         try:
             student = Student.objects.get(user=request.user)
