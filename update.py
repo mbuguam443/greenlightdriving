@@ -266,6 +266,13 @@ with connection.cursor() as c:
         c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('student_portal', '0006_notification_replied_at_notification_reply', NOW())")
         print("      Faked migration student_portal.0006_notification_reply")
 
+    # Ensure OTP columns exist
+    for col in ['otp', 'is_verified']:
+        c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='accounts_user' AND column_name='{col}'")
+        if not c.fetchone()[0]:
+            c.execute(f"ALTER TABLE accounts_user ADD COLUMN {col} {'VARCHAR(6)' if col == 'otp' else 'TINYINT(1) DEFAULT 0'} NOT NULL")
+            print(f"      Added {col} to accounts_user")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1

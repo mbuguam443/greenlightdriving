@@ -1,3 +1,5 @@
+import random
+import string
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
@@ -50,6 +52,8 @@ class User(AbstractUser):
         blank=True,
     )
     is_active = models.BooleanField(default=True)
+    otp = models.CharField(max_length=6, blank=True)
+    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -85,3 +89,7 @@ class User(AbstractUser):
 
     def is_student(self):
         return self.role == "STUDENT"
+
+    def generate_otp(self):
+        self.otp = ''.join(random.choices(string.digits, k=6))
+        self.save(update_fields=['otp'])
