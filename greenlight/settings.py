@@ -222,7 +222,11 @@ LOGGING = {
     },
 }
 
-# Password Reset Email (writes to file - check /sent_emails/)
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-DEFAULT_FROM_EMAIL = 'noreply@greenlight.co.ke'
+# Email (Password Reset via cPanel SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
+EMAIL_HOST_PASSWORD = 'Me32323383#&'
+DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
