@@ -1,0 +1,30 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Site Settings - Green Light School{% endblock %}
+{% block page_title %}Site Settings{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold" style="color:#2E7D32;"><i class="bi bi-gear me-2"></i>Exam Fee Configuration</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Exam Booking Fee (KES)</label>
+                        <input type="number" name="exam_fee" class="form-control" value="{{ settings.exam_fee }}" step="0.01" min="0">
+                        <div class="form-text">This fee is added to every student's total fees. Applies to all students immediately.</div>
+                    </div>
+                    <button type="submit" class="btn fw-semibold text-white" style="background-color:#2E7D32;">
+                        <i class="bi bi-check-lg me-1"></i>Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

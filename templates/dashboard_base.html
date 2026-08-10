@@ -152,6 +152,7 @@
                 <li><a href="{% url 'reports:activity' %}"><i class="bi bi-activity"></i><span>Activity Log</span></a></li>
                 <li><a href="{% url 'reports:backup' %}"><i class="bi bi-download"></i><span>Backup Database</span></a></li>
                 <li><a href="#" onclick="if(confirm('Delete ALL dummy/seed data? This cannot be undone.')){location.href='{% url 'reports:purge_dummy' %}'}"><i class="bi bi-eraser"></i><span>Purge Dummy Data</span></a></li>
+                <li><a href="{% url 'core:site_settings' %}"><i class="bi bi-gear"></i><span>Exam Fee Settings</span></a></li>
                 <li><a class="{% block nav_branches %}{% endblock %}" href="{% url 'core:branch_list' %}"><i class="bi bi-building"></i><span>Branches</span></a></li>
                 <li><a class="{% block nav_settings %}{% endblock %}" href="{% url 'accounts:profile' %}"><i class="bi bi-gear"></i><span>Settings</span></a></li>
                 {% if user.role == 'SUPER_ADMIN' or user.role == 'MANAGER' %}

@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views import View
 from django.http import HttpResponse
-from .models import DailyLog
+from .models import DailyLog, SiteSettings
 
 
 class StaffMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -139,3 +139,17 @@ class DailyLogPDFView(StaffMixin, View):
         buf.seek(0)
         return HttpResponse(buf, content_type='application/pdf')
 
+
+
+
+class SiteSettingsView(StaffMixin, View):
+    def get(self, request):
+        settings = SiteSettings.load()
+        return render(request, 'core/site_settings.html', {'settings': settings})
+
+    def post(self, request):
+        settings = SiteSettings.load()
+        settings.exam_fee = request.POST.get('exam_fee', 3100)
+        settings.save(update_fields=['exam_fee'])
+        messages.success(request, f'Exam fee updated to KES {settings.exam_fee}.')
+        return redirect('core:site_settings')

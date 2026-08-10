@@ -12,4 +12,5 @@ urlpatterns = [
     path('daily-log/<int:pk>/update/', views.DailyLogUpdateView.as_view(), name='daily_log_update'),
     path('daily-log/<int:pk>/delete/', views.DailyLogDeleteView.as_view(), name='daily_log_delete'),
     path('daily-log/pdf/', views.DailyLogPDFView.as_view(), name='daily_log_pdf'),
+    path('settings/', views.SiteSettingsView.as_view(), name='site_settings'),
 ]
