@@ -131,6 +131,8 @@ class PortalLessonsView(StudentRequiredMixin, View):
                 student=student, lesson_item=item, date=lesson_date,
                 status='NOT_STARTED', submitted_by_student=True, is_approved=False,
             )
+            from core.models import DailyLog
+            DailyLog.objects.create(title=f'Student Submitted: {student.user.full_name}', description=f'Lesson: {item.name}. Date: {lesson_date}. Pending approval.', log_date=timezone.now().date())
         else:
             if TheoryLesson.objects.filter(student=student, lesson_item=item).exists():
                 messages.warning(request, 'This theory lesson already exists.')
@@ -716,6 +718,9 @@ class MarkAttendedView(StudentRequiredMixin, View):
             lesson.is_approved = False
             lesson.save(update_fields=['attended', 'is_approved'])
             messages.success(request, 'Attendance submitted for approval.')
+            from core.models import DailyLog
+            from django.utils import timezone
+            DailyLog.objects.create(title=f'Student Attendance: {student.user.full_name}', description=f'Marked {lesson.lesson_item.name} as attended. Pending approval.', log_date=timezone.now().date())
         else:
             lesson = get_object_or_404(TheoryLesson, pk=pk, student=student)
             lesson.attended = not lesson.attended
