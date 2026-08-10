@@ -191,10 +191,9 @@
     var preselectedId = '{{ selected_student.pk|stringformat:"s" }}';
     hiddenSelect.value = preselectedId;
     fallbackSelect.value = preselectedId;
-    {% endif %}
-    {% if selected_student %}
-    // Trigger the filter to show the right student
     filterOptions('{{ selected_student.user.full_name|lower }}');
+    {% else %}
+    filterOptions('');
     {% endif %}
 })();
 </script>
