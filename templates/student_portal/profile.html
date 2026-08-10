@@ -15,9 +15,13 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center p-4">
+                {% if admission and admission.passport_photo %}
+                <img src="{{ admission.passport_photo.url }}" class="rounded-circle mb-3 shadow" style="width:120px;height:120px;object-fit:cover;">
+                {% else %}
                 <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width:120px;height:120px;">
                     <span class="text-success fw-bold" style="font-size:2.5rem;">{{ user.first_name.0 }}{{ user.last_name.0 }}</span>
                 </div>
+                {% endif %}
                 <h4 class="mb-1">{{ user.full_name }}</h4>
                 <p class="text-muted mb-3">{{ user.email }}</p>
                 {% if student_profile %}
@@ -25,6 +29,7 @@
                 <div class="text-start mt-4">
                     <div class="py-2 border-bottom"><small class="text-muted">Student No.</small><br>{{ student_profile.student_number }}</div>
                     <div class="py-2 border-bottom"><small class="text-muted">Course</small><br>{{ student_profile.course.name|default:"—" }}</div>
+                    <div class="py-2 border-bottom"><small class="text-muted">Package</small><br>{{ student_profile.get_package_choice_display }}</div>
                     <div class="py-2 border-bottom"><small class="text-muted">Branch</small><br>{{ student_profile.branch.name|default:"—" }}</div>
                     <div class="py-2 border-bottom"><small class="text-muted">Instructor</small><br>{{ student_profile.instructor.user.full_name|default:"Unassigned" }}</div>
                     <div class="py-2"><small class="text-muted">Enrolled</small><br>{{ student_profile.enrollment_date|date:"d M Y" }}</div>
@@ -38,10 +43,13 @@
             <div class="card-header bg-white border-bottom"><h5 class="mb-0"><i class="bi bi-person me-2" style="color:#2E7D32;"></i>Personal Information</h5></div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-6"><small class="text-muted">Full Name</small><p class="fw-semibold">{{ user.full_name }}</p></div>
-                    <div class="col-md-6"><small class="text-muted">Email</small><p class="fw-semibold">{{ user.email }}</p></div>
-                    <div class="col-md-6"><small class="text-muted">Phone</small><p class="fw-semibold">{{ user.phone|default:"Not provided" }}</p></div>
-                    <div class="col-md-6"><small class="text-muted">Package</small><p class="fw-semibold">{{ student_profile.get_package_choice_display|default:"—" }}</p></div>
+                    <div class="col-md-4"><small class="text-muted">Full Name</small><p class="fw-semibold">{{ user.full_name }}</p></div>
+                    <div class="col-md-4"><small class="text-muted">Email</small><p class="fw-semibold">{{ user.email }}</p></div>
+                    <div class="col-md-4"><small class="text-muted">Phone</small><p class="fw-semibold">{{ user.phone|default:"—" }}</p></div>
+                    <div class="col-md-4"><small class="text-muted">Date of Birth</small><p class="fw-semibold">{{ admission.date_of_birth|date:"d M Y"|default:"—" }}</p></div>
+                    <div class="col-md-4"><small class="text-muted">Gender</small><p class="fw-semibold">{{ admission.get_gender_display|default:"—" }}</p></div>
+                    <div class="col-md-4"><small class="text-muted">National ID</small><p class="fw-semibold">{{ admission.national_id|default:"—" }}</p></div>
+                    <div class="col-12"><small class="text-muted">Address</small><p class="fw-semibold">{{ admission.address|default:"—" }}</p></div>
                 </div>
             </div>
         </div>
@@ -49,15 +57,27 @@
 </div>
 
 <div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form method="post">
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header text-white" style="background:#2E7D32;"><h5 class="modal-title"><i class="bi bi-pencil me-1"></i>Edit Profile</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label fw-semibold">First Name</label><input type="text" name="first_name" class="form-control" value="{{ user.first_name }}"></div>
-                    <div class="mb-3"><label class="form-label fw-semibold">Last Name</label><input type="text" name="last_name" class="form-control" value="{{ user.last_name }}"></div>
-                    <div class="mb-3"><label class="form-label fw-semibold">Phone</label><input type="text" name="phone" class="form-control" value="{{ user.phone|default:'' }}"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label fw-semibold">First Name</label><input type="text" name="first_name" class="form-control" value="{{ user.first_name }}"></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">Last Name</label><input type="text" name="last_name" class="form-control" value="{{ user.last_name }}"></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">Phone</label><input type="text" name="phone" class="form-control" value="{{ user.phone|default:'' }}"></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">National ID</label><input type="text" name="national_id" class="form-control" value="{{ admission.national_id|default:'' }}"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Date of Birth</label><input type="date" name="date_of_birth" class="form-control" value="{{ admission.date_of_birth|date:'Y-m-d'|default:'' }}"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">—</option>
+                                <option value="M" {% if admission.gender == 'M' %}selected{% endif %}>Male</option>
+                                <option value="F" {% if admission.gender == 'F' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-12"><label class="form-label fw-semibold">Address</label><input type="text" name="address" class="form-control" value="{{ admission.address|default:'' }}"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>

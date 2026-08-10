@@ -226,16 +226,23 @@ class PortalCertificatesView(StudentRequiredMixin, View):
 class PortalProfileView(StudentRequiredMixin, View):
     def get(self, request):
         from students.models import Student
+        from admissions.models import Admission
         try:
-            student = Student.objects.select_related('user', 'course', 'branch', 'instructor__user').get(user=request.user)
+            student = Student.objects.select_related('user', 'course', 'branch', 'instructor__user', 'admission').get(user=request.user)
         except Student.DoesNotExist:
             student = None
-        return render(request, 'student_portal/profile.html', {'student_profile': student, 'user': request.user})
+        admission = student.admission if student else None
+        return render(request, 'student_portal/profile.html', {
+            'student_profile': student,
+            'admission': admission,
+            'user': request.user,
+        })
 
     def post(self, request):
         from students.models import Student
+        from admissions.models import Admission
         try:
-            student = Student.objects.get(user=request.user)
+            student = Student.objects.select_related('admission').get(user=request.user)
         except Student.DoesNotExist:
             return redirect('student_portal:profile')
 
@@ -244,6 +251,14 @@ class PortalProfileView(StudentRequiredMixin, View):
         user.last_name = request.POST.get('last_name', user.last_name)
         user.phone = request.POST.get('phone', user.phone)
         user.save(update_fields=['first_name', 'last_name', 'phone'])
+
+        if student.admission:
+            student.admission.national_id = request.POST.get('national_id', student.admission.national_id)
+            student.admission.address = request.POST.get('address', student.admission.address)
+            student.admission.date_of_birth = request.POST.get('date_of_birth') or student.admission.date_of_birth
+            student.admission.gender = request.POST.get('gender', student.admission.gender)
+            student.admission.save(update_fields=['national_id', 'address', 'date_of_birth', 'gender'])
+
         messages.success(request, 'Profile updated.')
         return redirect('student_portal:profile')
 
