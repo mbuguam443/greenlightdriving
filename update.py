@@ -260,6 +260,12 @@ with connection.cursor() as c:
             c.execute(f"ALTER TABLE student_portal_notification ADD COLUMN {col} {'LONGTEXT' if col == 'reply' else 'DATETIME(6) NULL'}")
             print(f"      Added {col} to student_portal_notification")
 
+    # Fake reply migration
+    c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='student_portal' AND name='0006_notification_replied_at_notification_reply'")
+    if not c.fetchone()[0]:
+        c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('student_portal', '0006_notification_replied_at_notification_reply', NOW())")
+        print("      Faked migration student_portal.0006_notification_reply")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1
