@@ -117,3 +117,14 @@ class StudentRegistrationForm(forms.Form):
         user.set_password(data['password'])
         user.save()
         return user
+
+
+from django.contrib.auth.forms import PasswordResetForm as DjangoPasswordResetForm
+
+
+class CustomPasswordResetForm(DjangoPasswordResetForm):
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if not User.objects.filter(email=email).exists():
+            raise forms.ValidationError('No account found with this email address.')
+        return email
