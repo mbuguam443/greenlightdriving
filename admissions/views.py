@@ -106,6 +106,16 @@ class AdmissionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+        from payments.models import Payment
+        admission = self.object
+        student = Student.objects.filter(admission=admission).first()
+        if student:
+            context['payments'] = Payment.objects.filter(student=student).order_by('-created_at')
+        return context
+
 
 class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Admission
