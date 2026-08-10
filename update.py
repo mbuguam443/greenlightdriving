@@ -194,6 +194,12 @@ with connection.cursor() as c:
         c.execute("ALTER TABLE core_sitesettings ADD COLUMN exam_fee DECIMAL(10,2) DEFAULT 3100 NOT NULL")
         print("      Added exam_fee column to core_sitesettings")
 
+    # Fake exam_fee migration
+    c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='core' AND name='0003_sitesettings_exam_fee'")
+    if not c.fetchone()[0]:
+        c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('core', '0003_sitesettings_exam_fee', NOW())")
+        print("      Faked migration core.0003_sitesettings_exam_fee")
+
     # Fake the daily log migration if table exists
     c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='core' AND name='0002_dailylog'")
     if not c.fetchone()[0]:
