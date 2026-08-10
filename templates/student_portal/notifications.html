@@ -37,7 +37,7 @@
                     <small class="text-muted d-block">Your reply ({{ n.replied_at|date:"d M H:i" }}):</small>
                     <small>{{ n.reply }}</small>
                 </div>
-                {% if not n.reply %}
+                {% else %}
                 <div class="mt-2">
                     <button class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" data-bs-target="#reply{{ n.pk }}">
                         <i class="bi bi-reply me-1"></i>Reply
