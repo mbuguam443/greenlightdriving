@@ -224,9 +224,9 @@ LOGGING = {
 
 # Email (Password Reset via cPanel SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
-EMAIL_USE_TLS = False
+EMAIL_HOST = 'greenlight-driving-defensive.schones-heim-builders.co.ke'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 EMAIL_HOST_USER = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
 EMAIL_HOST_PASSWORD = 'Me32323383#&'
 DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
