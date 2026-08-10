@@ -235,8 +235,14 @@ class InquiryListView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request):
         from .models import WalkInInquiry
         from .forms import InquiryForm
+        from django.db.models import Q
         tab = request.GET.get('tab', 'all')
+        query = request.GET.get('q', '').strip()
+
         all_inquiries = WalkInInquiry.objects.select_related('course').all()
+        if query:
+            all_inquiries = all_inquiries.filter(Q(name__icontains=query) | Q(phone__icontains=query))
+
         if tab == 'pending':
             inquiries = all_inquiries.filter(followed_up=False, converted=False)
         elif tab == 'followed':
@@ -246,14 +252,19 @@ class InquiryListView(LoginRequiredMixin, UserPassesTestMixin, View):
         else:
             inquiries = all_inquiries
 
+        counts = WalkInInquiry.objects
+        if query:
+            counts = counts.filter(Q(name__icontains=query) | Q(phone__icontains=query))
+
         return render(request, 'admissions/inquiry_list.html', {
             'inquiries': inquiries,
             'inquiry_form': InquiryForm(),
             'filter_tab': tab,
+            'search_query': query,
             'total_count': all_inquiries.count(),
-            'pending_count': all_inquiries.filter(followed_up=False, converted=False).count(),
-            'followed_count': all_inquiries.filter(followed_up=True, converted=False).count(),
-            'converted_count': all_inquiries.filter(converted=True).count(),
+            'pending_count': counts.filter(followed_up=False, converted=False).count(),
+            'followed_count': counts.filter(followed_up=True, converted=False).count(),
+            'converted_count': counts.filter(converted=True).count(),
         })
 
 
