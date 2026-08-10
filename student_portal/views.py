@@ -714,3 +714,20 @@ class RejectAttendanceView(StaffMixin, View):
         lesson.save(update_fields=['attended', 'is_approved'])
         messages.success(request, f'Attendance rejected for {lesson.student.user.full_name}.')
         return redirect('student_portal:lesson_approval')
+
+
+
+class PortalReceiptView(StudentRequiredMixin, View):
+    def get(self, request, pk):
+        from payments.models import Payment
+        from django.templatetags.static import static
+        try:
+            from students.models import Student
+            student = Student.objects.get(user=request.user)
+            payment = get_object_or_404(Payment, pk=pk, student=student)
+        except Student.DoesNotExist:
+            return redirect('student_portal:dashboard')
+        return render(request, 'payments/receipt_standalone.html', {
+            'payment': payment,
+            'logo_url': request.build_absolute_uri(static('images/logo.png')),
+        })

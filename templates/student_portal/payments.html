@@ -95,13 +95,9 @@
                         <td><code>{{ payment.reference_number }}</code></td>
                         <td>{{ payment.description|default:"Course fee payment"|truncatewords:10 }}</td>
                         <td class="text-end">
-                            {% if payment.receipt %}
-                                <a href="{{ payment.receipt.url }}" class="btn btn-sm btn-outline-success" download>
-                                    <i class="bi bi-download me-1"></i> Receipt
-                                </a>
-                            {% else %}
-                                <span class="text-muted small">-</span>
-                            {% endif %}
+                            <a href="{% url 'student_portal:receipt' payment.pk %}" class="btn btn-sm btn-outline-success" target="_blank">
+                                <i class="bi bi-receipt"></i>
+                            </a>
                         </td>
                     </tr>
                     {% empty %}

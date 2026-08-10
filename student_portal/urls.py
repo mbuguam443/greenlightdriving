@@ -8,6 +8,7 @@ urlpatterns = [
     path('schedule/', views.PortalScheduleView.as_view(), name='schedule'),
     path('lessons/', views.PortalLessonsView.as_view(), name='lessons'),
     path('payments/', views.PortalPaymentsView.as_view(), name='payments'),
+    path('receipt/<int:pk>/', views.PortalReceiptView.as_view(), name='receipt'),
     path('progress/', views.PortalProgressView.as_view(), name='progress'),
     path('certificates/', views.PortalCertificatesView.as_view(), name='certificates'),
     path('documents/', views.PortalDocumentsView.as_view(), name='documents'),
