@@ -273,6 +273,12 @@ with connection.cursor() as c:
             c.execute(f"ALTER TABLE accounts_user ADD COLUMN {col} {'VARCHAR(6)' if col == 'otp' else 'TINYINT(1) DEFAULT 0'} NOT NULL")
             print(f"      Added {col} to accounts_user")
 
+    # Fake OTP migration
+    c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='accounts' AND name='0002_user_is_verified_user_otp'")
+    if not c.fetchone()[0]:
+        c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('accounts', '0002_user_is_verified_user_otp', NOW())")
+        print("      Faked migration accounts.0002_user_is_verified_user_otp")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1
