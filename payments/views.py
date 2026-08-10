@@ -89,8 +89,13 @@ class PaymentCreateView(StaffTestMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.recorded_by = self.request.user
+        response = super().form_valid(form)
+        from core.models import DailyLog
+        from django.utils import timezone
+        p = form.instance
+        DailyLog.objects.create(title=f'Payment: {p.student.user.full_name}', description=f'KES {p.amount:,.0f} via {p.get_method_display()}. Receipt: {p.receipt_number}', log_date=timezone.now().date())
         messages.success(self.request, 'Payment recorded successfully.')
-        return super().form_valid(form)
+        return response
 
 
 class PaymentDetailView(StaffTestMixin, DetailView):
