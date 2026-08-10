@@ -197,7 +197,20 @@
                                 <tr>
                                     <td class="ps-3">{{ l.topic }}</td>
                                     <td>{{ l.date|date:"d M Y" }}</td>
-                                    <td>{% if l.status == 'COMPLETED' %}<span class="badge bg-success">Done</span>{% elif l.status == 'SCHEDULED' %}<span class="badge bg-warning text-dark">Scheduled</span>{% else %}<span class="badge bg-secondary">Pending</span>{% endif %}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'lessons:theory_quick_status' l.pk %}" onchange="this.submit()">
+                                            {% csrf_token %}
+                                            <select name="status" class="form-select form-select-sm py-0" style="font-size:0.8rem;width:auto;min-width:110px;
+                                                {% if l.status == 'NOT_STARTED' %}background:#6c757d;color:#fff;
+                                                {% elif l.status == 'SCHEDULED' %}background:#ffc107;color:#333;
+                                                {% elif l.status == 'COMPLETED' %}background:#198754;color:#fff;
+                                                {% endif %}">
+                                                <option value="NOT_STARTED" {% if l.status == 'NOT_STARTED' %}selected{% endif %}>Not Started</option>
+                                                <option value="SCHEDULED" {% if l.status == 'SCHEDULED' %}selected{% endif %}>Scheduled</option>
+                                                <option value="COMPLETED" {% if l.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                                            </select>
+                                        </form>
+                                    </td>
                                     <td>{% if l.attended %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}</td>
                                     <td class="text-end pe-3">
                                         <a href="{% url 'lessons:theory_update' l.pk %}" class="btn btn-sm btn-outline-success" title="Edit"><i class="bi bi-pencil"></i></a>

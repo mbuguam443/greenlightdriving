@@ -326,3 +326,18 @@ class TheoryLessonAttendanceView(StaffTestMixin, View):
         lesson.save(update_fields=['attended'])
         messages.success(request, f'Theory attendance: {"Present" if lesson.attended else "Absent"}')
         return redirect('lessons:theory_list')
+
+
+
+class TheoryLessonQuickStatusView(StaffTestMixin, View):
+    def post(self, request, pk):
+        lesson = get_object_or_404(TheoryLesson, pk=pk)
+        new_status = request.POST.get('status', '')
+        if new_status in dict(TheoryLesson.STATUS_CHOICES):
+            lesson.status = new_status
+            lesson.save()
+            messages.success(request, f'{lesson.topic} ? {lesson.get_status_display()}')
+        referer = request.META.get('HTTP_REFERER', '')
+        if '/students/' in referer:
+            return redirect('students:detail', pk=lesson.student.pk)
+        return redirect('lessons:theory_list')
