@@ -167,7 +167,7 @@ with connection.cursor() as c:
         c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('lessons', '0006_practicallesson_is_approved_and_more', NOW())")
         print("      Faked migration lessons.0006_practicallesson_is_approved_and_more")
 
-    # Ensure daily log table exists
+    # Ensure OTP columns exist
     c.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='core_dailylog'")
     if not c.fetchone()[0]:
         c.execute("""
@@ -278,6 +278,12 @@ with connection.cursor() as c:
     if not c.fetchone()[0]:
         c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('accounts', '0002_user_is_verified_user_otp', NOW())")
         print("      Faked migration accounts.0002_user_is_verified_user_otp")
+
+    # Ensure sent_emails directory exists for file-based email
+    sent_emails_dir = os.path.join(project_dir, 'sent_emails')
+    if not os.path.isdir(sent_emails_dir):
+        os.makedirs(sent_emails_dir, exist_ok=True)
+        print("      Created sent_emails/ directory")
 
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
