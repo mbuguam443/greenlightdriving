@@ -234,14 +234,14 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/chart.min.js' %}"></script>
+<script src="/static/js/chart.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    try {
     var revCtx = document.getElementById('revenueChart');
     if (revCtx) {
-        revCtx = revCtx.getContext('2d');
-        new Chart(revCtx, {
+        try {
+        var ctx = revCtx.getContext('2d');
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: {{ revenue_labels|safe }},
