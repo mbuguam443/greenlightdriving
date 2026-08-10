@@ -19,6 +19,7 @@ urlpatterns = [
     path('reports/attendance/', views.PortalAttendanceReportPDFView.as_view(), name='report_attendance'),
     path('notifications/', views.PortalNotificationsView.as_view(), name='notifications'),
     path('notifications/<int:pk>/read/', views.ReadNotificationView.as_view(), name='read_notification'),
+    path('notifications/<int:pk>/reply/', views.ReplyNotificationView.as_view(), name='reply_notification'),
     path('lessons/', views.PortalLessonsView.as_view(), name='lessons'),
     path('mark-attended/<int:pk>/', views.MarkAttendedView.as_view(), name='mark_attended'),
     path('manage/lesson-approval/', views.LessonApprovalView.as_view(), name='lesson_approval'),

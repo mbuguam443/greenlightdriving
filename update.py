@@ -253,6 +253,13 @@ with connection.cursor() as c:
         c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('student_portal', '0005_notification', NOW())")
         print("      Faked migration student_portal.0005_notification")
 
+    # Ensure reply columns exist
+    for col in ['reply', 'replied_at']:
+        c.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='student_portal_notification' AND column_name='{col}'")
+        if not c.fetchone()[0]:
+            c.execute(f"ALTER TABLE student_portal_notification ADD COLUMN {col} {'LONGTEXT' if col == 'reply' else 'DATETIME(6) NULL'}")
+            print(f"      Added {col} to student_portal_notification")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1

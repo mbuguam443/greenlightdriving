@@ -14,6 +14,7 @@
                         <th class="ps-3">Student</th>
                         <th>Title</th>
                         <th>Message</th>
+                        <th>Reply</th>
                         <th>Type</th>
                         <th>Status</th>
                         <th>Date</th>
@@ -25,6 +26,7 @@
                         <td class="ps-3 fw-semibold">{{ n.student.user.full_name }}</td>
                         <td>{{ n.title }}</td>
                         <td><small>{{ n.message|truncatechars:60 }}</small></td>
+                        <td><small>{% if n.reply %}<i class="bi bi-check-circle text-success me-1"></i>{{ n.reply|truncatechars:40 }}{% else %}—{% endif %}</small></td>
                         <td>
                             {% if n.notification_type == 'lesson' %}<span class="badge bg-info text-dark">Lesson</span>
                             {% elif n.notification_type == 'payment' %}<span class="badge bg-danger">Payment</span>
@@ -34,7 +36,7 @@
                         <td>{{ n.created_at|date:"d M H:i" }}</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="6" class="text-center py-4 text-muted">No notifications sent yet</td></tr>
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No notifications sent yet</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

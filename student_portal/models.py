@@ -108,6 +108,8 @@ class Notification(models.Model):
     message = models.TextField()
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='general')
     is_read = models.BooleanField(default=False)
+    reply = models.TextField(blank=True)
+    replied_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

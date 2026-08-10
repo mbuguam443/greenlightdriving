@@ -767,3 +767,21 @@ class PortalReceiptView(StudentRequiredMixin, View):
             'payment': payment,
             'logo_url': request.build_absolute_uri(static('images/logo.png')),
         })
+
+
+
+class ReplyNotificationView(StudentRequiredMixin, View):
+    def post(self, request, pk):
+        from .models import Notification
+        from students.models import Student
+        from django.utils import timezone
+        try:
+            student = Student.objects.get(user=request.user)
+            notification = get_object_or_404(Notification, pk=pk, student=student)
+        except Student.DoesNotExist:
+            return redirect('student_portal:dashboard')
+        notification.reply = request.POST.get('reply', '').strip()
+        notification.replied_at = timezone.now()
+        notification.save(update_fields=['reply', 'replied_at'])
+        messages.success(request, 'Reply sent.')
+        return redirect('student_portal:notifications')
