@@ -140,7 +140,7 @@
             <div class="sb-section">Student Portal</div>
             <ul class="sb-nav">
                 <li><a href="{% url 'student_portal:manage_notification' %}"><i class="bi bi-bell"></i><span>Send Notification</span></a></li>
-                <li><a href="{% url 'student_portal:manage_notification_history' %}"><i class="bi bi-clock-history"></i><span>Notification History</span></a></li>
+                <li><a href="{% url 'student_portal:manage_notification_history' %}"><i class="bi bi-clock-history"></i><span>Notification History</span>{% if admin_reply_count > 0 %}<span class="badge bg-danger ms-1" style="font-size:0.6rem;">{{ admin_reply_count }}</span>{% endif %}</a></li>
                 <li><a class="{% block nav_manage_documents %}{% endblock %}" href="{% url 'student_portal:manage_documents' %}"><i class="bi bi-file-earmark-arrow-down"></i><span>Documents</span></a></li>
                 <li><a href="{% url 'student_portal:lesson_approval' %}"><i class="bi bi-check2-circle"></i><span>Lesson Approvals</span></a></li>
                 <li><a class="{% block nav_manage_events %}{% endblock %}" href="{% url 'student_portal:manage_events' %}"><i class="bi bi-calendar-event"></i><span>Events</span></a></li>

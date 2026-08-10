@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.site_context',
                 'greenlight.context_processors.student_balance',
+                'greenlight.context_processors.admin_notifications',
             ],
         },
     },
