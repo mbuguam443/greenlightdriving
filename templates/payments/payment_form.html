@@ -138,62 +138,55 @@
     var searchInput = document.getElementById('student_search');
     var fallbackSelect = document.getElementById('id_student_fallback');
     var hiddenSelect = document.getElementById('id_student');
-    var options = hiddenSelect.getElementsByTagName('option');
-    var optionMap = {};
-    for (var i = 0; i < options.length; i++) {
-        var opt = options[i];
-        if (opt.value) {
-            optionMap[opt.value] = opt;
-        }
+    var allStudents = [];
+    var opts = hiddenSelect.getElementsByTagName('option');
+    for (var i = 1; i < opts.length; i++) {
+        allStudents.push({
+            id: opts[i].value,
+            text: opts[i].text,
+            search: (opts[i].getAttribute('data-search') || '').toLowerCase(),
+        });
     }
 
     function filterOptions(query) {
         var q = query.toLowerCase();
         fallbackSelect.innerHTML = '<option value="">Select Student</option>';
         hiddenSelect.innerHTML = '<option value="">Select Student</option>';
-        var found = 0;
-        for (var i = 1; i < options.length; i++) {
-            var opt = options[i];
-            var text = opt.getAttribute('data-search') || '';
-            if (text.indexOf(q) >= 0) {
-                var clone = opt.cloneNode(true);
-                fallbackSelect.appendChild(clone);
-                hiddenSelect.appendChild(opt.cloneNode(true));
-                found++;
+        for (var i = 0; i < allStudents.length; i++) {
+            var s = allStudents[i];
+            if (!q || s.search.indexOf(q) >= 0) {
+                fallbackSelect.innerHTML += '<option value="' + s.id + '">' + s.text + '</option>';
+                hiddenSelect.innerHTML += '<option value="' + s.id + '">' + s.text + '</option>';
             }
         }
-        if (searchInput.dataset.lastSelected && optionMap[searchInput.dataset.lastSelected]) {
+        if (searchInput.dataset.lastSelected) {
             fallbackSelect.value = searchInput.dataset.lastSelected;
             hiddenSelect.value = searchInput.dataset.lastSelected;
         }
     }
 
+    filterOptions('');
+
     searchInput.addEventListener('input', function() {
         filterOptions(this.value);
-        fallbackSelect.style.display = '';
-        hiddenSelect.style.display = 'none';
-    });
-
-    searchInput.addEventListener('focus', function() {
-        if (this.value) filterOptions(this.value);
     });
 
     fallbackSelect.addEventListener('change', function() {
         if (this.value) {
-            var selectedOpt = this.options[this.selectedIndex];
-            searchInput.value = selectedOpt ? selectedOpt.text : '';
+            var opt = this.options[this.selectedIndex];
+            searchInput.value = opt ? opt.text : '';
             searchInput.dataset.lastSelected = this.value;
             hiddenSelect.value = this.value;
         }
     });
 
     {% if selected_student %}
-    var preselectedId = '{{ selected_student.pk|stringformat:"s" }}';
-    hiddenSelect.value = preselectedId;
-    fallbackSelect.value = preselectedId;
-    filterOptions('{{ selected_student.user.full_name|lower }}');
-    {% else %}
-    filterOptions('');
+    var psid = '{{ selected_student.pk|stringformat:"s" }}';
+    searchInput.value = '{{ selected_student.user.full_name|escapejs }} ({{ selected_student.student_number|escapejs }})';
+    searchInput.dataset.lastSelected = psid;
+    filterOptions('{{ selected_student.user.full_name|lower|escapejs }}');
+    hiddenSelect.value = psid;
+    fallbackSelect.value = psid;
     {% endif %}
 })();
 </script>
