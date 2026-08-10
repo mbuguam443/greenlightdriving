@@ -782,6 +782,7 @@ class ReplyNotificationView(StudentRequiredMixin, View):
             return redirect('student_portal:dashboard')
         notification.reply = request.POST.get('reply', '').strip()
         notification.replied_at = timezone.now()
-        notification.save(update_fields=['reply', 'replied_at'])
+        notification.is_read = True
+        notification.save(update_fields=['reply', 'replied_at', 'is_read'])
         messages.success(request, 'Reply sent.')
         return redirect('student_portal:notifications')
