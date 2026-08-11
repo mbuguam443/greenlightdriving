@@ -91,9 +91,15 @@
                         <span class="fw-semibold">{{ admission.get_schedule_display }}</span>
                     </div>
                     <div class="col-md-4">
-                        <small class="text-muted d-block">Date Applied</small>
+                        <small class="text-muted d-block">Registration Date</small>
                         <span class="fw-semibold">{{ admission.created_at|date:"d M Y H:i" }}</span>
                     </div>
+                    {% if student %}
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Student Enrollment Date</small>
+                        <span class="fw-semibold">{{ student.enrollment_date|date:"d M Y" }}</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -115,6 +121,24 @@
     </div>
 
     <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
+                    <i class="bi bi-person-badge me-2" style="color: #2E7D32;"></i>Linked Student
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if student %}
+                <a href="{% url 'students:detail' student.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                    {{ student.student_number }} - {{ student.user.full_name }}
+                </a>
+                <small class="text-muted d-block mt-1">Open student profile</small>
+                {% else %}
+                <span class="text-muted">No student profile linked yet.</span>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body text-center">
                 <h6 class="text-muted mb-3">Status</h6>

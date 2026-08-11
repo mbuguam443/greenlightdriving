@@ -73,7 +73,7 @@ class AdmissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
 
     def get_queryset(self):
-        queryset = Admission.objects.all()
+        queryset = Admission.objects.select_related('course', 'branch', 'student').all()
         status = self.request.GET.get('status')
         search = self.request.GET.get('search')
         if status:
@@ -114,6 +114,7 @@ class AdmissionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         from payments.models import Payment
         admission = self.object
         student = Student.objects.filter(admission=admission).first()
+        context['student'] = student
         if student:
             context['payments'] = Payment.objects.filter(student=student).order_by('-created_at')
         return context

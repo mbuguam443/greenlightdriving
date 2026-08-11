@@ -68,6 +68,7 @@
                     <tr>
                         <th class="ps-3">Admission No.</th>
                         <th>Name</th>
+                        <th>Student</th>
                         <th>Course</th>
                         <th>Documents</th>
                         <th>Status</th>
@@ -99,6 +100,16 @@
                                 </div>
                             </div>
                         </td>
+                        <td>
+                            {% if admission.student %}
+                            <a href="{% url 'students:detail' admission.student.pk %}" class="text-decoration-none fw-semibold" style="color: #2E7D32;">
+                                {{ admission.student.student_number }}
+                            </a>
+                            <br><small class="text-muted">Enrolled {{ admission.student.enrollment_date|date:"d M Y" }}</small>
+                            {% else %}
+                            <span class="text-muted">Not linked</span>
+                            {% endif %}
+                        </td>
                         <td>{{ admission.course.name }}</td>
                         <td>
                             {% if admission.passport_photo or admission.national_id_image %}
@@ -122,7 +133,7 @@
                             <span class="badge" style="background-color: #2E7D32;">Enrolled</span>
                             {% endif %}
                         </td>
-                        <td>{{ admission.created_at|date:"d M Y" }}</td>
+                        <td>{{ admission.created_at|date:"d M Y H:i" }}</td>
                         <td class="text-end pe-3">
                             <a href="{% url 'admissions:detail' admission.pk %}" class="btn btn-sm btn-outline-success" title="View">
                                 <i class="bi bi-eye"></i>
@@ -134,7 +145,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
+                        <td colspan="8" class="text-center py-4 text-muted">
                             <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                             <p class="mt-2 mb-0">No admissions found</p>
                         </td>
