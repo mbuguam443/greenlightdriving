@@ -108,8 +108,6 @@ class VerifyOTPView(View):
         if not email:
             return redirect('accounts:register')
         otp = request.POST.get('otp', '').strip()
-from django.core.mail import send_mail
-from .models import User
         user = User.objects.filter(email=email, otp=otp).first()
         if user:
             user.is_active = True
