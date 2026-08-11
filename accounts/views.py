@@ -8,6 +8,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.utils import timezone
+from django.core.mail import send_mail
 from .models import User
 from .forms import LoginForm, UserProfileForm, UserAdminForm, StudentRegistrationForm
 
