@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db import models
+from django.utils import timezone
 from .models import Admission
 from .forms import OnlineAdmissionForm, AdmissionUpdateForm, InternalAdmissionForm
 from website.models import Course, CourseCategory
@@ -39,7 +40,8 @@ class OnlineAdmissionView(LoginRequiredMixin, View):
             from core.models import DailyLog
             DailyLog.objects.create(title=f'New Admission: {admission.full_name}', description=f'Course: {admission.course.name}. Phone: {admission.phone}', log_date=timezone.now().date(), created_by=request.user)
 
-        return redirect('admissions:confirmation', pk=admission.pk)
+            return redirect('admissions:confirmation', pk=admission.pk)
+
         messages.error(request, 'Please correct the errors below.')
         return render(request, 'admissions/online_admission.html', {
             'form': form,
