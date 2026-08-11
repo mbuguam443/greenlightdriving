@@ -285,6 +285,13 @@ with connection.cursor() as c:
         os.makedirs(sent_emails_dir, exist_ok=True)
         print("      Created sent_emails/ directory")
 
+    # Ensure email_config.py exists (contains password, not in git)
+    email_config_path = os.path.join(project_dir, 'email_config.py')
+    if not os.path.isfile(email_config_path):
+        with open(email_config_path, 'w') as f:
+            f.write("EMAIL_PASS = 'Me32323383#&'\n")
+        print("      Created email_config.py")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1

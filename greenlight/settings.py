@@ -222,11 +222,15 @@ LOGGING = {
     },
 }
 
-# Email — cPanel domain:587 TLS (confirmed working by diagnostic test 5)
+# Email — cPanel domain:587 TLS
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'greenlight-driving-defensive.schones-heim-builders.co.ke'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
-EMAIL_HOST_PASSWORD = 'Me32323383#&'
+try:
+    from email_config import EMAIL_PASS
+except ImportError:
+    EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
+EMAIL_HOST_PASSWORD = EMAIL_PASS
 DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'

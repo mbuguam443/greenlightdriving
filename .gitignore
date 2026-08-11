@@ -7,3 +7,5 @@ media/
 staticfiles/
 *.zip
 tmp/
+
+email_config.py
