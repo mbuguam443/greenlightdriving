@@ -222,11 +222,11 @@ LOGGING = {
     },
 }
 
-# Email — Gmail SMTP (test with python test_email.py)
+# Email — cPanel domain:587 TLS (confirmed working by diagnostic test 5)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'greenlight-driving-defensive.schones-heim-builders.co.ke'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mbuguanjane@gmail.com'
-EMAIL_HOST_PASSWORD = 'syhgujomdcnofene'
-DEFAULT_FROM_EMAIL = 'mbuguanjane@gmail.com'
+EMAIL_HOST_USER = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
+EMAIL_HOST_PASSWORD = 'Me32323383#&'
+DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
