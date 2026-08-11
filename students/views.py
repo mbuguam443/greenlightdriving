@@ -42,10 +42,14 @@ class StudentListView(StaffTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from accounts.models import User
         context['status_choices'] = Student.STATUS_CHOICES
         context['current_status'] = self.request.GET.get('status', '')
         context['search_query'] = self.request.GET.get('search', '')
         context['branches'] = __import__('core.models', fromlist=['Branch']).Branch.objects.filter(is_active=True)
+        context['registered_students'] = User.objects.filter(
+            role='STUDENT', student_profile__isnull=True
+        ).order_by('-created_at')
         return context
 
 

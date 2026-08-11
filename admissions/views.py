@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views import View
-from django.views.generic import ListView, DetailView, UpdateView
+from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.http import JsonResponse
@@ -134,7 +134,7 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         new_status = form.cleaned_data.get('status')
         response = super().form_valid(form)
 
-        if new_status == 'APPROVED' and old_status != 'APPROVED':
+        if new_status in ('APPROVED', 'ENROLLED') and old_status not in ('APPROVED', 'ENROLLED'):
             self._create_student_profile(self.object)
 
         if new_status:
@@ -218,6 +218,19 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     created_count += 1
         if created_count:
             messages.success(self.request, f'{created_count} lessons auto-created with instructor & vehicle.')
+
+
+class AdmissionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Admission
+    template_name = 'admissions/admission_confirm_delete.html'
+    success_url = reverse_lazy('admissions:list')
+
+    def test_func(self):
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Admission deleted successfully.')
+        return super().delete(request, *args, **kwargs)
 
 
 class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
