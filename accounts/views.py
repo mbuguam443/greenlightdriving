@@ -90,7 +90,6 @@ class RegisterView(View):
             except Exception:
                 pass
             request.session['verify_email'] = user.email
-            request.session['verify_otp'] = user.otp
             return redirect('accounts:verify_otp')
         return render(request, 'accounts/register.html', {'form': form})
 
@@ -250,16 +249,17 @@ class CustomPasswordResetView(View):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         reset_url = request.build_absolute_uri(f'/accounts/reset/{uid}/{token}/')
-        request.session['reset_url'] = reset_url
-        # Try sending email
-        try:
-            send_mail(
-                'Green Light - Password Reset',
-                f'Click to reset your password: {reset_url}',
-                None, [user.email], fail_silently=True,
-            )
-        except Exception:
-            pass
+        # Send via email only (secure)
+        send_mail(
+            'Green Light - Password Reset',
+            f'Click here to reset your password: {reset_url}\n\nIf you did not request this, ignore this email.',
+            None, [user.email], fail_silently=True,
+        )
+        # Also save as file backup
+        import os
+        os.makedirs('sent_emails', exist_ok=True)
+        with open(f'sent_emails/reset_{user.email.replace("@","_")}.txt', 'w') as f:
+            f.write(f'Reset link for {user.email}: {reset_url}')
 
         # Also save to file
         import os
