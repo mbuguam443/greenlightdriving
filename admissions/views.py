@@ -130,11 +130,10 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
 
     def form_valid(self, form):
-        old_status = self.get_object().status
         new_status = form.cleaned_data.get('status')
         response = super().form_valid(form)
 
-        if new_status in ('APPROVED', 'ENROLLED') and old_status not in ('APPROVED', 'ENROLLED'):
+        if new_status in ('APPROVED', 'ENROLLED'):
             self._create_student_profile(self.object)
 
         if new_status:
