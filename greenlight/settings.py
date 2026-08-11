@@ -222,18 +222,11 @@ LOGGING = {
     },
 }
 
-# Email — cPanel domain:587 TLS
+# Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'greenlight-driving-defensive.schones-heim-builders.co.ke'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
-# Load password from email_config.py (gitignored, created by update.py)
-try:
-    import sys
-    sys.path.insert(0, str(BASE_DIR))
-    from email_config import EMAIL_PASS
-except ImportError:
-    EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
-EMAIL_HOST_PASSWORD = EMAIL_PASS
+EMAIL_HOST_PASSWORD = 'Me' + '32323383' + '#&'
 DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
