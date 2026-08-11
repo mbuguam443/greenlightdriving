@@ -222,10 +222,11 @@ LOGGING = {
     },
 }
 
-# Email (localhost:25 works ✓ — tested)
+# Email — Gmail SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = 'info@greenlight-driving-defensive.schones-heim-builders.co.ke'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mbuguanjane@gmail.com'
+EMAIL_HOST_PASSWORD = 'syhgujomdcnofene'
+DEFAULT_FROM_EMAIL = 'mbuguanjane@gmail.com'
