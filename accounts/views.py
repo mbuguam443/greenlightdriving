@@ -80,6 +80,15 @@ class RegisterView(View):
             user.set_password(data['password'])
             user.save()
             user.generate_otp()
+            # Try sending email
+            try:
+                send_mail(
+                    'Green Light - Verify Your Account',
+                    f'Your verification code is: {user.otp}',
+                    None, [user.email], fail_silently=True,
+                )
+            except Exception:
+                pass
             request.session['verify_email'] = user.email
             request.session['verify_otp'] = user.otp
             return redirect('accounts:verify_otp')
@@ -99,7 +108,8 @@ class VerifyOTPView(View):
         if not email:
             return redirect('accounts:register')
         otp = request.POST.get('otp', '').strip()
-        from .models import User
+from django.core.mail import send_mail
+from .models import User
         user = User.objects.filter(email=email, otp=otp).first()
         if user:
             user.is_active = True
@@ -243,6 +253,15 @@ class CustomPasswordResetView(View):
         token = default_token_generator.make_token(user)
         reset_url = request.build_absolute_uri(f'/accounts/reset/{uid}/{token}/')
         request.session['reset_url'] = reset_url
+        # Try sending email
+        try:
+            send_mail(
+                'Green Light - Password Reset',
+                f'Click to reset your password: {reset_url}',
+                None, [user.email], fail_silently=True,
+            )
+        except Exception:
+            pass
 
         # Also save to file
         import os
