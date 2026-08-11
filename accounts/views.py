@@ -250,7 +250,8 @@ class CustomPasswordResetView(View):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         reset_url = request.build_absolute_uri(f'/accounts/reset/{uid}/{token}/')
-        # Send via email only (secure)
+        request.session['reset_url'] = reset_url
+        # Send via email
         send_mail(
             'Green Light - Password Reset',
             f'Click here to reset your password: {reset_url}\n\nIf you did not request this, ignore this email.',

@@ -76,3 +76,31 @@ print("  DIAGNOSTIC COMPLETE")
 print("  Check your inbox (mbuguanjane@gmail.com) and spam folder")
 print("  Also check sent_emails/ folder for file-based backup")
 print("=" * 50)
+
+# Test 6: Gmail SMTP with App Password
+print("\n  [Test 6] Gmail SMTP (app password)...")
+try:
+    with get_connection('django.core.mail.backends.smtp.EmailBackend',
+            host='smtp.gmail.com', port=587, use_tls=True,
+            username='mbuguanjane@gmail.com',
+            password='syhgujomdcnofene') as conn:
+        send_mail('Test Email', 'Test from Gmail SMTP.', 'mbuguanjane@gmail.com', [TO_EMAIL], connection=conn, fail_silently=False)
+    print("  ? Gmail SMTP OK!")
+except Exception as e:
+    print(f"  ? Gmail SMTP FAILED: {e}")
+
+# Test 7: Gmail SMTP on port 465 (SSL)
+print("\n  [Test 7] Gmail SMTP port 465 (SSL)...")
+try:
+    with get_connection('django.core.mail.backends.smtp.EmailBackend',
+            host='smtp.gmail.com', port=465, use_ssl=True,
+            username='mbuguanjane@gmail.com',
+            password='syhgujomdcnofene') as conn:
+        send_mail('Test Email', 'Test from Gmail SMTP SSL.', 'mbuguanjane@gmail.com', [TO_EMAIL], connection=conn, fail_silently=False)
+    print("  ? Gmail SMTP SSL OK!")
+except Exception as e:
+    print(f"  ? Gmail SMTP SSL FAILED: {e}")
+
+print("\n" + "=" * 50)
+print("  ALL TESTS COMPLETE")
+print("=" * 50)
