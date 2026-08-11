@@ -222,7 +222,13 @@ LOGGING = {
     },
 }
 
-# Email (file-based — reliable, check sent_emails/ folder)
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
+# Email — cPanel local mail server (Exim on port 25, no auth)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+DEFAULT_FROM_EMAIL = 'info@greenlight-driving-defensive.schones-heim-builders.co.ke'
+SERVER_EMAIL = 'info@greenlight-driving-defensive.schones-heim-builders.co.ke'
