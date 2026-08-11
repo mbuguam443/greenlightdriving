@@ -1,17 +1,42 @@
 {% extends 'base.html' %}
 {% block title %}Verify Account - Green Light School{% endblock %}
+{% block extra_css %}
+<style>
+    .otp-verification-page {
+        padding-top: 110px !important;
+    }
+
+    .otp-code-box {
+        border: 2px solid #66BB6A;
+        border-radius: 12px;
+        background: #f1f8e9;
+        color: #1B5E20;
+        padding: 1rem;
+    }
+
+    .otp-code {
+        display: block;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: 0.45rem;
+        margin-top: 0.35rem;
+    }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 otp-verification-page">
     <div class="row justify-content-center"><div class="col-md-5">
         {% if otp_code %}
-        <div class="alert alert-success text-center mb-4">
-            <strong>Your code: <span style="font-size:1.5rem;letter-spacing:4px;">{{ otp_code }}</span></strong>
+        <div class="otp-code-box text-center mb-4" role="status">
+            <div><i class="bi bi-envelope-check me-1"></i>Your verification code</div>
+            <span class="otp-code">{{ otp_code }}</span>
+            <small class="d-block mt-2">Use this code below, or check your email.</small>
         </div>
         {% endif %}
         <div class="card border-0 shadow-sm">
             <div class="card-header text-white text-center" style="background:#2E7D32;"><h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Verify Your Account</h5></div>
             <div class="card-body p-4 text-center">
-                <p class="text-muted">A verification code was sent to <strong>{{ email }}</strong>. Check your email.</p>
+                <p class="text-muted">Enter the code sent to <strong>{{ email }}</strong>.</p>
                 <form method="post">{% csrf_token %}
                     <div class="mb-3">
                         <input type="text" name="otp" class="form-control text-center fs-4" style="letter-spacing:8px;" maxlength="6" placeholder="000000" required>

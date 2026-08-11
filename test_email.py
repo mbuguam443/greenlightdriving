@@ -8,8 +8,8 @@ django.setup()
 from django.core.mail import send_mail, get_connection
 from django.conf import settings
 
-TO_EMAIL = 'mbuguanjane@gmail.com'
-FROM_EMAIL = 'info@greenlight-driving-defensive.schones-heim-builders.co.ke'
+TO_EMAIL = os.environ.get('EMAIL_TEST_TO', settings.EMAIL_HOST_USER)
+FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
 
 print("=" * 50)
 print("  Email Diagnostic Test")
@@ -47,59 +47,24 @@ try:
 except Exception as e:
     print(f"  ✗ SMTP localhost:587 FAILED: {e}")
 
-# Test 4: SMTP on greenlight-...:465 (SSL)
-print("\n  [Test 4] SMTP domain:465 (SSL with auth)...")
-try:
-    with get_connection('django.core.mail.backends.smtp.EmailBackend',
-            host='greenlight-driving-defensive.schones-heim-builders.co.ke', port=465, use_ssl=True,
-            username='noreply@greenlight-driving-defensive.schones-heim-builders.co.ke',
-            password='Me32323383#&') as conn:
-        send_mail('Test Email', 'Test.', FROM_EMAIL, [TO_EMAIL], connection=conn, fail_silently=False)
-    print("  ✓ SMTP domain:465 OK!")
-except Exception as e:
-    print(f"  ✗ SMTP domain:465 FAILED: {e}")
-
-# Test 5: SMTP on domain:587 (TLS with auth)
-print("\n  [Test 5] SMTP domain:587 (TLS with auth)...")
-try:
-    with get_connection('django.core.mail.backends.smtp.EmailBackend',
-            host='greenlight-driving-defensive.schones-heim-builders.co.ke', port=587, use_tls=True,
-            username='noreply@greenlight-driving-defensive.schones-heim-builders.co.ke',
-            password='Me32323383#&') as conn:
-        send_mail('Test Email', 'Test.', FROM_EMAIL, [TO_EMAIL], connection=conn, fail_silently=False)
-    print("  ✓ SMTP domain:587 OK!")
-except Exception as e:
-    print(f"  ✗ SMTP domain:587 FAILED: {e}")
-
 print("\n" + "=" * 50)
 print("  DIAGNOSTIC COMPLETE")
-print("  Check your inbox (mbuguanjane@gmail.com) and spam folder")
+print("  Check the configured recipient inbox and spam folder")
 print("  Also check sent_emails/ folder for file-based backup")
 print("=" * 50)
 
-# Test 6: Gmail SMTP with App Password
+# Test 6: configured SMTP (Gmail when EMAIL_HOST=smtp.gmail.com)
 print("\n  [Test 6] Gmail SMTP (app password)...")
 try:
     with get_connection('django.core.mail.backends.smtp.EmailBackend',
-            host='smtp.gmail.com', port=587, use_tls=True,
-            username='mbuguanjane@gmail.com',
-            password='syhgujomdcnofene') as conn:
-        send_mail('Test Email', 'Test from Gmail SMTP.', 'mbuguanjane@gmail.com', [TO_EMAIL], connection=conn, fail_silently=False)
-    print("  ? Gmail SMTP OK!")
+            host=settings.EMAIL_HOST, port=settings.EMAIL_PORT,
+            use_tls=settings.EMAIL_USE_TLS, use_ssl=settings.EMAIL_USE_SSL,
+            username=settings.EMAIL_HOST_USER,
+            password=settings.EMAIL_HOST_PASSWORD) as conn:
+        send_mail('Test Email', 'Test from configured SMTP.', FROM_EMAIL, [TO_EMAIL], connection=conn, fail_silently=False)
+    print("  OK: configured SMTP accepted the message!")
 except Exception as e:
-    print(f"  ? Gmail SMTP FAILED: {e}")
-
-# Test 7: Gmail SMTP on port 465 (SSL)
-print("\n  [Test 7] Gmail SMTP port 465 (SSL)...")
-try:
-    with get_connection('django.core.mail.backends.smtp.EmailBackend',
-            host='smtp.gmail.com', port=465, use_ssl=True,
-            username='mbuguanjane@gmail.com',
-            password='syhgujomdcnofene') as conn:
-        send_mail('Test Email', 'Test from Gmail SMTP SSL.', 'mbuguanjane@gmail.com', [TO_EMAIL], connection=conn, fail_silently=False)
-    print("  ? Gmail SMTP SSL OK!")
-except Exception as e:
-    print(f"  ? Gmail SMTP SSL FAILED: {e}")
+    print(f"  FAILED: configured SMTP: {e}")
 
 print("\n" + "=" * 50)
 print("  ALL TESTS COMPLETE")

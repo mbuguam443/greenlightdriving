@@ -1,3 +1,6 @@
+import logging
+import os
+
 from django.shortcuts import render, redirect
 from django.db import models
 from django.contrib.auth import login, logout, authenticate
@@ -11,6 +14,8 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from .models import User
 from .forms import LoginForm, UserProfileForm, UserAdminForm, StudentRegistrationForm
+
+logger = logging.getLogger(__name__)
 
 
 class LoginView(View):
@@ -81,7 +86,18 @@ class RegisterView(View):
             user.set_password(data['password'])
             user.save()
             user.generate_otp()
-            # Save to file + session
+            try:
+                send_mail(
+                    'Green Light - Your verification code',
+                    f'Hi {user.full_name},\n\nYour Green Light verification code is: {user.otp}\n\nThis code expires after use.',
+                    None,
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                # Keep the on-screen OTP fallback available if SMTP is unavailable.
+                logger.exception('Unable to send verification OTP to %s', user.email)
+            # Keep the code in the session as a fallback while SMTP is configured.
             request.session['verify_email'] = user.email
             request.session['verify_otp'] = user.otp
             return redirect('accounts:verify_otp')
@@ -109,15 +125,14 @@ class VerifyOTPView(View):
             user.save()
             del request.session['verify_email']
             login(request, user)
-            from django.core.mail import send_mail
             try:
                 send_mail(
                     'Green Light - Login Alert',
                     f'Hi {user.full_name},\n\nYour account was just logged into.\nTime: {timezone.now().strftime("%d %b %Y %H:%M")}\n\nIf this wasn\'t you, contact us immediately.',
-                    None, [user.email], fail_silently=True,
+                    None, [user.email], fail_silently=False,
                 )
             except Exception:
-                pass
+                logger.exception('Unable to send login alert to %s', user.email)
             messages.success(request, 'Verified! Welcome to Green Light.')
             return redirect('student_portal:dashboard' if user.role == 'STUDENT' else 'dashboard')
         messages.error(request, 'Invalid code. Try again.')
@@ -238,26 +253,21 @@ class CustomPasswordResetView(View):
         from django.contrib.auth.tokens import default_token_generator
         from django.utils.encoding import force_bytes
         from django.utils.http import urlsafe_base64_encode
-        from django.utils import timezone
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         reset_url = request.build_absolute_uri(f'/accounts/reset/{uid}/{token}/')
         request.session['reset_url'] = reset_url
         # Send via email
-        send_mail(
-            'Green Light - Password Reset',
-            f'Click here to reset your password: {reset_url}\n\nIf you did not request this, ignore this email.',
-            None, [user.email], fail_silently=True,
-        )
+        try:
+            send_mail(
+                'Green Light - Password Reset',
+                f'Click here to reset your password: {reset_url}\n\nIf you did not request this, ignore this email.',
+                None, [user.email], fail_silently=False,
+            )
+        except Exception:
+            logger.exception('Unable to send password reset email to %s', user.email)
         # Also save as file backup
-        import os
-        os.makedirs('sent_emails', exist_ok=True)
-        with open(f'sent_emails/reset_{user.email.replace("@","_")}.txt', 'w') as f:
-            f.write(f'Reset link for {user.email}: {reset_url}')
-
-        # Also save to file
-        import os
         os.makedirs('sent_emails', exist_ok=True)
         with open(f'sent_emails/reset_{user.email.replace("@","_")}.txt', 'w') as f:
             f.write(f'Reset link for {user.email}: {reset_url}')
