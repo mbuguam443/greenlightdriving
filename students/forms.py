@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student
+from .models import Student, StudentEnrollment
 from website.models import CourseCategory, Course
 from core.models import Branch
 from instructors.models import Instructor
@@ -32,3 +32,27 @@ class StudentForm(forms.ModelForm):
         self.fields['vehicle'].required = False
         self.fields['instructor'].queryset = Instructor.objects.filter(is_active=True).select_related('user')
         self.fields['vehicle'].queryset = Vehicle.objects.filter(is_available=True)
+
+
+class StudentEnrollmentForm(forms.ModelForm):
+    class Meta:
+        model = StudentEnrollment
+        fields = ['course', 'package_choice', 'branch', 'instructor', 'vehicle', 'expected_graduation', 'notes']
+        widgets = {
+            'course': forms.Select(attrs={'class': 'form-select'}),
+            'package_choice': forms.Select(attrs={'class': 'form-select'}),
+            'branch': forms.Select(attrs={'class': 'form-select'}),
+            'instructor': forms.Select(attrs={'class': 'form-select'}),
+            'vehicle': forms.Select(attrs={'class': 'form-select'}),
+            'expected_graduation': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['course'].queryset = Course.objects.filter(is_active=True)
+        self.fields['branch'].queryset = Branch.objects.filter(is_active=True)
+        self.fields['instructor'].queryset = Instructor.objects.filter(is_active=True).select_related('user')
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(is_available=True)
+        self.fields['instructor'].required = False
+        self.fields['vehicle'].required = False

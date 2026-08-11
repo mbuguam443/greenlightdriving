@@ -29,6 +29,7 @@ class PracticalLesson(models.Model):
     ]
     
     student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='practical_lessons')
+    enrollment = models.ForeignKey('students.StudentEnrollment', on_delete=models.CASCADE, null=True, blank=True, related_name='practical_lessons')
     lesson_item = models.ForeignKey(LessonItem, on_delete=models.CASCADE)
     instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True, blank=True)
     vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, null=True, blank=True)
@@ -43,7 +44,7 @@ class PracticalLesson(models.Model):
 
     class Meta:
         ordering = ['-date', 'lesson_item__order']
-        unique_together = ['student', 'lesson_item']
+    unique_together = ['student', 'lesson_item', 'enrollment']
 
     def __str__(self):
         return f"{self.student} - {self.lesson_item.name}"
@@ -57,6 +58,7 @@ class TheoryLesson(models.Model):
     ]
     
     student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='theory_lessons')
+    enrollment = models.ForeignKey('students.StudentEnrollment', on_delete=models.CASCADE, null=True, blank=True, related_name='theory_lessons')
     lesson_item = models.ForeignKey(LessonItem, on_delete=models.SET_NULL, null=True, blank=True)
     topic = models.CharField(max_length=300)
     instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True, blank=True)

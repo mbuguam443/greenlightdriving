@@ -73,12 +73,26 @@ class PaymentCreateView(StaffTestMixin, CreateView):
         student_id = self.request.GET.get('student')
         if student_id:
             initial['student'] = student_id
+        enrollment_id = self.request.GET.get('enrollment')
+        if enrollment_id:
+            initial['enrollment'] = enrollment_id
         return initial
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        from students.models import StudentEnrollment
+        student_id = self.request.GET.get('student') or self.request.POST.get('student')
+        form.fields['enrollment'].queryset = StudentEnrollment.objects.filter(
+            student_id=student_id
+        ).select_related('course') if student_id else StudentEnrollment.objects.none()
+        return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from students.models import Student
         context['students'] = Student.objects.filter(status='ACTIVE').select_related('user')
+        from students.models import StudentEnrollment
+        context['enrollments'] = StudentEnrollment.objects.select_related('course', 'student__user')
         student_id = self.request.GET.get('student') or self.request.POST.get('student')
         if student_id:
             try:

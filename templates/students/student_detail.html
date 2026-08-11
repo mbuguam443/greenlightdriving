@@ -140,6 +140,36 @@
         </div>
 
         <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);"><i class="bi bi-collection me-2"></i>Course Enrollments</h6>
+                <a href="{% url 'students:enrollment_create' student.pk %}" class="btn btn-sm btn-success"><i class="bi bi-plus me-1"></i>Add Course</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light"><tr><th class="ps-3">Course</th><th>Package</th><th>Progress</th><th>Fees</th><th>Paid</th><th>Balance</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                            {% for enrollment in enrollments %}
+                            <tr>
+                                <td class="ps-3 fw-semibold">{{ enrollment.course.name }}</td>
+                                <td>{{ enrollment.get_package_choice_display }}</td>
+                                <td>{{ enrollment.lessons_completed }}/{{ enrollment.total_lessons }} ({{ enrollment.progress_percentage }}%)</td>
+                                <td>KES {{ enrollment.total_fees|floatformat:0 }}</td>
+                                <td>KES {{ enrollment.amount_paid|floatformat:0 }}</td>
+                                <td>KES {{ enrollment.balance|floatformat:0 }}</td>
+                                <td><span class="badge {% if enrollment.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %}">{{ enrollment.get_status_display }}</span></td>
+                                <td><a href="{% url 'payments:create' %}?student={{ student.pk }}&enrollment={{ enrollment.pk }}" class="btn btn-sm btn-outline-success">Payment</a></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="8" class="text-center py-3 text-muted">No additional course enrollments.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-bottom">
                 <h6 class="mb-0 fw-semibold" style="color: var(--primary-green);">
                     <i class="bi bi-list-check me-2" style="color: #2E7D32;"></i>Student Lessons

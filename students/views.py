@@ -7,8 +7,8 @@ from django.urls import reverse_lazy
 from django.db import models as db_models
 from django.utils import timezone
 from datetime import timedelta
-from .models import Student
-from .forms import StudentForm
+from .models import Student, StudentEnrollment
+from .forms import StudentForm, StudentEnrollmentForm
 
 
 class StaffTestMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -72,6 +72,7 @@ class StudentDetailView(StaffTestMixin, DetailView):
         context['theory_completed'] = TheoryLesson.objects.filter(student=student, status='COMPLETED').count()
         context['theory_total'] = TheoryLesson.objects.filter(student=student).count()
         context['theory_percentage'] = int((context['theory_completed'] / context['theory_total'] * 100) if context['theory_total'] else 0)
+        context['enrollments'] = StudentEnrollment.objects.filter(student=student).select_related('course', 'branch')
         return context
 
 
@@ -95,6 +96,57 @@ class StudentCreateView(StaffTestMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, 'Student created successfully.')
         return super().form_valid(form)
+
+
+class StudentEnrollmentCreateView(StaffTestMixin, CreateView):
+    model = StudentEnrollment
+    form_class = StudentEnrollmentForm
+    template_name = 'students/enrollment_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.student = get_object_or_404(Student, pk=kwargs['student_pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.student = self.student
+        response = super().form_valid(form)
+        self._create_lessons(form.instance)
+        messages.success(self.request, f'{self.student.user.full_name} enrolled in {form.instance.course.name}.')
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy('students:detail', kwargs={'pk': self.student.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['student'] = self.student
+        return context
+
+    def _create_lessons(self, enrollment):
+        from datetime import date, timedelta
+        from lessons.models import LessonItem, PracticalLesson, TheoryLesson
+        package_lesson_map = {
+            'TEST': LessonItem.objects.filter(is_active=True, lesson_type='THEORY'),
+            'HALF': LessonItem.objects.filter(is_active=True).exclude(lesson_type='ASSESSMENT').exclude(order__gte=11),
+            'FULL': LessonItem.objects.filter(is_active=True),
+        }
+        lesson_items = package_lesson_map.get(enrollment.package_choice, LessonItem.objects.none())
+        lesson_date = date.today() + timedelta(days=1)
+        for item in lesson_items:
+            if item.lesson_type == 'PRACTICAL':
+                PracticalLesson.objects.create(
+                    student=self.student, enrollment=enrollment, lesson_item=item,
+                    instructor=enrollment.instructor, vehicle=enrollment.vehicle,
+                    date=lesson_date, status='NOT_STARTED',
+                )
+                lesson_date += timedelta(days=2)
+            elif item.lesson_type == 'THEORY':
+                TheoryLesson.objects.create(
+                    student=self.student, enrollment=enrollment, lesson_item=item,
+                    topic=item.name, instructor=enrollment.instructor, date=lesson_date,
+                    time_start='08:00', time_end='09:00', status='NOT_STARTED',
+                )
+                lesson_date += timedelta(days=1)
 
 
 class StudentUpdateView(StaffTestMixin, UpdateView):

@@ -79,6 +79,7 @@ class Student(models.Model):
             course_fee += settings.exam_fee
         except Exception:
             pass
+        course_fee += sum(enrollment.total_fees for enrollment in self.enrollments.all())
         return course_fee
 
     @property
@@ -90,3 +91,63 @@ class Student(models.Model):
     @property
     def balance(self):
         return self.total_fees - self.amount_paid
+
+    @property
+    def lessons_completed(self):
+        return self.practical_lessons.filter(status='COMPLETED').count() + self.theory_lessons.filter(status='COMPLETED').count()
+
+    @property
+    def total_lessons(self):
+        return self.practical_lessons.count() + self.theory_lessons.count()
+
+    @property
+    def progress_percentage(self):
+        total = self.total_lessons
+        return round(self.lessons_completed * 100 / total) if total else 0
+
+
+class StudentEnrollment(models.Model):
+    """A student's additional course with its own package and balance."""
+    STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey('website.Course', on_delete=models.PROTECT)
+    package_choice = models.CharField(max_length=10, choices=Student.PACKAGE_CHOICES, default='FULL')
+    branch = models.ForeignKey('core.Branch', on_delete=models.PROTECT)
+    instructor = models.ForeignKey('instructors.Instructor', on_delete=models.SET_NULL, null=True, blank=True)
+    vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
+    enrollment_date = models.DateField(auto_now_add=True)
+    expected_graduation = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-enrollment_date', '-id']
+        constraints = [
+            models.UniqueConstraint(fields=['student', 'course'], name='unique_student_enrollment_course'),
+        ]
+
+    @property
+    def total_fees(self):
+        prices = {
+            'FULL': self.course.full_course_price,
+            'HALF': self.course.half_course_price,
+            'TEST': self.course.test_only_price,
+        }
+        from core.models import SiteSettings
+        return prices.get(self.package_choice, 0) + SiteSettings.load().exam_fee
+
+    @property
+    def amount_paid(self):
+        return sum(payment.amount for payment in self.payments.filter(status='COMPLETED'))
+
+    @property
+    def balance(self):
+        return self.total_fees - self.amount_paid
+
+    def __str__(self):
+        return f'{self.student} - {self.course.name}'

@@ -68,6 +68,19 @@
                             {% endif %}
                         </div>
 
+                        <div class="col-12">
+                            <label for="id_enrollment" class="form-label fw-semibold">Course Enrollment <small class="text-muted">(optional)</small></label>
+                            <select name="enrollment" id="id_enrollment" class="form-select">
+                                <option value="">General student payment</option>
+                                {% for enrollment in form.fields.enrollment.queryset %}
+                                <option value="{{ enrollment.id }}" {% if form.enrollment.value|stringformat:"s" == enrollment.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ enrollment.course.name }} - {{ enrollment.get_package_choice_display }} (Balance: KES {{ enrollment.balance|floatformat:0 }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.enrollment.errors %}<div class="text-danger small mt-1">{{ form.enrollment.errors.0 }}</div>{% endif %}
+                        </div>
+
                         <div class="col-md-4">
                             <label for="id_amount" class="form-label fw-semibold">Amount (KES) <span class="text-danger">*</span></label>
                             <input type="number" name="amount" id="id_amount" class="form-control"

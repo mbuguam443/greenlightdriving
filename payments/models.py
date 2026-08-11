@@ -18,6 +18,7 @@ class Payment(models.Model):
     
     receipt_number = models.CharField(max_length=30, unique=True, editable=False)
     student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='payments')
+    enrollment = models.ForeignKey('students.StudentEnrollment', on_delete=models.SET_NULL, null=True, blank=True, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     method = models.CharField(max_length=20, choices=METHOD_CHOICES)
     reference_number = models.CharField(max_length=100, blank=True, help_text='M-Pesa code, Cheque no, etc.')
