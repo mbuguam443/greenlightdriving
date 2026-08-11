@@ -36,16 +36,6 @@ class LoginView(View):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.first_name}!')
-                # Send login notification
-                from django.core.mail import send_mail
-                try:
-                    send_mail(
-                        'Green Light - Login Alert',
-                        f'Hi {user.full_name},\n\nYour account was logged into.\nTime: {timezone.now().strftime("%d %b %Y %H:%M")}\nIP: {self._get_ip(request)}\n\nIf this wasn\'t you, contact us.',
-                        None, [user.email], fail_silently=True,
-                    )
-                except Exception:
-                    pass
                 next_url = request.GET.get('next')
                 if not next_url:
                     next_url = self._get_redirect_url(user)
@@ -90,17 +80,8 @@ class RegisterView(View):
             user.set_password(data['password'])
             user.save()
             user.generate_otp()
-            from django.core.mail import send_mail
-            try:
-                send_mail(
-                    'Green Light - Verify Your Account',
-                    f'Your verification code is: {user.otp}',
-                    None, [user.email], fail_silently=True,
-                )
-            except Exception:
-                pass
             request.session['verify_email'] = user.email
-            messages.success(request, 'Account created! Check your email for the verification code.')
+            request.session['verify_otp'] = user.otp
             return redirect('accounts:verify_otp')
         return render(request, 'accounts/register.html', {'form': form})
 
@@ -108,9 +89,10 @@ class RegisterView(View):
 class VerifyOTPView(View):
     def get(self, request):
         email = request.session.get('verify_email')
+        otp = request.session.get('verify_otp', '')
         if not email:
             return redirect('accounts:register')
-        return render(request, 'accounts/verify_otp.html', {'email': email})
+        return render(request, 'accounts/verify_otp.html', {'email': email, 'otp_code': otp})
 
     def post(self, request):
         email = request.session.get('verify_email')
@@ -238,3 +220,40 @@ class UserDeleteView(StaffRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'User deleted successfully.')
         return super().delete(request, *args, **kwargs)
+
+
+
+class CustomPasswordResetView(View):
+    def get(self, request):
+        return render(request, 'accounts/password_reset.html')
+
+    def post(self, request):
+        email = request.POST.get('email', '').strip().lower()
+        user = User.objects.filter(email=email).first()
+        if not user:
+            messages.error(request, 'No account found with this email.')
+            return render(request, 'accounts/password_reset.html')
+
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.encoding import force_bytes
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils import timezone
+
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_url = request.build_absolute_uri(f'/accounts/reset/{uid}/{token}/')
+        request.session['reset_url'] = reset_url
+
+        # Also save to file
+        import os
+        os.makedirs('sent_emails', exist_ok=True)
+        with open(f'sent_emails/reset_{user.email.replace("@","_")}.txt', 'w') as f:
+            f.write(f'Reset link for {user.email}: {reset_url}')
+
+        return redirect('accounts:password_reset_done')
+
+
+class CustomPasswordResetDoneView(View):
+    def get(self, request):
+        reset_url = request.session.get('reset_url', '')
+        return render(request, 'accounts/password_reset_done.html', {'reset_url': reset_url})

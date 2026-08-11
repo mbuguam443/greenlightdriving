@@ -3,10 +3,15 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center"><div class="col-md-5">
+        {% if otp_code %}
+        <div class="alert alert-success text-center mb-4">
+            <strong>Your verification code is: <span style="font-size:1.5rem;letter-spacing:4px;">{{ otp_code }}</span></strong>
+        </div>
+        {% endif %}
         <div class="card border-0 shadow-sm">
             <div class="card-header text-white text-center" style="background:#2E7D32;"><h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Verify Your Account</h5></div>
             <div class="card-body p-4 text-center">
-                <p class="text-muted">A verification code was sent to <strong>{{ email }}</strong></p>
+                <p class="text-muted">Enter the verification code for <strong>{{ email }}</strong></p>
                 <form method="post">{% csrf_token %}
                     <div class="mb-3">
                         <input type="text" name="otp" class="form-control text-center fs-4" style="letter-spacing:8px;" maxlength="6" placeholder="000000" required>
