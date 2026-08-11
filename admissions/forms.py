@@ -80,13 +80,8 @@ class OnlineAdmissionForm(forms.ModelForm):
 class AdmissionUpdateForm(forms.ModelForm):
     class Meta:
         model = Admission
-        fields = ['category', 'course', 'package_choice', 'branch', 'preferred_schedule', 'status', 'notes']
+        fields = ['status', 'notes']
         widgets = {
-            'category': forms.Select(attrs={'class': 'form-select'}),
-            'course': forms.Select(attrs={'class': 'form-select'}),
-            'package_choice': forms.Select(attrs={'class': 'form-select'}),
-            'branch': forms.Select(attrs={'class': 'form-select'}),
-            'preferred_schedule': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
