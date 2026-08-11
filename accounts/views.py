@@ -81,16 +81,9 @@ class RegisterView(View):
             user.set_password(data['password'])
             user.save()
             user.generate_otp()
-            # Try sending email
-            try:
-                send_mail(
-                    'Green Light - Verify Your Account',
-                    f'Your verification code is: {user.otp}',
-                    None, [user.email], fail_silently=True,
-                )
-            except Exception:
-                pass
+            # Save to file + session
             request.session['verify_email'] = user.email
+            request.session['verify_otp'] = user.otp
             return redirect('accounts:verify_otp')
         return render(request, 'accounts/register.html', {'form': form})
 

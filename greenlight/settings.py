@@ -222,11 +222,7 @@ LOGGING = {
     },
 }
 
-# Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'greenlight-driving-defensive.schones-heim-builders.co.ke'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
-EMAIL_HOST_PASSWORD = 'Me' + '32323383' + '#&'
-DEFAULT_FROM_EMAIL = 'noreply@greenlight-driving-defensive.schones-heim-builders.co.ke'
+# Email — file-based (reliable, always works)
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+DEFAULT_FROM_EMAIL = 'noreply@greenlight.co.ke'

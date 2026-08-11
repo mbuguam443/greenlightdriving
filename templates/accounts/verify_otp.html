@@ -3,6 +3,11 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center"><div class="col-md-5">
+        {% if otp_code %}
+        <div class="alert alert-success text-center mb-4">
+            <strong>Your code: <span style="font-size:1.5rem;letter-spacing:4px;">{{ otp_code }}</span></strong>
+        </div>
+        {% endif %}
         <div class="card border-0 shadow-sm">
             <div class="card-header text-white text-center" style="background:#2E7D32;"><h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Verify Your Account</h5></div>
             <div class="card-body p-4 text-center">
