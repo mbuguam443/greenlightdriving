@@ -285,6 +285,19 @@ with connection.cursor() as c:
         os.makedirs(sent_emails_dir, exist_ok=True)
         print("      Created sent_emails/ directory")
 
+    # The course price migration may have been applied directly by an older
+    # repair script. Fake it when the final columns already exist, otherwise
+    # Django will try to drop the missing legacy price column.
+    c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='website_course' AND column_name='price'")
+    has_legacy_price = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='website_course' AND column_name IN ('full_course_price', 'half_course_price', 'test_only_price')")
+    final_price_columns = c.fetchone()[0] == 3
+    if not has_legacy_price and final_price_columns:
+        c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='website' AND name='0003_remove_course_price_course_full_course_price_and_more'")
+        if not c.fetchone()[0]:
+            c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('website', '0003_remove_course_price_course_full_course_price_and_more', NOW())")
+            print("      Faked website price migration (schema already repaired)")
+
     # Remove duplicate LessonItem records (seed run multiple times)
     c.execute("""
         SELECT t1.id, t2.id FROM lessons_lessonitem t1
