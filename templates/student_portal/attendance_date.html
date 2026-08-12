@@ -1,0 +1,22 @@
+{% extends "student_portal_base.html" %}
+{% block title %}Record Attendance - Green Light School{% endblock %}
+{% block dashboard_content %}
+<div class="row justify-content-center"><div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header text-white" style="background:#2E7D32;">
+            <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Record Attendance</h5>
+        </div>
+        <div class="card-body p-4">
+            <p class="mb-1 fw-semibold">{% if is_practical %}{{ lesson.lesson_item.name }}{% else %}{{ lesson.topic }}{% endif %}</p>
+            <p class="text-muted">Select the date you attended this lesson.</p>
+            <form method="post">
+                {% csrf_token %}
+                <label for="attendance_date" class="form-label fw-semibold">Attendance date</label>
+                <input type="date" id="attendance_date" name="attendance_date" class="form-control mb-4" required max="{% now 'Y-m-d' %}">
+                <a href="{% url 'student_portal:lessons' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn text-white" style="background:#2E7D32;">Submit Attendance</button>
+            </form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}

@@ -713,18 +713,43 @@ class MarkAttendedView(StudentRequiredMixin, View):
         except Student.DoesNotExist:
             return redirect('student_portal:lessons')
         lesson = PracticalLesson.objects.filter(pk=pk, student=student).first()
+        is_practical = lesson is not None
+        if not lesson:
+            lesson = get_object_or_404(TheoryLesson, pk=pk, student=student)
+        return render(request, 'student_portal/attendance_date.html', {
+            'lesson': lesson,
+            'is_practical': is_practical,
+        })
+
+    def post(self, request, pk):
+        from lessons.models import PracticalLesson, TheoryLesson
+        from students.models import Student
+        from datetime import datetime
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return redirect('student_portal:lessons')
+        attendance_date = request.POST.get('attendance_date', '').strip()
+        try:
+            selected_date = datetime.strptime(attendance_date, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            messages.error(request, 'Please select a valid attendance date.')
+            return redirect('student_portal:mark_attended', pk=pk)
+
+        lesson = PracticalLesson.objects.filter(pk=pk, student=student).first()
         if lesson:
-            lesson.attended = not lesson.attended
+            lesson.attended = True
             lesson.is_approved = False
-            lesson.save(update_fields=['attended', 'is_approved'])
+            lesson.date = selected_date
+            lesson.save(update_fields=['attended', 'is_approved', 'date'])
             messages.success(request, 'Attendance submitted for approval.')
             from core.models import DailyLog
-            from django.utils import timezone
-            DailyLog.objects.create(title=f'Student Attendance: {student.user.full_name}', description=f'Marked {lesson.lesson_item.name} as attended. Pending approval.', log_date=timezone.now().date())
+            DailyLog.objects.create(title=f'Student Attendance: {student.user.full_name}', description=f'Marked {lesson.lesson_item.name} attended on {selected_date}. Pending approval.', log_date=timezone.now().date())
         else:
             lesson = get_object_or_404(TheoryLesson, pk=pk, student=student)
-            lesson.attended = not lesson.attended
-            lesson.save(update_fields=['attended'])
+            lesson.attended = True
+            lesson.date = selected_date
+            lesson.save(update_fields=['attended', 'date'])
             messages.success(request, 'Attendance recorded.')
         return redirect('student_portal:lessons')
 
