@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.db import models
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
@@ -77,6 +77,12 @@ class PaymentCreateView(StaffTestMixin, CreateView):
         if enrollment_id:
             initial['enrollment'] = enrollment_id
         return initial
+
+    def get_success_url(self):
+        student_id = self.request.GET.get('student') or self.request.POST.get('student')
+        if student_id:
+            return reverse('students:detail', kwargs={'pk': student_id})
+        return reverse('payments:list')
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
