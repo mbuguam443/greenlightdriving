@@ -1,7 +1,7 @@
 import logging
 import os
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import models
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -236,6 +236,17 @@ class UserDeleteView(StaffRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'User deleted successfully.')
         return super().delete(request, *args, **kwargs)
+
+
+class UserVerifyView(StaffRequiredMixin, View):
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk, role='STUDENT')
+        user.is_active = True
+        user.is_verified = True
+        user.otp = ''
+        user.save(update_fields=['is_active', 'is_verified', 'otp'])
+        messages.success(request, f'{user.full_name} has been verified and can now log in.')
+        return redirect('accounts:user_list')
 
 
 

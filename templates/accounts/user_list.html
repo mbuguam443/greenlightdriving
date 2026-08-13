@@ -88,6 +88,14 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-3">
+                            {% if u.role == 'STUDENT' and not u.is_verified %}
+                            <form method="post" action="{% url 'accounts:user_verify' u.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Verify student" onclick="return confirm('Verify this student account?')">
+                                    <i class="bi bi-patch-check me-1"></i>Verify
+                                </button>
+                            </form>
+                            {% endif %}
                             <a href="{% url 'accounts:user_update' u.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
