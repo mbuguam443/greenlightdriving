@@ -81,26 +81,14 @@ class RegisterView(View):
             user = User(
                 username=data['email'], email=data['email'],
                 first_name=data['first_name'], last_name=data['last_name'],
-                phone=data.get('phone', ''), role='STUDENT', is_active=False,
+                phone=data.get('phone', ''), role='STUDENT', is_active=True,
+                is_verified=True,
             )
             user.set_password(data['password'])
             user.save()
-            user.generate_otp()
-            try:
-                send_mail(
-                    'Green Light - Your verification code',
-                    f'Hi {user.full_name},\n\nYour Green Light verification code is: {user.otp}\n\nThis code expires after use.',
-                    None,
-                    [user.email],
-                    fail_silently=False,
-                )
-            except Exception:
-                # Keep the on-screen OTP fallback available if SMTP is unavailable.
-                logger.exception('Unable to send verification OTP to %s', user.email)
-            # Keep the code in the session as a fallback while SMTP is configured.
-            request.session['verify_email'] = user.email
-            request.session['verify_otp'] = user.otp
-            return redirect('accounts:verify_otp')
+            login(request, user)
+            messages.success(request, 'Account created. Please complete your admission application.')
+            return redirect('admissions:online_admission')
         return render(request, 'accounts/register.html', {'form': form})
 
 
