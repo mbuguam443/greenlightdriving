@@ -38,6 +38,9 @@ class ReportIndexView(StaffTestMixin, View):
             'total_students': Student.objects.filter(status='ACTIVE').count(),
             'total_revenue': Payment.objects.filter(status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0,
             'month_revenue': Payment.objects.filter(status='COMPLETED', created_at__date__gte=month_start).aggregate(total=Sum('amount'))['total'] or 0,
+            'outstanding_balance': sum(
+                s.balance for s in Student.objects.filter(status='ACTIVE') if s.balance > 0
+            ),
             'total_admissions': Admission.objects.count(),
             'pending_admissions': Admission.objects.filter(status='PENDING').count(),
             'total_instructors': Instructor.objects.filter(is_active=True).count(),
@@ -110,15 +113,33 @@ class OutstandingBalanceView(StaffTestMixin, View):
         
         active_students = Student.objects.filter(
             status='ACTIVE'
-        ).select_related('user', 'course')
+        ).select_related('user', 'course', 'admission')
         
-        students_with_balance = [s for s in active_students if s.balance > 0]
-        students_with_balance.sort(key=lambda s: s.balance, reverse=True)
+        outstanding_list = []
+        fully_paid_count = 0
+        total_outstanding = 0
+        for s in active_students:
+            total_fees = s.total_fees
+            amount_paid = s.amount_paid
+            balance = s.balance
+            if balance > 0:
+                total_outstanding += balance
+                outstanding_list.append({
+                    'student': s,
+                    'total_fees': total_fees,
+                    'amount_paid': amount_paid,
+                    'balance': balance,
+                    'balance_percentage': round(balance * 100 / total_fees) if total_fees else 0,
+                })
+            else:
+                fully_paid_count += 1
         
-        total_outstanding = sum(s.balance for s in students_with_balance)
+        outstanding_list.sort(key=lambda item: item['balance'], reverse=True)
         
         context = {
-            'students': students_with_balance,
+            'outstanding_list': outstanding_list,
+            'students_with_balance': len(outstanding_list),
+            'fully_paid_count': fully_paid_count,
             'total_outstanding': total_outstanding,
         }
         return render(request, 'reports/outstanding.html', context)

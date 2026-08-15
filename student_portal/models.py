@@ -117,3 +117,16 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.student.student_number} - {self.title}"
+
+
+class ChatMessage(models.Model):
+    """A shared group chat message (all students + staff)."""
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='chat_messages')
+    content = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.user.get_full_name() or self.user.username}: {self.content[:50]}"

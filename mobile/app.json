@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Greenlight Student",
+    "slug": "greenlight-student",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "greenlight",
+    "extra": {
+      "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2E7D32",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.greenlightstudent"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{% load tz %}
+<div class="chat-row mb-2 d-flex {% if m.user == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+    <div class="chat-bubble p-2 px-3" style="max-width:75%;border-radius:16px;
+        {% if m.user == request.user %}background:#DCF8C6;{% else %}background:#fff;border:1px solid #e6e6e6;{% endif %}">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="chat-avatar" style="width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;background:#2E7D32;">{{ m.user.username|slice:":1"|upper }}</span>
+            <span class="small fw-semibold" style="color:#2E7D32;">{{ m.user.get_full_name|default:m.user.username }}</span>
+            {% if m.user.role != 'STUDENT' %}<span class="badge bg-info text-dark ms-1" style="font-size:.65rem;">Staff</span>{% endif %}
+            <span class="small text-muted ms-auto">{{ m.created_at|localtime|date:"d M H:i" }}</span>
+        </div>
+        <div class="small" style="white-space:pre-wrap;">{{ m.content }}</div>
+    </div>
+</div>

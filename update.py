@@ -146,7 +146,7 @@ with connection.cursor() as c:
 
     # Convert theory lessons that should now be practical (after lesson type update)
     c.execute("""
-        SELECT tl.id, tl.student_id, tl.lesson_item_id, tl.instructor_id, tl.date, tl.time_start, tl.time_end, tl.status, tl.notes
+        SELECT tl.id, tl.student_id, tl.lesson_item_id, tl.instructor_id, tl.date, tl.time_start, tl.time_end, tl.status, tl.notes, tl.attended
         FROM lessons_theorylesson tl
         INNER JOIN lessons_lessonitem li ON tl.lesson_item_id = li.id
         WHERE li.lesson_type = 'PRACTICAL'
@@ -156,8 +156,8 @@ with connection.cursor() as c:
         for row in bad_theory:
             c.execute("""
                 INSERT IGNORE INTO lessons_practicallesson (student_id, lesson_item_id, instructor_id, vehicle_id, date, status, remarks, attended, submitted_by_student, is_approved, created_at, completed_at)
-                VALUES (%s, %s, %s, NULL, %s, %s, %s, 0, 0, 0, NOW(), NULL)
-            """, [row[1], row[2], row[3], row[4], row[7], row[8] or ''])
+                VALUES (%s, %s, %s, NULL, %s, %s, %s, %s, 0, 0, NOW(), NULL)
+            """, [row[1], row[2], row[3], row[4], row[7], row[8] or '', int(row[9] or 0)])
             c.execute("DELETE FROM lessons_theorylesson WHERE id = %s", [row[0]])
         print(f"      Converted {len(bad_theory)} theory lessons to practical (type mismatch)")
 
@@ -229,6 +229,29 @@ with connection.cursor() as c:
         if not c.fetchone()[0]:
             c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('students', '0003_student_payment_reminder', NOW())")
             print("      Faked migration students.0003_student_payment_reminder")
+
+    # Ensure discount columns exist
+    for col in ('discount', 'discount_reason'):
+        c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name=%s", (col,))
+        if not c.fetchone()[0]:
+            col_type = "DECIMAL(10,2) DEFAULT 0" if col == 'discount' else "VARCHAR(200) DEFAULT ''"
+            c.execute(f"ALTER TABLE students_student ADD COLUMN {col} {col_type} NOT NULL")
+            print(f"      Added missing column students_student.{col}")
+    # Fake the discount migration if columns already exist (avoids duplicate error)
+    c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='students' AND name='0004_student_discount_student_discount_reason_and_more'")
+    if not c.fetchone()[0]:
+        c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('students', '0004_student_discount_student_discount_reason_and_more', NOW())")
+        print("      Faked migration students.0004_student_discount_student_discount_reason_and_more")
+
+    # Ensure discount_description column exists
+    c.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='students_student' AND column_name='discount_description'")
+    if not c.fetchone()[0]:
+        c.execute("ALTER TABLE students_student ADD COLUMN discount_description LONGTEXT NOT NULL")
+        print("      Added missing column students_student.discount_description")
+    c.execute("SELECT COUNT(*) FROM django_migrations WHERE app='students' AND name='0005_student_discount_description'")
+    if not c.fetchone()[0]:
+        c.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('students', '0005_student_discount_description', NOW())")
+        print("      Faked migration students.0005_student_discount_description")
 
     # Ensure notification table exists
     c.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='student_portal_notification'")

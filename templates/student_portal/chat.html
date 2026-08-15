@@ -1,0 +1,12 @@
+{% extends "student_portal_base.html" %}
+{% block portal_title %}Students Chat{% endblock %}
+{% block page_title %}Students Chat{% endblock %}
+{% block breadcrumb_active %}Chat{% endblock %}
+{% block nav_portal_chat %}active{% endblock %}
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% include "student_portal/_chat_box.html" %}
+    </div>
+</div>
+{% endblock %}

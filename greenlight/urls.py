@@ -4,10 +4,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve as static_serve
 from students.views import IndexView
+from student_portal.views import pwa_manifest, pwa_service_worker
 import os
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
+
+    # PWA install support (service worker must be at root scope)
+    path('manifest.webmanifest', pwa_manifest, name='pwa_manifest'),
+    path('sw.js', pwa_service_worker, name='pwa_sw'),
 
     # Media files — serve via Django BEFORE includes swallow the URL
     re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': str(settings.MEDIA_ROOT)}),
@@ -28,6 +33,7 @@ urlpatterns = [
     path('ntsa/', include('ntsa.urls')),
     path('reports/', include('reports.urls')),
     path('portal/', include('student_portal.urls')),
+    path('api/', include('api.urls')),
 ]
 
 if settings.DEBUG:

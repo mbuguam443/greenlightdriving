@@ -1,0 +1,32 @@
+{
+  "name": "Green Light Student Portal",
+  "short_name": "Green Light",
+  "description": "Greenlight Driving School student portal — schedule, lessons, payments and progress on your phone.",
+  "start_url": "/portal/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2E7D32",
+  "theme_color": "#2E7D32",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/static/pwa/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/pwa/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/pwa/maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

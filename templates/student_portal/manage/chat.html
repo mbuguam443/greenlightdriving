@@ -1,0 +1,12 @@
+{% extends "dashboard_base.html" %}
+{% block dashboard_title %}Staff Chat{% endblock %}
+{% block page_title %}Staff Chat{% endblock %}
+{% block breadcrumb_active %}Chat{% endblock %}
+{% block nav_chat %}active{% endblock %}
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% include "student_portal/_chat_box.html" %}
+    </div>
+</div>
+{% endblock %}

@@ -3,8 +3,28 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views import View
 from django.http import HttpResponse
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.conf import settings
+import os
+import json
+
+
+def pwa_manifest(request):
+    path = os.path.join(str(settings.BASE_DIR), 'static', 'pwa', 'manifest.webmanifest')
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    return HttpResponse(json.dumps(data, indent=2), content_type='application/manifest+json')
+
+
+def pwa_service_worker(request):
+    path = os.path.join(str(settings.BASE_DIR), 'static', 'pwa', 'sw.js')
+    with open(path, encoding='utf-8') as f:
+        content = f.read()
+    response = HttpResponse(content, content_type='text/javascript; charset=utf-8')
+    response['Service-Worker-Allowed'] = '/'
+    response['Cache-Control'] = 'no-cache'
+    return response
 
 
 class StudentRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -811,3 +831,67 @@ class ReplyNotificationView(StudentRequiredMixin, View):
         notification.save(update_fields=['reply', 'replied_at', 'is_read'])
         messages.success(request, 'Reply sent.')
         return redirect('student_portal:notifications')
+
+
+class ChatStaffMixin(LoginRequiredMixin):
+    """Allow any staff role (anything except STUDENT) into staff chat."""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        if request.user.role == 'STUDENT':
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+        return super().dispatch(request, *args, **kwargs)
+
+
+def _chat_context(request, post_url, messages_url):
+    from .models import ChatMessage
+    chat_messages = list(ChatMessage.objects.select_related('user').order_by('-created_at')[:200])
+    chat_messages.reverse()
+    return {'chat_messages': chat_messages, 'chat_post_url': post_url, 'chat_messages_url': messages_url}
+
+
+class PortalChatView(StudentRequiredMixin, View):
+    def get(self, request):
+        ctx = _chat_context(request, reverse('student_portal:chat'), reverse('student_portal:chat_messages'))
+        return render(request, 'student_portal/chat.html', ctx)
+
+    def post(self, request):
+        content = request.POST.get('content', '').strip()
+        if content:
+            from .models import ChatMessage
+            ChatMessage.objects.create(user=request.user, content=content[:2000])
+        return redirect('student_portal:chat')
+
+
+class StaffChatView(ChatStaffMixin, View):
+    def get(self, request):
+        ctx = _chat_context(request, reverse('student_portal:staff_chat'), reverse('student_portal:staff_chat_messages'))
+        return render(request, 'student_portal/manage/chat.html', ctx)
+
+    def post(self, request):
+        content = request.POST.get('content', '').strip()
+        if content:
+            from .models import ChatMessage
+            ChatMessage.objects.create(user=request.user, content=content[:2000])
+        return redirect('student_portal:staff_chat')
+
+
+class ChatMessagesJSONView(LoginRequiredMixin, View):
+    def get(self, request):
+        from .models import ChatMessage
+        from django.http import JsonResponse
+        data = []
+        qs = ChatMessage.objects.select_related('user').order_by('-created_at')[:200]
+        for m in reversed(list(qs)):
+            u = m.user
+            data.append({
+                'user': u.get_full_name() or u.username,
+                'role': u.get_role_display(),
+                'is_staff': u.role != 'STUDENT',
+                'content': m.content,
+                'time': timezone.localtime(m.created_at).strftime('%H:%M'),
+                'date': timezone.localtime(m.created_at).strftime('%a %d %b'),
+                'is_me': u.id == request.user.id,
+            })
+        return JsonResponse({'messages': data})

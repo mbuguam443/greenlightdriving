@@ -28,6 +28,12 @@ class Student(models.Model):
     enrollment_date = models.DateField(auto_now_add=True)
     expected_graduation = models.DateField(null=True, blank=True)
     payment_reminder = models.BooleanField(default=False, help_text='Show balance alert to student')
+    discount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text='Flat KES discount to subtract from the student\'s total fees',
+    )
+    discount_reason = models.CharField(max_length=200, blank=True, help_text='Why the discount was given')
+    discount_description = models.TextField(blank=True, help_text='Internal note about this discount (admin only)')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -80,7 +86,7 @@ class Student(models.Model):
         except Exception:
             pass
         course_fee += sum(enrollment.total_fees for enrollment in self.enrollments.all())
-        return course_fee
+        return max(course_fee - self.discount, 0)
 
     @property
     def amount_paid(self):

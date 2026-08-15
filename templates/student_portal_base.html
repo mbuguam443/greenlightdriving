@@ -1,4 +1,4 @@
-{% load static %}
+{% load static humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +8,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Green Light">
+    <link rel="apple-touch-icon" href="{% static 'pwa/apple-touch-icon-180x180.png' %}">
     <style>
         :root {
             --primary-green: #2E7D32;
@@ -114,6 +121,7 @@
                 <li><a class="{% block nav_portal_documents %}{% endblock %}" href="{% url 'student_portal:documents' %}"><i class="bi bi-file-earmark-arrow-down"></i><span>Documents</span></a></li>
                 <li><a class="{% block nav_portal_events %}{% endblock %}" href="{% url 'student_portal:events' %}"><i class="bi bi-calendar-event"></i><span>Events & Reports</span></a></li>
                 <li><a class="{% block nav_portal_certificates %}{% endblock %}" href="{% url 'student_portal:certificates' %}"><i class="bi bi-award"></i><span>Certificates</span></a></li>
+                <li><a class="{% block nav_portal_chat %}{% endblock %}" href="{% url 'student_portal:chat' %}"><i class="bi bi-chat-dots"></i><span>Chat</span></a></li>
                 <li><a class="{% block nav_portal_profile %}{% endblock %}" href="{% url 'student_portal:profile' %}"><i class="bi bi-person"></i><span>Profile</span></a></li>
             </ul>
 
@@ -181,11 +189,15 @@
                 {% endif %}
 
                 {% if show_reminder and student_balance > 0 %}
-                <div class="alert alert-danger border-0 d-flex align-items-center mb-4" role="alert" style="position:sticky;top:0;z-index:1000;border-radius:0;margin:-1.5rem -1.5rem 1.5rem -1.5rem;background:linear-gradient(135deg,#dc3545,#c82333);">
-                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-                    <strong>Outstanding Balance: KES {{ student_balance|floatformat:0 }}</strong>
-                    <span class="ms-2">— Practical lessons &amp; exams on hold until payment is cleared.</span>
-                    <a href="{% url 'payments:mpesa' %}" class="btn btn-sm btn-light fw-semibold ms-auto">
+                <div class="alert border-0 d-flex align-items-center gap-3 mb-4" role="alert" style="border-radius:14px;background:#FFF8E1;border:1px solid #FFD54F;box-shadow:0 4px 14px rgba(0,0,0,0.06);">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;background:#FFE082;">
+                        <i class="bi bi-wallet2 fs-5" style="color:#EF6C00;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong style="color:#E65100;">Outstanding balance: KES {{ student_balance|intcomma }}</strong>
+                        <div class="small mt-1" style="color:#795548;">Practical lessons and exams resume once payment is cleared.</div>
+                    </div>
+                    <a href="{% url 'payments:mpesa' %}" class="btn btn-sm fw-semibold flex-shrink-0" style="background:#F57C00;border-color:#F57C00;color:#fff;">
                         <i class="bi bi-phone-vibrate me-1"></i>Pay Now
                     </a>
                 </div>
@@ -208,6 +220,119 @@
                 if (a.getAttribute('href') === cp) a.classList.add('active');
             });
         });
+    </script>
+
+    <style>
+        .pwa-banner {
+            position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 2000;
+            display: flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            color: #fff; border-radius: 14px; padding: 12px 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+        .pwa-banner[hidden] { display: none; }
+        .pwa-banner-icon { width: 46px; height: 46px; border-radius: 10px; background: #fff; object-fit: cover; flex-shrink: 0; }
+        .pwa-banner-text { flex: 1; min-width: 0; line-height: 1.25; }
+        .pwa-banner-text strong { display: block; font-size: 0.95rem; }
+        .pwa-banner-text span { display: block; font-size: 0.78rem; opacity: 0.9; }
+        .pwa-banner-btn {
+            background: #fff; color: #1B5E20; border: none; border-radius: 8px;
+            padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; flex-shrink: 0;
+        }
+        .pwa-banner-close {
+            background: none; border: none; color: rgba(255,255,255,0.85);
+            font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 4px 6px; flex-shrink: 0;
+        }
+    </style>
+    <div id="pwaBanner" class="pwa-banner" hidden>
+        <img class="pwa-banner-icon" src="{% static 'pwa/pwa-192x192.png' %}" alt="Green Light">
+        <div class="pwa-banner-text">
+            <strong>Green Light Portal</strong>
+            <span id="pwaBannerMsg">Install it to open like an app.</span>
+        </div>
+        <button id="pwaInstallBtn" class="pwa-banner-btn">Install</button>
+        <button id="pwaDismissBtn" class="pwa-banner-close" aria-label="Dismiss">&times;</button>
+    </div>
+    <script>
+        (function () {
+            var banner = document.getElementById('pwaBanner');
+            var msg = document.getElementById('pwaBannerMsg');
+            var btn = document.getElementById('pwaInstallBtn');
+            var dismiss = document.getElementById('pwaDismissBtn');
+            if (!banner) return;
+
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                               (window.navigator.standalone === true);
+            if (isStandalone) return;
+
+            var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            var isMobile = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+            var deferredPrompt = null;
+
+            function dismissedRecently() {
+                try {
+                    var t = parseInt(localStorage.getItem('gl_pwa_dismissed') || '0', 10);
+                    return (Date.now() - t) < (7 * 24 * 60 * 60 * 1000);
+                } catch (e) { return false; }
+            }
+
+            function show() { banner.hidden = false; }
+
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                msg.textContent = 'Install it to open like an app.';
+                show();
+            });
+
+            btn.addEventListener('click', function () {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function (choice) {
+                        if (choice.outcome === 'accepted') banner.hidden = true;
+                        deferredPrompt = null;
+                    });
+                } else if (isIOS) {
+                    msg.textContent = 'Tap the Share icon, then choose "Add to Home Screen".';
+                } else if (isMobile) {
+                    msg.textContent = 'Open your browser menu (⋮ or ☰), then choose "Install app" or "Add to Home Screen".';
+                } else {
+                    msg.textContent = 'Click the install icon in your browser\'s address bar (or ⋮ menu → "Install").';
+                }
+            });
+
+            dismiss.addEventListener('click', function () {
+                banner.hidden = true;
+                try { localStorage.setItem('gl_pwa_dismissed', String(Date.now())); } catch (e) {}
+            });
+
+            window.addEventListener('appinstalled', function () { banner.hidden = true; });
+
+            if (isIOS) {
+                setTimeout(function () {
+                    if (dismissedRecently()) return;
+                    msg.textContent = 'Tap the Share icon, then "Add to Home Screen".';
+                    show();
+                }, 1500);
+            } else if (!dismissedRecently()) {
+                setTimeout(function () {
+                    if (deferredPrompt) return;
+                    if (isMobile) {
+                        msg.textContent = 'Install Green Light on your phone: open the browser menu (⋮ or ☰) and choose "Install app" / "Add to Home Screen".';
+                    } else {
+                        msg.textContent = 'Install it to open like an app: click the install icon in the address bar (or ⋮ menu → "Install").';
+                    }
+                    show();
+                }, 4000);
+            }
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () {
+                    navigator.serviceWorker.register('/sw.js').catch(function () {});
+                });
+            }
+        })();
     </script>
 </body>
 </html>

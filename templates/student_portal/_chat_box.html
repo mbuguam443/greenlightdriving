@@ -1,0 +1,67 @@
+<div class="card shadow-sm border-0" style="border-radius: 16px; overflow: hidden;">
+    <div class="card-header d-flex align-items-center py-3"
+         style="background: linear-gradient(135deg, #2E7D32, #4CAF50); color: #fff;">
+        <i class="bi bi-chat-dots me-2 fs-5"></i>
+        <span class="fw-semibold">School Chat</span>
+        <span class="ms-auto small opacity-75"><i class="bi bi-people me-1"></i>Students &amp; staff</span>
+    </div>
+    <div id="chat-messages" style="height: 420px; overflow-y: auto; background: #f6f9f7; padding: 16px;">
+        {% for m in chat_messages %}
+            {% include "student_portal/_chat_bubble.html" %}
+        {% endfor %}
+    </div>
+    <form method="post" action="{{ chat_post_url }}" class="d-flex align-items-center gap-2 p-3 border-top bg-white" id="chat-form">
+        {% csrf_token %}
+        <textarea name="content" id="chat-input" class="form-control" rows="1" maxlength="2000"
+                  placeholder="Type a message..." style="resize:none; border-radius: 20px;"
+                  required></textarea>
+        <button type="submit" class="btn btn-success flex-shrink-0"
+                style="border-radius: 20px; background: #25D366; border-color: #25D366;">
+            <i class="bi bi-send"></i> Send
+        </button>
+    </form>
+</div>
+
+<script>
+(function () {
+    var list = document.getElementById('chat-messages');
+    var lastCount = 0;
+    var atBottom = true;
+    list.addEventListener('scroll', function () {
+        atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
+    });
+    function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+    function bubble(m) {
+        var left = m.is_me ? 'justify-content-end' : 'justify-content-start';
+        var bg = m.is_me ? '#DCF8C6' : '#ffffff';
+        var staffTag = m.is_staff ? ' <span class="badge bg-info text-dark ms-1" style="font-size:.65rem;">Staff</span>' : '';
+        return '<div class="chat-row mb-2 d-flex ' + left + '">' +
+            '<div class="chat-bubble p-2 px-3" style="max-width:75%;border-radius:16px;background:' + bg + ';border:1px solid #e6e6e6;">' +
+            '<div class="d-flex align-items-center gap-2 mb-1">' +
+            '<span class="chat-avatar" style="width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;background:#2E7D32;">' + (m.user.charAt(0).toUpperCase() || '?') + '</span>' +
+            '<span class="small fw-semibold" style="color:#2E7D32;">' + escapeHtml(m.user) + '</span>' + staffTag +
+            '<span class="small text-muted ms-auto">' + m.date + ' ' + m.time + '</span>' +
+            '</div><div class="small" style="white-space:pre-wrap;">' + escapeHtml(m.content) + '</div></div></div>';
+    }
+    function render(data) {
+        if (!data || !data.messages || data.messages.length === lastCount) return;
+        var html = '';
+        data.messages.forEach(function (m) { html += bubble(m); });
+        list.innerHTML = html;
+        if (atBottom || lastCount === 0) { list.scrollTop = list.scrollHeight; }
+        lastCount = data.messages.length;
+    }
+    function poll() {
+        fetch("{{ chat_messages_url }}", { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(render)
+            .catch(function () {});
+    }
+    poll();
+    setInterval(poll, 5000);
+})();
+</script>

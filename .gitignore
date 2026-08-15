@@ -9,3 +9,4 @@ staticfiles/
 tmp/
 
 email_config.py
+greenlight/settings_local.py
