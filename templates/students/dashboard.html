@@ -237,9 +237,9 @@
 <script src="/static/js/chart.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
     var revCtx = document.getElementById('revenueChart');
     if (revCtx) {
-        try {
         var ctx = revCtx.getContext('2d');
         new Chart(ctx, {
             type: 'bar',
@@ -261,9 +261,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     var courseCtx = document.getElementById('courseChart');
     if (courseCtx) {
-        courseCtx = courseCtx.getContext('2d');
         var colors = ['#2E7D32','#66BB6A','#81C784','#A5D6A7','#C8E6C9','#1B5E20','#388E3C','#43A047','#4CAF50'];
-        new Chart(courseCtx, {
+        new Chart(courseCtx.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: {{ course_labels|safe }},

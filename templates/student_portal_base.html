@@ -273,7 +273,7 @@
             function dismissedRecently() {
                 try {
                     var t = parseInt(localStorage.getItem('gl_pwa_dismissed') || '0', 10);
-                    return (Date.now() - t) < (7 * 24 * 60 * 60 * 1000);
+                    return (Date.now() - t) < (24 * 60 * 60 * 1000);
                 } catch (e) { return false; }
             }
 
@@ -324,7 +324,7 @@
                         msg.textContent = 'Install it to open like an app: click the install icon in the address bar (or ⋮ menu → "Install").';
                     }
                     show();
-                }, 4000);
+                }, 2000);
             }
 
             if ('serviceWorker' in navigator) {
