@@ -36,18 +36,47 @@ except Exception:
 
 if git_available:
     if os.path.isdir(git_dir):
-        result = subprocess.run(
-            ['git', 'pull', 'origin', 'main'],
+        # Get current commit so we can detect if the code actually changed
+        before = subprocess.run(
+            ['git', 'rev-parse', 'HEAD'],
+            capture_output=True, text=True, cwd=project_dir
+        ).stdout.strip()
+
+        # Fetch the latest code from GitHub
+        fetch_result = subprocess.run(
+            ['git', 'fetch', 'origin', 'main'],
             capture_output=True, text=True, timeout=60, cwd=project_dir
         )
-        if result.returncode == 0:
-            output = result.stdout.strip()
-            print(f"      {output or 'Already up to date.'}")
-            if output and 'Already up to date' not in output:
-                print("      Code updated. Re-running with new version...")
-                os.execv(sys.executable, [sys.executable] + sys.argv)
+        if fetch_result.returncode == 0:
+            # Hard reset to origin/main:
+            #  - discards any local changes to tracked files (same as "git checkout .")
+            #  - fast-forwards to the latest pushed code (same as "git pull")
+            reset_result = subprocess.run(
+                ['git', 'reset', '--hard', 'origin/main'],
+                capture_output=True, text=True, timeout=60, cwd=project_dir
+            )
+            if reset_result.returncode == 0:
+                # Remove leftover untracked files (same as "git clean -fd").
+                # media/, staticfiles/, .env, db.sqlite3, email_config.py are
+                # gitignored so they are never touched.
+                subprocess.run(
+                    ['git', 'clean', '-fd'],
+                    capture_output=True, text=True, timeout=60, cwd=project_dir
+                )
+                after = subprocess.run(
+                    ['git', 'rev-parse', 'HEAD'],
+                    capture_output=True, text=True, cwd=project_dir
+                ).stdout.strip()
+                if before != after:
+                    print(f"      Code updated ({before[:7]} -> {after[:7]}). Re-running with new version...")
+                    os.execv(sys.executable, [sys.executable] + sys.argv)
+                else:
+                    print("      Already up to date.")
+            else:
+                print(f"      Git reset failed: {reset_result.stderr.strip()}")
+                print("      Continuing with existing code...")
         else:
-            print(f"      Git pull failed: {result.stderr.strip()}")
+            print(f"      Git fetch failed: {fetch_result.stderr.strip()}")
             print("      Continuing with existing code...")
     else:
         print("      Cloning repository for the first time...")
