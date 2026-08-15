@@ -310,3 +310,38 @@ class ToggleReminderView(StaffTestMixin, View):
 
         messages.success(request, f'Payment reminder {status} for {student.user.full_name}.')
         return redirect('students:detail', pk=student.pk)
+
+
+class RemindAllView(StaffTestMixin, View):
+    def get(self, request):
+        from student_portal.models import Notification
+        ids = [s.id for s in Student.objects.all() if s.balance > 0]
+        students = list(Student.objects.filter(id__in=ids))
+        count = len(students)
+        Student.objects.filter(id__in=ids).update(payment_reminder=True)
+
+        existing = set(
+            Notification.objects.filter(student_id__in=ids, title='Payment Reminder', is_read=False)
+            .values_list('student_id', flat=True)
+        )
+        notifications = [
+            Notification(
+                student=s,
+                title='Payment Reminder',
+                message=f'Your outstanding balance is KES {s.balance:,.0f}. Please clear it to proceed with lessons and exams.',
+                notification_type='payment',
+            )
+            for s in students if s.id not in existing
+        ]
+        if notifications:
+            Notification.objects.bulk_create(notifications)
+
+        messages.success(request, f'Payment reminder enabled for {count} student(s) with an outstanding balance.')
+        return redirect('students:list')
+
+
+class ClearAllRemindersView(StaffTestMixin, View):
+    def get(self, request):
+        Student.objects.update(payment_reminder=False)
+        messages.success(request, 'Payment reminders cleared for all students.')
+        return redirect('students:list')

@@ -11,5 +11,7 @@ urlpatterns = [
     path('<int:pk>/delete/', views.StudentDeleteView.as_view(), name='delete'),
     path('<int:pk>/generate-lessons/', views.GenerateLessonsView.as_view(), name='generate_lessons'),
     path('<int:pk>/toggle-reminder/', views.ToggleReminderView.as_view(), name='toggle_reminder'),
+    path('remind-all/', views.RemindAllView.as_view(), name='remind_all'),
+    path('clear-reminders/', views.ClearAllRemindersView.as_view(), name='clear_reminders'),
     path('<int:student_pk>/enrollments/create/', views.StudentEnrollmentCreateView.as_view(), name='enrollment_create'),
 ]

@@ -13,6 +13,14 @@
     <a href="{% url 'students:create' %}" class="btn fw-semibold text-white" style="background-color: #2E7D32;">
         <i class="bi bi-plus-lg me-1"></i>Add Student
     </a>
+    <a href="{% url 'students:remind_all' %}" class="btn fw-semibold text-white" style="background-color: #D32F2F;"
+       onclick="return confirm('Enable the payment reminder (red balance banner) for ALL students with an outstanding balance?');">
+        <i class="bi bi-bell-fill me-1"></i>Remind All
+    </a>
+    <a href="{% url 'students:clear_reminders' %}" class="btn btn-sm btn-outline-secondary"
+       onclick="return confirm('Turn OFF payment reminders for all students?');">
+        <i class="bi bi-bell-slash me-1"></i>Clear All
+    </a>
     <a href="{% url 'reports:pdf_students' %}?search={{ search_query|default:'' }}&status={{ current_status|default:'' }}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf me-1"></i>PDF</a>
 </div>
 
@@ -61,6 +69,7 @@
                         <th>Course</th>
                         <th>Branch</th>
                         <th>Status</th>
+                        <th>Reminder</th>
                         <th class="text-end pe-3">Actions</th>
                     </tr>
                 </thead>
@@ -114,6 +123,17 @@
                                 </span>
                             {% endif %}
                         </td>
+                        <td>
+                            {% if student.payment_reminder %}
+                                <span class="badge" style="background-color: rgba(220,53,69,0.1); color: #D32F2F;">
+                                    <i class="bi bi-bell-fill me-1"></i> ON
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-bell me-1"></i> OFF
+                                </span>
+                            {% endif %}
+                        </td>
                         <td class="text-end pe-3">
                             <a href="{% url 'students:detail' student.pk %}" class="btn btn-sm btn-outline-success" title="View">
                                 <i class="bi bi-eye"></i>
@@ -128,7 +148,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-5">
+                        <td colspan="8" class="text-center py-5">
                             <div class="text-muted">
                                 <i class="bi bi-people display-4 d-block mb-3"></i>
                                 <p class="mb-2">No students found</p>
