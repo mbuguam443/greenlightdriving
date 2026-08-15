@@ -23,94 +23,133 @@ print("=" * 50)
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
-# 0. Git setup / pull
+# 0. Sync code from GitHub
 print("\n[0/6] Syncing code from GitHub...")
 git_dir = os.path.join(project_dir, '.git')
-git_available = False
 
+ZIP_URL = 'https://codeload.github.com/mbuguam443/greenlightdriving/zip/refs/heads/main'
+
+
+def sync_from_zip(project_dir):
+    """Download the latest code as a ZIP and replace the working tree.
+    Returns True if anything changed. Works even when git is broken/missing.
+    Server data (media/, staticfiles/, .env, db.sqlite3, email_config.py,
+    settings_local.py, .git, node_modules, sent_emails/) is never touched."""
+    import io
+    import zipfile
+    import urllib.request
+
+    keep_top = {'.git', 'media', 'staticfiles', 'node_modules', 'sent_emails', '__pycache__'}
+    keep_files = {'.env', 'db.sqlite3', 'email_config.py', 'settings_local.py'}
+
+    print("      Downloading latest code from GitHub (ZIP)...")
+    req = urllib.request.Request(ZIP_URL, headers={'User-Agent': 'greenlight-updater'})
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        data = resp.read()
+    zf = zipfile.ZipFile(io.BytesIO(data))
+    root = zf.namelist()[0].split('/')[0]
+
+    changed = False
+    zip_files = set()
+    for n in zf.namelist():
+        rel = n[len(root) + 1:] if n.startswith(root + '/') else n
+        rel = rel.replace('\\', '/')
+        if not rel or rel.endswith('/'):
+            continue
+        if rel.split('/')[0] in keep_top:
+            continue
+        if os.path.basename(rel) in keep_files:
+            continue
+        zip_files.add(rel)
+        dst = os.path.join(project_dir, rel)
+        if os.path.isdir(dst):
+            continue
+        os.makedirs(os.path.dirname(dst) or project_dir, exist_ok=True)
+        new_bytes = zf.read(n)
+        if not os.path.exists(dst) or open(dst, 'rb').read() != new_bytes:
+            with open(dst, 'wb') as f:
+                f.write(new_bytes)
+            changed = True
+
+    # Remove stale files that no longer exist in the new ZIP (kept files stay)
+    for walk_root, dirs, files in os.walk(project_dir):
+        dirs[:] = [d for d in dirs if d not in keep_top]
+        rel_dir = os.path.relpath(walk_root, project_dir).replace('\\', '/')
+        for fn in files:
+            rel = (rel_dir + '/' + fn) if rel_dir != '.' else fn
+            if rel in zip_files:
+                continue
+            if os.path.basename(rel) in keep_files:
+                continue
+            if rel.split('/')[0] in keep_top:
+                continue
+            try:
+                os.remove(os.path.join(walk_root, fn))
+                changed = True
+            except OSError:
+                pass
+    return changed
+
+
+def git_rev_parse(project_dir):
+    try:
+        r = subprocess.run(
+            ['git', 'rev-parse', 'HEAD'],
+            capture_output=True, text=True, cwd=project_dir
+        )
+        return r.stdout.strip() or None
+    except Exception:
+        return None
+
+
+def git_update(project_dir):
+    """Fast path using git. Returns True if code was updated (re-exec'd)."""
+    before = git_rev_parse(project_dir)
+    fetch = subprocess.run(
+        ['git', 'fetch', 'origin', 'main'],
+        capture_output=True, text=True, timeout=60, cwd=project_dir
+    )
+    if fetch.returncode != 0:
+        print(f"      Git fetch failed: {fetch.stderr.strip()}")
+        return False
+    reset = subprocess.run(
+        ['git', 'reset', '--hard', 'origin/main'],
+        capture_output=True, text=True, timeout=60, cwd=project_dir
+    )
+    if reset.returncode != 0:
+        print(f"      Git reset failed: {reset.stderr.strip()}")
+        return False
+    subprocess.run(['git', 'clean', '-fd'], capture_output=True, text=True, timeout=60, cwd=project_dir)
+    after = git_rev_parse(project_dir)
+    if before != after:
+        print(f"      Code updated ({before[:7] or '?'} -> {after[:7] or '?'}). Re-running with new version...")
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    print("      Already up to date.")
+    return True
+
+
+git_available = False
 try:
     subprocess.run(['git', '--version'], capture_output=True, check=True)
     git_available = True
 except Exception:
     pass
 
-if git_available:
-    if os.path.isdir(git_dir):
-        # Get current commit so we can detect if the code actually changed
-        before = subprocess.run(
-            ['git', 'rev-parse', 'HEAD'],
-            capture_output=True, text=True, cwd=project_dir
-        ).stdout.strip()
+git_ok = False
+if git_available and os.path.isdir(git_dir):
+    git_ok = git_update(project_dir)
 
-        # Fetch the latest code from GitHub
-        fetch_result = subprocess.run(
-            ['git', 'fetch', 'origin', 'main'],
-            capture_output=True, text=True, timeout=60, cwd=project_dir
-        )
-        if fetch_result.returncode == 0:
-            # Hard reset to origin/main:
-            #  - discards any local changes to tracked files (same as "git checkout .")
-            #  - fast-forwards to the latest pushed code (same as "git pull")
-            reset_result = subprocess.run(
-                ['git', 'reset', '--hard', 'origin/main'],
-                capture_output=True, text=True, timeout=60, cwd=project_dir
-            )
-            if reset_result.returncode == 0:
-                # Remove leftover untracked files (same as "git clean -fd").
-                # media/, staticfiles/, .env, db.sqlite3, email_config.py are
-                # gitignored so they are never touched.
-                subprocess.run(
-                    ['git', 'clean', '-fd'],
-                    capture_output=True, text=True, timeout=60, cwd=project_dir
-                )
-                after = subprocess.run(
-                    ['git', 'rev-parse', 'HEAD'],
-                    capture_output=True, text=True, cwd=project_dir
-                ).stdout.strip()
-                if before != after:
-                    print(f"      Code updated ({before[:7]} -> {after[:7]}). Re-running with new version...")
-                    os.execv(sys.executable, [sys.executable] + sys.argv)
-                else:
-                    print("      Already up to date.")
-            else:
-                print(f"      Git reset failed: {reset_result.stderr.strip()}")
-                print("      Continuing with existing code...")
-        else:
-            print(f"      Git fetch failed: {fetch_result.stderr.strip()}")
-            print("      Continuing with existing code...")
-    else:
-        print("      Cloning repository for the first time...")
-        tmp = tempfile.mkdtemp()
-        clone_result = subprocess.run(
-            ['git', 'clone', REPO_URL, tmp],
-            capture_output=True, text=True, timeout=120
-        )
-        if clone_result.returncode == 0:
-            # Copy all files from clone to project dir (except media, staticfiles, .git)
-            exclude_dirs = {'media', 'staticfiles', '.git'}
-            for item in os.listdir(tmp):
-                if item in exclude_dirs:
-                    continue
-                src = os.path.join(tmp, item)
-                dst = os.path.join(project_dir, item)
-                if os.path.isdir(src):
-                    if os.path.exists(dst):
-                        shutil.rmtree(dst)
-                    shutil.copytree(src, dst, symlinks=True)
-                else:
-                    shutil.copy2(src, dst)
-            # Copy .git directory too
-            shutil.copytree(os.path.join(tmp, '.git'), git_dir, symlinks=True)
-            shutil.rmtree(tmp)
-            print("      Repository cloned. Re-running update with fresh code...")
+if not git_ok:
+    print("      Using ZIP download instead of git...")
+    try:
+        if sync_from_zip(project_dir):
+            print("      Code updated from ZIP. Re-running with new version...")
             os.execv(sys.executable, [sys.executable] + sys.argv)
         else:
-            print(f"      Clone failed: {clone_result.stderr.strip()}")
-            print("      Continuing with existing code...")
-else:
-    print("      Git not found on this server.")
-    print("      To enable automatic updates, install git or set up GitHub deployment.")
-    print("      Continuing with existing code...")
+            print("      Already up to date.")
+    except Exception as e:
+        print(f"      ZIP download failed: {e}")
+        print("      Continuing with existing code...")
 
 # 1. Setup Django
 import django
