@@ -10,3 +10,4 @@ tmp/
 
 email_config.py
 greenlight/settings_local.py
+*-firebase-adminsdk-*.json

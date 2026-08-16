@@ -43,3 +43,7 @@ yarn-error.*
 # build artifacts
 *.apk
 *.aab
+
+# Firebase / secrets
+*-firebase-adminsdk-*.json
+
