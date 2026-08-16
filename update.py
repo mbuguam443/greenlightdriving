@@ -439,10 +439,36 @@ print("      Database repair done")
 
 # 3. Migrations
 print("\n[2/6] Running migrations...")
+
+# Remove locally-generated migration files that are not tracked in the repo.
+# (Schema changes on this project are handled by the repair step above, which
+#  records the migration names in django_migrations directly. Running
+#  makemigrations would regenerate conflicting files, so it is disabled and any
+#  leftover generated files must not be re-applied by migrate.)
 try:
-    call_command('makemigrations', interactive=False, verbosity=1)
+    tracked = set(subprocess.run(
+        ['git', 'ls-files', '*/migrations/*.py'],
+        capture_output=True, text=True, cwd=project_dir
+    ).stdout.splitlines())
+    if tracked:
+        for root, dirs, files in os.walk(project_dir):
+            root = os.path.normpath(root)
+            parts = root.replace('\\', '/').split('/')
+            if 'migrations' not in parts:
+                continue
+            for fn in files:
+                if not fn.endswith('.py'):
+                    continue
+                rel = os.path.relpath(os.path.join(root, fn), project_dir).replace('\\', '/')
+                if rel not in tracked and fn != '__init__.py':
+                    try:
+                        os.remove(os.path.join(root, fn))
+                        print(f"      Removed stale migration {rel}")
+                    except OSError:
+                        pass
 except Exception:
-    call_command('makemigrations', '--merge', interactive=False, verbosity=1)
+    pass
+
 call_command('migrate', interactive=False, verbosity=1)
 print("      Done!")
 
