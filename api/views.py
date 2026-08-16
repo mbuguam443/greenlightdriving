@@ -495,10 +495,15 @@ class StudentProfileView(APIView):
             return Response({'detail': 'No student profile linked to this account.'},
                             status=status.HTTP_404_NOT_FOUND)
         admission = student.admission
+        token = getattr(student, 'push_token', '') or ''
         return Response({
             'user': UserSerializer(request.user, context={'request': request}).data,
             'student': StudentSerializer(student, context={'request': request}).data,
             'admission': AdmissionSerializer(admission, context={'request': request}).data if admission else None,
+            'push_notifications': {
+                'registered': bool(token),
+                'token': token,
+            },
         })
 
     def put(self, request):
