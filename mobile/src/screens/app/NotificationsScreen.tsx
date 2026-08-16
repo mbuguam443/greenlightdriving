@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, Button, EmptyState, ErrorState, FormInput, Loading } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
 import { api, getErrorMessage } from '../../services/apiClient';
+import { useUnread } from '../../context/UnreadContext';
 import { colors, radius, shadows, spacing } from '../../theme/colors';
 import { NotificationItem } from '../../types';
 import { formatDateTime } from '../../utils/format';
@@ -14,12 +15,16 @@ import { formatDateTime } from '../../utils/format';
 export default function NotificationsScreen() {
   const isFocused = useIsFocused();
   const { data, loading, error, refreshing, refresh } = useApiData<NotificationItem[]>('/student/notifications/');
+  const { refreshUnread } = useUnread();
   const [replyingTo, setReplyingTo] = useState<NotificationItem | null>(null);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (isFocused) refresh();
+    if (isFocused) {
+      refresh();
+      refreshUnread();
+    }
   }, [isFocused]);
 
   const markRead = async (n: NotificationItem) => {
@@ -27,6 +32,7 @@ export default function NotificationsScreen() {
     try {
       await api.post(`/student/notifications/${n.id}/`, { action: 'read' });
       refresh();
+      refreshUnread();
     } catch {
       // non-critical
     }
@@ -40,6 +46,7 @@ export default function NotificationsScreen() {
       setReplyingTo(null);
       setReplyText('');
       refresh();
+      refreshUnread();
     } catch (err) {
       Alert.alert('Reply failed', getErrorMessage(err));
     } finally {

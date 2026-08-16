@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 
 import { colors } from '../theme/colors';
+import { useUnread } from '../context/UnreadContext';
 import { AppTabsParamList, HomeStackParamList, MoreStackParamList } from './types';
 import DashboardScreen from '../screens/app/DashboardScreen';
 import DocumentsScreen from '../screens/app/DocumentsScreen';
@@ -65,6 +66,7 @@ function tabIcon(name: keyof typeof Ionicons.glyphMap) {
 }
 
 export default function AppTabs() {
+  const { unreadCount } = useUnread();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -87,7 +89,12 @@ export default function AppTabs() {
       <Tab.Screen
         name="NotificationsTab"
         component={NotificationsScreen}
-        options={{ title: 'Updates', tabBarIcon: tabIcon('notifications-outline') }}
+        options={{
+          title: 'Updates',
+          tabBarIcon: tabIcon('notifications-outline'),
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          tabBarBadgeStyle: { backgroundColor: colors.danger, color: colors.white, fontWeight: '700' },
+        }}
       />
       <Tab.Screen
         name="MoreTab"

@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { UnreadProvider } from './src/context/UnreadContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { setupNotificationHandler } from './src/services/notifications';
 import { colors } from './src/theme/colors';
@@ -33,8 +34,10 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <StatusBar style="auto" />
-        <AppContent />
+        <UnreadProvider>
+          <StatusBar style="auto" />
+          <AppContent />
+        </UnreadProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );
