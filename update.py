@@ -151,7 +151,33 @@ if not git_ok:
         print(f"      ZIP download failed: {e}")
         print("      Continuing with existing code...")
 
-# 1. Setup Django
+# 1. Ensure Python dependencies are installed
+print("\n[0/6] Checking Python dependencies...")
+missing = []
+for mod in ('rest_framework', 'rest_framework_simplejwt', 'corsheaders',
+            'django_filters', 'PIL', 'reportlab', 'pymysql', 'requests'):
+    try:
+        __import__(mod)
+    except Exception:
+        missing.append(mod)
+if missing:
+    print(f"      Missing packages: {', '.join(missing)}. Installing requirements.txt...")
+    req_file = os.path.join(project_dir, 'requirements.txt')
+    if not os.path.isfile(req_file):
+        print("      requirements.txt not found - skipping")
+    else:
+        r = subprocess.run(
+            [sys.executable, '-m', 'pip', 'install', '-r', req_file],
+            capture_output=True, text=True
+        )
+        if r.returncode != 0:
+            print(f"      pip install failed: {r.stderr.strip()[-500:]}")
+        else:
+            print("      Dependencies installed")
+else:
+    print("      All dependencies present")
+
+# 2. Setup Django
 import django
 django.setup()
 from django.core.management import call_command
