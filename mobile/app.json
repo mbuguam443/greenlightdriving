@@ -7,6 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "greenlight",
+    "plugins": [
+      "expo-notifications"
+    ],
     "extra": {
       "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api",
       "eas": {
