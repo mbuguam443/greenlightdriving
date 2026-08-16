@@ -8,7 +8,10 @@
     "userInterfaceStyle": "light",
     "scheme": "greenlight",
     "extra": {
-      "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api"
+      "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api",
+      "eas": {
+        "projectId": "54c10e15-5f36-494c-88bf-246e08ca31e3"
+      }
     },
     "ios": {
       "supportsTablet": true
@@ -21,10 +24,17 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.greenlightstudent"
+      "package": "com.anonymous.greenlightstudent",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "owner": "mbuguam443",
+    "updates": {
+      "url": "https://u.expo.dev/54c10e15-5f36-494c-88bf-246e08ca31e3"
     }
   }
 }
