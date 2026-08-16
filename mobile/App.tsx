@@ -6,7 +6,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
+import { setupNotificationHandler } from './src/services/notifications';
 import { colors } from './src/theme/colors';
+
+setupNotificationHandler();
 
 function LoadingScreen() {
   return (

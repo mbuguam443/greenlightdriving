@@ -160,12 +160,16 @@ class PracticalLessonCreateView(StaffTestMixin, CreateView):
 
     def _notify(self, lesson, action):
         from student_portal.models import Notification
+        from student_portal.push import send_push
+        title = f'New Lesson: {lesson.lesson_item.name}'
+        message = f'A new practical lesson "{lesson.lesson_item.name}" has been added for {lesson.date.strftime("%d %b %Y")}.'
         Notification.objects.create(
             student=lesson.student,
-            title=f'New Lesson: {lesson.lesson_item.name}',
-            message=f'A new practical lesson "{lesson.lesson_item.name}" has been added for {lesson.date.strftime("%d %b %Y")}.',
+            title=title,
+            message=message,
             notification_type='lesson',
         )
+        send_push(lesson.student, title, message)
 
 
 class TheoryLessonCreateView(StaffTestMixin, CreateView):

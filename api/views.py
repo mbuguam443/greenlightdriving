@@ -425,6 +425,23 @@ class StudentNotificationsView(APIView):
         return Response(NotificationSerializer(notification).data)
 
 
+class StudentPushTokenView(APIView):
+    permission_classes = [IsStudent]
+
+    def post(self, request):
+        student = _get_student(request)
+        if not student:
+            return Response({'detail': 'No student profile linked to this account.'},
+                            status=status.HTTP_404_NOT_FOUND)
+        token = (request.data.get('push_token') or '').strip()
+        if not token:
+            return Response({'detail': 'push_token is required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        student.push_token = token[:300]
+        student.save(update_fields=['push_token'])
+        return Response({'detail': 'Push token saved.'})
+
+
 class StudentEventsView(APIView):
     permission_classes = [IsStudent]
 

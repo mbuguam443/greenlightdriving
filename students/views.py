@@ -301,12 +301,15 @@ class ToggleReminderView(StaffTestMixin, View):
 
         if student.payment_reminder and student.balance > 0:
             from student_portal.models import Notification
+            from student_portal.push import send_push
+            message = f'Your outstanding balance is KES {student.balance:,.0f}. Please clear it to proceed with lessons and exams.'
             Notification.objects.create(
                 student=student,
                 title='Payment Reminder',
-                message=f'Your outstanding balance is KES {student.balance:,.0f}. Please clear it to proceed with lessons and exams.',
+                message=message,
                 notification_type='payment',
             )
+            send_push(student, 'Payment Reminder', message)
 
         messages.success(request, f'Payment reminder {status} for {student.user.full_name}.')
         return redirect('students:detail', pk=student.pk)
@@ -335,6 +338,9 @@ class RemindAllView(StaffTestMixin, View):
         ]
         if notifications:
             Notification.objects.bulk_create(notifications)
+            from student_portal.push import send_push
+            for n in notifications:
+                send_push(n.student, n.title, n.message)
 
         messages.success(request, f'Payment reminder enabled for {count} student(s) with an outstanding balance.')
         return redirect('students:list')

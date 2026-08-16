@@ -9,6 +9,8 @@ from django.conf import settings
 import os
 import json
 
+from .push import send_push
+
 
 def pwa_manifest(request):
     path = os.path.join(str(settings.BASE_DIR), 'static', 'pwa', 'manifest.webmanifest')
@@ -647,11 +649,13 @@ class NotificationCreateView(StaffMixin, View):
             students = Student.objects.filter(status='ACTIVE')
             for s in students:
                 Notification.objects.create(student=s, title=title, message=message, notification_type=ntype)
+                send_push(s, title, message)
             messages.success(request, f'Notification sent to {students.count()} students.')
         elif student_ids:
             students = Student.objects.filter(pk__in=student_ids)
             for s in students:
                 Notification.objects.create(student=s, title=title, message=message, notification_type=ntype)
+                send_push(s, title, message)
             messages.success(request, f'Notification sent to {students.count()} selected students.')
         else:
             student_id = request.POST.get('student')
@@ -660,6 +664,7 @@ class NotificationCreateView(StaffMixin, View):
                 return redirect('student_portal:manage_notification')
             student = get_object_or_404(Student, pk=student_id)
             Notification.objects.create(student=student, title=title, message=message, notification_type=ntype)
+            send_push(student, title, message)
             messages.success(request, f'Notification sent to {student.user.full_name}.')
 
         return redirect('student_portal:manage_notification')

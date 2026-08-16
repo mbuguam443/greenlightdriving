@@ -35,6 +35,10 @@ class Student(models.Model):
     discount_reason = models.CharField(max_length=200, blank=True, help_text='Why the discount was given')
     discount_description = models.TextField(blank=True, help_text='Internal note about this discount (admin only)')
     notes = models.TextField(blank=True)
+    push_token = models.CharField(
+        max_length=300, blank=True, default='',
+        help_text="Expo push token for this student's phone",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

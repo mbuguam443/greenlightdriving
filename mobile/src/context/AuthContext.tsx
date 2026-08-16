@@ -9,6 +9,7 @@ import {
   saveUser,
 } from '../services/apiClient';
 import { api, getErrorMessage } from '../services/apiClient';
+import { registerForPushNotifications } from '../services/notifications';
 
 export interface AuthUser {
   id: number;
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const [token, storedUser] = await Promise.all([getAccessToken(), getStoredUser()]);
         if (token && storedUser) {
           setUser(storedUser as AuthUser);
+          void registerForPushNotifications();
         }
       } catch {
         // ignore storage errors, fall back to logged out
@@ -69,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await saveTokens(data.access, data.refresh);
     await saveUser(data.user);
     setUser(data.user);
+    void registerForPushNotifications();
   };
 
   const register = async (payload: {
@@ -82,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await saveTokens(data.access, data.refresh);
     await saveUser(data.user);
     setUser(data.user);
+    void registerForPushNotifications();
   };
 
   const logout = async () => {
