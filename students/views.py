@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
@@ -246,6 +248,8 @@ class IndexView(LoginRequiredMixin, View):
             'today_lessons': today_lessons,
             'revenue_labels': revenue_labels,
             'revenue_data': revenue_data,
+            'revenue_labels_json': json.dumps(revenue_labels),
+            'revenue_data_json': json.dumps(revenue_data),
             'course_labels': course_labels,
             'course_data': course_data,
         }

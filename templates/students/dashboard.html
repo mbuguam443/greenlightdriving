@@ -234,7 +234,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/js/chart.min.js"></script>
+<script src="{% static 'js/chart.min.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof Chart === 'undefined') return;
@@ -244,10 +244,10 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {{ revenue_labels|safe }},
+                labels: {{ revenue_labels_json|safe }},
                 datasets: [{
                     label: 'Revenue (KES)',
-                    data: {{ revenue_data|safe }},
+                    data: {{ revenue_data_json|safe }},
                     backgroundColor: '#2E7D32',
                     borderRadius: 6,
                 }]
