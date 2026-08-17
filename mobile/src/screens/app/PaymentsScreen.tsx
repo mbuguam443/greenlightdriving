@@ -127,7 +127,7 @@ export default function PaymentsScreen() {
                     </View>
                     <Badge
                       text={p.status_display}
-                      color={p.status === 'completed' ? colors.success : p.status === 'pending' ? colors.warning : colors.danger}
+                      color={p.status.toLowerCase() === 'completed' ? colors.success : p.status.toLowerCase() === 'pending' ? colors.warning : colors.danger}
                     />
                   </View>
                 </Card>
@@ -150,7 +150,7 @@ export default function PaymentsScreen() {
                           {t.mpesa_receipt ? ` · ${t.mpesa_receipt}` : ''}
                         </Text>
                       </View>
-                      <Badge text={t.status} color={t.status === 'completed' ? colors.success : t.status === 'pending' ? colors.warning : colors.danger} />
+                      <Badge text={t.status} color={t.status.toLowerCase() === 'success' || t.status.toLowerCase() === 'completed' ? colors.success : t.status.toLowerCase() === 'pending' ? colors.warning : colors.danger} />
                     </View>
                   </Card>
                 ))}

@@ -135,7 +135,7 @@ export default function DashboardScreen({ navigation }: Props) {
                   </View>
                   <Badge
                     text={p.status_display}
-                    color={p.status === 'completed' ? colors.success : p.status === 'pending' ? colors.warning : colors.danger}
+                    color={p.status.toLowerCase() === 'completed' ? colors.success : p.status.toLowerCase() === 'pending' ? colors.warning : colors.danger}
                   />
                 </View>
               </Card>
