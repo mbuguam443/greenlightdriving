@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, FormInput } from '../../components/ui';
 import { useAuth, getErrorMessage } from '../../context/AuthContext';
@@ -21,6 +21,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
   const { login } = useAuth();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,16 +44,15 @@ export default function LoginScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={insets.top}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <View style={styles.logo}>
-              <Ionicons name="car-sport" size={40} color={colors.white} />
-            </View>
+            <Image source={require('../../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
             <Text style={styles.brandName}>Green Light</Text>
             <Text style={styles.brandTagline}>Defensive Driving School</Text>
             <Text style={styles.brandSlogan}>Drive Safe, Drive Smart</Text>
@@ -92,7 +92,7 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -101,12 +101,8 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
   brand: { alignItems: 'center', marginBottom: spacing.xl },
   logo: {
-    width: 76,
-    height: 76,
-    borderRadius: 22,
-    backgroundColor: colors.primaryDark,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 120,
+    height: 120,
     marginBottom: spacing.md,
   },
   brandName: { fontSize: 26, fontWeight: '800', color: colors.white },
