@@ -489,6 +489,12 @@ print("      Media directories ready")
 
 # 4. Collect static
 print("\n[4/6] Collecting static files...")
+# Preserve manually uploaded downloads while syncing collected static files.
+downloads_dir = os.path.join(project_dir, 'static', 'downloads')
+downloads_backup = tempfile.mkdtemp(prefix='greenlight-downloads-')
+downloads_backup_dir = os.path.join(downloads_backup, 'downloads')
+if os.path.isdir(downloads_dir):
+    shutil.copytree(downloads_dir, downloads_backup_dir)
 call_command('collectstatic', '--noinput', verbosity=1)
 # Sync staticfiles/ -> static/ for Apache
 staticfiles_dir = os.path.join(project_dir, 'staticfiles')
@@ -504,6 +510,10 @@ if os.path.isdir(staticfiles_dir):
         else:
             shutil.copy2(src, dst)
     print("      Static files synced to static/")
+if os.path.isdir(downloads_backup_dir):
+    os.makedirs(downloads_dir, exist_ok=True)
+    shutil.copytree(downloads_backup_dir, downloads_dir, dirs_exist_ok=True)
+shutil.rmtree(downloads_backup, ignore_errors=True)
 print("      Done!")
 
 # 5. Fix permissions
