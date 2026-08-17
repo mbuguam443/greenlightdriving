@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Image, Linking, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,19 +23,15 @@ const EXT_COLORS: Record<string, string> = {
 
 const IMAGE_EXTS = ['JPG', 'JPEG', 'PNG', 'GIF'];
 
-type Viewer =
-  | { type: 'image'; url: string; title: string }
-  | { type: 'pdf'; url: string; title: string }
-  | null;
-
 function resolveFileUrl(file: string): string {
   return file.startsWith('http') ? file : `${API_URL.replace(/\/api$/, '')}${file}`;
 }
 
 export default function DocumentsScreen() {
   const isFocused = useIsFocused();
+  const { width } = useWindowDimensions();
   const { data, loading, error, refreshing, refresh } = useApiData<StudentDocument[]>('/student/documents/');
-  const [viewer, setViewer] = useState<Viewer>(null);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (isFocused) refresh();
@@ -45,13 +41,15 @@ export default function DocumentsScreen() {
     if (!doc.file) return;
     const url = resolveFileUrl(doc.file);
     const ext = (doc.file_extension || '').toUpperCase();
+    const index = data?.findIndex((item) => item.id === doc.id) ?? -1;
+    if (index < 0) return;
 
     if (IMAGE_EXTS.includes(ext)) {
-      setViewer({ type: 'image', url, title: doc.title });
+      setViewerIndex(index);
       return;
     }
     if (ext === 'PDF') {
-      setViewer({ type: 'pdf', url, title: doc.title });
+      setViewerIndex(index);
       return;
     }
     const supported = await Linking.canOpenURL(url);
@@ -109,23 +107,43 @@ export default function DocumentsScreen() {
         </ScrollView>
       )}
 
-      <Modal visible={viewer !== null} animationType="slide" onRequestClose={() => setViewer(null)}>
+      <Modal visible={viewerIndex !== null} animationType="slide" onRequestClose={() => setViewerIndex(null)}>
         <SafeAreaView style={styles.viewerSafe} edges={['top', 'bottom']}>
           <View style={styles.viewerHeader}>
             <Text style={styles.viewerTitle} numberOfLines={1}>
-              {viewer?.title}
+              {viewerIndex !== null ? data?.[viewerIndex]?.title : ''}
             </Text>
-            <Pressable onPress={() => setViewer(null)} hitSlop={8} style={styles.viewerClose}>
+            <Pressable onPress={() => setViewerIndex(null)} hitSlop={8} style={styles.viewerClose}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
           </View>
-          <View style={styles.viewerBody}>
-            {viewer?.type === 'image' ? (
-              <Image source={{ uri: viewer.url }} style={styles.viewerImage} resizeMode="contain" />
-            ) : viewer?.type === 'pdf' ? (
-              <WebView source={{ uri: viewer.url }} style={styles.viewerWeb} originWhitelist={['*']} />
-            ) : null}
-          </View>
+          <FlatList
+            data={data ?? []}
+            horizontal
+            pagingEnabled
+            initialScrollIndex={viewerIndex ?? 0}
+            keyExtractor={(item) => String(item.id)}
+            getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+            onMomentumScrollEnd={(event) => {
+              const width = event.nativeEvent.layoutMeasurement.width;
+              if (width) setViewerIndex(Math.round(event.nativeEvent.contentOffset.x / width));
+            }}
+            renderItem={({ item }) => {
+              const url = item.file ? resolveFileUrl(item.file) : '';
+              const ext = (item.file_extension || '').toUpperCase();
+              return (
+                <View style={[styles.viewerBody, { width }]}> 
+                  {ext === 'PDF' ? (
+                    <WebView source={{ uri: url }} style={styles.viewerWeb} originWhitelist={['*']} />
+                  ) : IMAGE_EXTS.includes(ext) ? (
+                    <Image source={{ uri: url }} style={styles.viewerImage} resizeMode="contain" />
+                  ) : (
+                    <Text style={styles.unsupported}>This document cannot be previewed here.</Text>
+                  )}
+                </View>
+              );
+            }}
+          />
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -173,4 +191,5 @@ const styles = StyleSheet.create({
   viewerBody: { flex: 1, backgroundColor: '#000' },
   viewerImage: { flex: 1, width: '100%' },
   viewerWeb: { flex: 1, backgroundColor: '#fff' },
+  unsupported: { color: colors.white, textAlign: 'center', marginTop: spacing.xl },
 });
