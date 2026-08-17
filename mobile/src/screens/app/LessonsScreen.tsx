@@ -104,6 +104,7 @@ export default function LessonsScreen() {
             {formatDate(l.date)} · {l.instructor_name ?? 'TBA'} {l.vehicle_registration ? `· ${l.vehicle_registration}` : ''}
           </Text>
           {l.remarks ? <Text style={styles.remarks}>{l.remarks}</Text> : null}
+          {l.attended ? <Text style={styles.attended}>Attended</Text> : null}
         </View>
         <Badge text={l.status} color={statusColor(l.status)} />
       </View>
