@@ -18,10 +18,23 @@ export default function PaymentsScreen() {
   const [amount, setAmount] = useState('');
   const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState('');
+  const [pendingTransactionId, setPendingTransactionId] = useState<number | null>(null);
 
   useEffect(() => {
     if (isFocused) refresh();
   }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused || pendingTransactionId === null) return;
+    const timer = setInterval(() => refresh(), 3000);
+    return () => clearInterval(timer);
+  }, [isFocused, pendingTransactionId, refresh]);
+
+  useEffect(() => {
+    if (pendingTransactionId === null || !data) return;
+    const transaction = data.mpesa_transactions.find((item) => item.id === pendingTransactionId);
+    if (transaction && transaction.status !== 'PENDING') setPendingTransactionId(null);
+  }, [data, pendingTransactionId]);
 
   const sendMpesa = async () => {
     setFormError('');
@@ -37,10 +50,11 @@ export default function PaymentsScreen() {
     }
     setSending(true);
     try {
-      const { data: res } = await api.post<{ detail: string }>('/student/mpesa/initiate/', {
+      const { data: res } = await api.post<{ detail: string; transaction_id: number }>('/student/mpesa/initiate/', {
         phone_number: clean,
         amount: amt,
       });
+      setPendingTransactionId(res.transaction_id);
       Alert.alert('M-Pesa Request Sent', res.detail);
       refresh();
     } catch (err) {
@@ -110,6 +124,17 @@ export default function PaymentsScreen() {
             </Card>
 
             <SectionTitle title="Payment history" />
+            {pendingTransactionId !== null ? (
+              <Card style={styles.progressCard}>
+                <View style={styles.paymentRow}>
+                  <Ionicons name="time-outline" size={22} color={colors.warning} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.progressTitle}>Waiting for M-Pesa confirmation</Text>
+                    <Text style={styles.paymentMeta}>Complete the prompt on your phone. This screen updates automatically.</Text>
+                  </View>
+                </View>
+              </Card>
+            ) : null}
             {data && data.payments.length === 0 ? (
               <EmptyState icon="card-outline" title="No payments recorded" subtitle="Payments you make will show here" />
             ) : (
@@ -183,6 +208,8 @@ const styles = StyleSheet.create({
   hint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.md },
   errorText: { color: colors.danger, fontSize: 13, marginBottom: spacing.sm },
   paymentCard: { marginBottom: spacing.sm },
+  progressCard: { marginBottom: spacing.sm, borderColor: colors.warning, borderWidth: 1 },
+  progressTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
   paymentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   iconWrap: {
     width: 36,

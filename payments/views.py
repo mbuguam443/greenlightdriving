@@ -422,7 +422,7 @@ class MpesaCallbackView(View):
                 transaction.save()
 
                 # Create the actual Payment record
-                payment = Payment.objects.create(
+                payment = transaction.payment or Payment.objects.create(
                     student=transaction.student,
                     amount=transaction.amount,
                     method='MPESA',

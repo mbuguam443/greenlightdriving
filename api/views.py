@@ -370,6 +370,15 @@ class StudentMpesaInitiateView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         from payments.mpesa_utils import initiate_stk_push
+        from payments.models import MpesaTransaction
+        from payments.mpesa_utils import format_phone
+        transaction = MpesaTransaction.objects.create(
+            student=student,
+            phone_number=format_phone(phone),
+            amount=amount,
+            account_reference=student.student_number[:12],
+            status='PENDING',
+        )
         try:
             response = initiate_stk_push(
                 phone, amount,
@@ -377,14 +386,24 @@ class StudentMpesaInitiateView(APIView):
                 transaction_desc='School Fees Payment',
             )
         except Exception as exc:
+            transaction.status = 'FAILED'
+            transaction.result_desc = str(exc)
+            transaction.save(update_fields=['status', 'result_desc', 'updated_at'])
             return Response({'detail': f'Unable to reach M-Pesa: {exc}'},
                             status=status.HTTP_502_BAD_GATEWAY)
 
         if not response.get('success'):
+            transaction.status = 'FAILED'
+            transaction.result_desc = response.get('message', 'M-Pesa request failed.')
+            transaction.save(update_fields=['status', 'result_desc', 'updated_at'])
             return Response({'detail': response.get('message', 'M-Pesa request failed.')},
                             status=status.HTTP_502_BAD_GATEWAY)
 
+        transaction.checkout_request_id = response.get('checkout_request_id', '')
+        transaction.merchant_request_id = response.get('merchant_request_id', '')
+        transaction.save(update_fields=['checkout_request_id', 'merchant_request_id', 'updated_at'])
         return Response({'detail': response.get('message', 'STK push sent. Check your phone.'),
+                         'transaction_id': transaction.id,
                          'response': response})
 
 
