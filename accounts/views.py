@@ -48,6 +48,11 @@ class LoginView(View):
                 response = HttpResponseRedirect(next_url)
                 response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
                 response['Pragma'] = 'no-cache'
+                return response
+
+        response = render(request, 'accounts/login.html', {'form': form})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
         return response
 
     def _get_ip(self, request):
