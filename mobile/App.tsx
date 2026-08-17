@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
+import * as Updates from 'expo-updates';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -11,6 +12,17 @@ import { setupNotificationHandler } from './src/services/notifications';
 import { colors } from './src/theme/colors';
 
 setupNotificationHandler();
+
+async function checkForUpdates() {
+  try {
+    if (Updates.channel === null || Updates.runtimeVersion === null) return;
+    const { isAvailable } = await Updates.checkForUpdateAsync();
+    if (isAvailable) {
+      const { isNew } = await Updates.fetchUpdateAsync();
+      if (isNew) await Updates.reloadAsync();
+    }
+  } catch {}
+}
 
 function LoadingScreen() {
   return (
@@ -31,6 +43,7 @@ function AppContent() {
 }
 
 export default function App() {
+  useEffect(() => { checkForUpdates(); }, []);
   return (
     <SafeAreaProvider>
       <AuthProvider>
