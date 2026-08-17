@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('student_portal', '0003_studentdocument_student_and_more'),
+        ('student_portal', '0004_student_portal_chatmessage'),
     ]
 
     operations = [
