@@ -79,9 +79,15 @@ export default function NotificationsScreen() {
                   <View style={styles.header}>
                     <View style={styles.headerLeft}>
                       <View style={[styles.dot, n.is_read && styles.dotRead]} />
-                      <Text style={styles.title}>{n.title}</Text>
+                      <Text style={[styles.title, n.is_read && styles.titleRead]}>{n.title}</Text>
                     </View>
-                    <Badge text={n.notification_type_display} />
+                    <View style={styles.badges}>
+                      <Badge
+                        text={n.is_read ? 'Read' : 'Unread'}
+                        color={n.is_read ? colors.textMuted : colors.primary}
+                      />
+                      <Badge text={n.notification_type_display} />
+                    </View>
                   </View>
                   <Text style={styles.message}>{n.message}</Text>
                   <Text style={styles.meta}>{formatDateTime(n.created_at)}</Text>
@@ -152,9 +158,11 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  badges: { alignItems: 'flex-end', gap: 4 },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
   dotRead: { backgroundColor: colors.border },
   title: { fontSize: 14, fontWeight: '700', color: colors.text, flex: 1 },
+  titleRead: { fontWeight: '500', color: colors.textMuted },
   message: { fontSize: 13, color: colors.text, marginTop: spacing.sm },
   meta: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm },
   reply: {
