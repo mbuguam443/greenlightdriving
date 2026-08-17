@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
                     <View style={styles.badges}>
                       <Badge
                         text={n.is_read ? 'Read' : 'Unread'}
-                        color={n.is_read ? colors.textMuted : colors.primary}
+                        color={n.is_read ? colors.textMuted : colors.danger}
                       />
                       <Badge text={n.notification_type_display} />
                     </View>
