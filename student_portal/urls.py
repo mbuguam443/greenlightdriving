@@ -37,6 +37,7 @@ urlpatterns = [
     path('manage/events/<int:pk>/delete/', views.EventDeleteView.as_view(), name='manage_event_delete'),
     path('manage/notification/', views.NotificationCreateView.as_view(), name='manage_notification'),
     path('manage/notification/history/', views.NotificationHistoryView.as_view(), name='manage_notification_history'),
+    path('manage/notification/<int:pk>/reply-read/', views.MarkReplyReadView.as_view(), name='mark_reply_read'),
     path('chat/', views.PortalChatView.as_view(), name='chat'),
     path('chat/messages/', views.ChatMessagesJSONView.as_view(), name='chat_messages'),
     path('manage/chat/', views.StaffChatView.as_view(), name='staff_chat'),

@@ -27,5 +27,5 @@ def admin_notifications(request):
     """Count student replies that admin hasn't seen."""
     admin_reply_count = 0
     if request.user.is_authenticated and request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST'):
-        admin_reply_count = Notification.objects.filter(reply__isnull=False).exclude(reply='').count()
+        admin_reply_count = Notification.objects.filter(reply__isnull=False, reply_read=False).exclude(reply='').count()
     return {'admin_reply_count': admin_reply_count}

@@ -26,7 +26,17 @@
                         <td class="ps-3 fw-semibold">{{ n.student.user.full_name }}</td>
                         <td>{{ n.title }}</td>
                         <td><small>{{ n.message|truncatechars:60 }}</small></td>
-                        <td><small>{% if n.reply %}<i class="bi bi-check-circle text-success me-1"></i>{{ n.reply|truncatechars:40 }}{% else %}—{% endif %}</small></td>
+                        <td>
+                            <small>{% if n.reply %}<i class="bi bi-check-circle text-success me-1"></i>{{ n.reply|truncatechars:40 }}{% else %}—{% endif %}</small>
+                            {% if n.reply and not n.reply_read %}
+                            <form method="post" action="{% url 'student_portal:mark_reply_read' n.pk %}" class="mt-1">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-success py-0">Mark read</button>
+                            </form>
+                            {% elif n.reply %}
+                            <span class="badge bg-success ms-1">Read</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if n.notification_type == 'lesson' %}<span class="badge bg-info text-dark">Lesson</span>
                             {% elif n.notification_type == 'payment' %}<span class="badge bg-danger">Payment</span>

@@ -110,6 +110,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     reply = models.TextField(blank=True)
     replied_at = models.DateTimeField(null=True, blank=True)
+    reply_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

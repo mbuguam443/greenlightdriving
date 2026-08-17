@@ -678,6 +678,15 @@ class NotificationHistoryView(StaffMixin, View):
         return render(request, 'student_portal/manage/notification_history.html', {'notifications': notifications})
 
 
+class MarkReplyReadView(StaffMixin, View):
+    def post(self, request, pk):
+        from .models import Notification
+        notification = get_object_or_404(Notification, pk=pk)
+        notification.reply_read = True
+        notification.save(update_fields=['reply_read'])
+        return redirect('student_portal:manage_notification_history')
+
+
 
 class StudentLessonRequestView(StudentRequiredMixin, View):
     def post(self, request):

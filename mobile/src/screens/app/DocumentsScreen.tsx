@@ -86,7 +86,7 @@ export default function DocumentsScreen() {
                       <View style={[styles.iconWrap, { backgroundColor: `${color}1A` }]}>
                         <Ionicons name="document-text-outline" size={20} color={color} />
                       </View>
-                      <View style={{ flex: 1 }}>
+                      <View style={styles.details}>
                         <Text style={styles.title}>{doc.title}</Text>
                         {doc.description ? <Text style={styles.desc}>{doc.description}</Text> : null}
                         <Text style={styles.meta}>
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md },
   card: { marginBottom: spacing.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  details: { flex: 1, minWidth: 0 },
   iconWrap: {
     width: 42,
     height: 42,
