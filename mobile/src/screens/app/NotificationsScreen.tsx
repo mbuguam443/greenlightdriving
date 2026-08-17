@@ -75,7 +75,7 @@ export default function NotificationsScreen() {
           ) : (
             sorted.map((n) => (
               <Pressable key={n.id} onPress={() => markRead(n)}>
-                <View style={[styles.card, n.is_read && styles.cardRead]}>
+                <View style={[styles.card, n.is_read ? styles.cardRead : styles.cardUnread]}>
                   <View style={styles.header}>
                     <View style={styles.headerLeft}>
                       <View style={[styles.dot, n.is_read && styles.dotRead]} />
@@ -155,6 +155,10 @@ const styles = StyleSheet.create({
   cardRead: {
     borderLeftColor: colors.border,
     opacity: 0.85,
+  },
+  cardUnread: {
+    backgroundColor: `${colors.warning}12`,
+    borderLeftColor: colors.warning,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
