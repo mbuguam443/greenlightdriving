@@ -8,7 +8,13 @@
     "userInterfaceStyle": "light",
     "scheme": "greenlight",
     "plugins": [
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#2E7D32"
+        }
+      ]
     ],
     "extra": {
       "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api",
