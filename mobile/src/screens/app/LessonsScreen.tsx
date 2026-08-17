@@ -132,9 +132,20 @@ export default function LessonsScreen() {
             {formatDate(l.date)} · {l.instructor_name ?? 'TBA'}
           </Text>
           {l.notes ? <Text style={styles.remarks}>{l.notes}</Text> : null}
+          {l.attended ? <Text style={styles.attended}>Attended</Text> : null}
         </View>
         <Badge text={l.status} color={statusColor(l.status)} />
       </View>
+      {!l.attended && l.status !== 'COMPLETED' ? (
+        <Button
+          title={attendingId === l.id ? 'Saving...' : 'Mark as attended'}
+          variant="outline"
+          style={styles.attendBtn}
+          onPress={() => markAttended(l.id, false)}
+          disabled={attendingId === l.id}
+          icon="checkmark-done-outline"
+        />
+      ) : null}
     </Card>
   );
 
@@ -294,6 +305,7 @@ const styles = StyleSheet.create({
   lessonName: { fontSize: 14, fontWeight: '700', color: colors.text },
   lessonMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   remarks: { fontSize: 12, color: colors.text, marginTop: 4, fontStyle: 'italic' },
+  attended: { fontSize: 12, color: colors.success, fontWeight: '700', marginTop: 4 },
   attendBtn: { marginTop: spacing.sm },
   requestHint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.sm },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
