@@ -144,6 +144,14 @@ export default function DocumentsScreen() {
               );
             }}
           />
+          <View style={styles.dots}>
+            {(data ?? []).map((item, index) => (
+              <View
+                key={item.id}
+                style={[styles.dot, index === viewerIndex && styles.dotActive]}
+              />
+            ))}
+          </View>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -192,4 +200,7 @@ const styles = StyleSheet.create({
   viewerImage: { flex: 1, width: '100%' },
   viewerWeb: { flex: 1, backgroundColor: '#fff' },
   unsupported: { color: colors.white, textAlign: 'center', marginTop: spacing.xl },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingVertical: spacing.sm },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },
+  dotActive: { width: 18, backgroundColor: colors.primary },
 });
