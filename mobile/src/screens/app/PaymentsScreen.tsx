@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Badge, Button, Card, EmptyState, ErrorState, FormInput, Loading, SectionTitle } from '../../components/ui';
+import { Badge, Card, EmptyState, ErrorState, Loading, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
-import { api, getErrorMessage } from '../../services/apiClient';
 import { colors, radius, spacing } from '../../theme/colors';
 import { PaymentsData } from '../../types';
 import { formatDate, formatKES } from '../../utils/format';
@@ -14,55 +13,10 @@ import { formatDate, formatKES } from '../../utils/format';
 export default function PaymentsScreen() {
   const isFocused = useIsFocused();
   const { data, loading, error, refreshing, refresh } = useApiData<PaymentsData>('/student/payments/');
-  const [phone, setPhone] = useState('');
-  const [amount, setAmount] = useState('');
-  const [sending, setSending] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [pendingTransactionId, setPendingTransactionId] = useState<number | null>(null);
 
   useEffect(() => {
     if (isFocused) refresh();
   }, [isFocused]);
-
-  useEffect(() => {
-    if (!isFocused || pendingTransactionId === null) return;
-    const timer = setInterval(() => refresh(), 3000);
-    return () => clearInterval(timer);
-  }, [isFocused, pendingTransactionId, refresh]);
-
-  useEffect(() => {
-    if (pendingTransactionId === null || !data) return;
-    const transaction = data.mpesa_transactions.find((item) => item.id === pendingTransactionId);
-    if (transaction && transaction.status !== 'PENDING') setPendingTransactionId(null);
-  }, [data, pendingTransactionId]);
-
-  const sendMpesa = async () => {
-    setFormError('');
-    const clean = phone.replace(/[^\d]/g, '');
-    if (clean.length < 9) {
-      setFormError('Enter a valid Safaricom phone number.');
-      return;
-    }
-    const amt = parseFloat(amount);
-    if (!amt || amt <= 0) {
-      setFormError('Enter a valid amount greater than zero.');
-      return;
-    }
-    setSending(true);
-    try {
-      const { data: res } = await api.post<{ detail: string; transaction_id: number }>('/student/mpesa/initiate/', {
-        phone_number: clean,
-        amount: amt,
-      });
-      setPendingTransactionId(res.transaction_id);
-      Alert.alert('M-Pesa Request Sent', res.detail);
-      refresh();
-    } catch (err) {
-      Alert.alert('M-Pesa Failed', getErrorMessage(err));
-    } finally {
-      setSending(false);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -97,44 +51,12 @@ export default function PaymentsScreen() {
 
             <SectionTitle title="Pay with M-Pesa" />
             <Card>
-              <Text style={styles.hint}>
-                You'll receive an STK push on your phone. Enter 254XXXXXXXXX format.
-              </Text>
-              <FormInput
-                label="M-Pesa phone number"
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="2547XXXXXXXX"
-                keyboardType="phone-pad"
-              />
-              <FormInput
-                label="Amount (KES)"
-                value={amount}
-                onChangeText={setAmount}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-              {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
-              <Button
-                title={sending ? 'Sending STK push...' : 'Send M-Pesa Request'}
-                icon="logo-usd"
-                loading={sending}
-                onPress={sendMpesa}
-              />
+              <Text style={styles.hint}>Pay manually using M-Pesa Till Number:</Text>
+              <Text style={styles.tillNumber}>5181799</Text>
+              <Text style={styles.hint}>Use your student number as the account/reference where requested.</Text>
             </Card>
 
             <SectionTitle title="Payment history" />
-            {pendingTransactionId !== null ? (
-              <Card style={styles.progressCard}>
-                <View style={styles.paymentRow}>
-                  <Ionicons name="time-outline" size={22} color={colors.warning} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.progressTitle}>Waiting for M-Pesa confirmation</Text>
-                    <Text style={styles.paymentMeta}>Complete the prompt on your phone. This screen updates automatically.</Text>
-                  </View>
-                </View>
-              </Card>
-            ) : null}
             {data && data.payments.length === 0 ? (
               <EmptyState icon="card-outline" title="No payments recorded" subtitle="Payments you make will show here" />
             ) : (
@@ -206,6 +128,7 @@ const styles = StyleSheet.create({
   summaryPaid: { color: colors.white, fontSize: 15, fontWeight: '700', marginTop: 4 },
   summaryTotal: { color: colors.white, fontSize: 13, fontWeight: '600', marginTop: 4 },
   hint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.md },
+  tillNumber: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginBottom: spacing.sm },
   errorText: { color: colors.danger, fontSize: 13, marginBottom: spacing.sm },
   paymentCard: { marginBottom: spacing.sm },
   progressCard: { marginBottom: spacing.sm, borderColor: colors.warning, borderWidth: 1 },
