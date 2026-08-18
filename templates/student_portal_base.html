@@ -251,16 +251,14 @@
             <strong>Green Light Portal</strong>
             <span id="pwaBannerMsg">Install it to open like an app.</span>
         </div>
-        <a id="pwaInstallBtn" class="pwa-banner-btn" href="{% static 'downloads/greenlight-student.apk' %}">Install</a>
+        <a class="pwa-banner-btn" href="{% static 'downloads/greenlight-student.apk' %}">Download APK</a>
         <button id="pwaDismissBtn" class="pwa-banner-close" aria-label="Dismiss">&times;</button>
     </div>
     <script>
         (function () {
             var banner = document.getElementById('pwaBanner');
             var msg = document.getElementById('pwaBannerMsg');
-             var btn = document.getElementById('pwaInstallBtn');
              var dismiss = document.getElementById('pwaDismissBtn');
-             var apkUrl = "{% static 'downloads/greenlight-student.apk' %}";
             if (!banner) return;
 
             var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
@@ -269,7 +267,6 @@
 
             var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
             var isMobile = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
-            var deferredPrompt = null;
 
             function dismissedRecently() {
                 try {
@@ -280,36 +277,7 @@
 
             function show() { banner.hidden = false; }
 
-            window.addEventListener('beforeinstallprompt', function (e) {
-                e.preventDefault();
-                deferredPrompt = e;
-                msg.textContent = 'Install it to open like an app.';
-                show();
-            });
-
-             btn.addEventListener('click', function (event) {
-                  if (isMobile && !isIOS) {
-                      return;
-                  } else if (deferredPrompt) {
-                     event.preventDefault();
-                     deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then(function (choice) {
-                        if (choice.outcome === 'accepted') banner.hidden = true;
-                        deferredPrompt = null;
-                    });
-                 } else if (isIOS) {
-                     event.preventDefault();
-                     msg.textContent = 'Tap the Share icon, then choose "Add to Home Screen".';
-                 } else if (isMobile) {
-                     event.preventDefault();
-                     msg.textContent = 'Open your browser menu (⋮ or ☰), then choose "Install app" or "Add to Home Screen".';
-                 } else {
-                     event.preventDefault();
-                     msg.textContent = 'Click the install icon in your browser\'s address bar (or ⋮ menu → "Install").';
-                }
-            });
-
-            dismiss.addEventListener('click', function () {
+             dismiss.addEventListener('click', function () {
                 banner.hidden = true;
                 try { localStorage.setItem('gl_pwa_dismissed', String(Date.now())); } catch (e) {}
             });
@@ -324,10 +292,8 @@
                 }, 1500);
              } else if (!dismissedRecently()) {
                  setTimeout(function () {
-                    if (deferredPrompt) return;
                      if (isMobile) {
                          msg.textContent = 'Download the Green Light Android app directly.';
-                         btn.textContent = 'Download APK';
                     } else {
                         msg.textContent = 'Install it to open like an app: click the install icon in the address bar (or ⋮ menu → "Install").';
                     }
