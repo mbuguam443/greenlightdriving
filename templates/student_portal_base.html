@@ -258,8 +258,9 @@
         (function () {
             var banner = document.getElementById('pwaBanner');
             var msg = document.getElementById('pwaBannerMsg');
-            var btn = document.getElementById('pwaInstallBtn');
-            var dismiss = document.getElementById('pwaDismissBtn');
+             var btn = document.getElementById('pwaInstallBtn');
+             var dismiss = document.getElementById('pwaDismissBtn');
+             var apkUrl = "{% static 'downloads/greenlight-student.apk' %}";
             if (!banner) return;
 
             var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
@@ -286,9 +287,11 @@
                 show();
             });
 
-            btn.addEventListener('click', function () {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
+             btn.addEventListener('click', function () {
+                 if (isMobile && !isIOS) {
+                     window.location.href = apkUrl;
+                 } else if (deferredPrompt) {
+                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then(function (choice) {
                         if (choice.outcome === 'accepted') banner.hidden = true;
                         deferredPrompt = null;
@@ -309,17 +312,18 @@
 
             window.addEventListener('appinstalled', function () { banner.hidden = true; });
 
-            if (isIOS) {
+             if (isIOS) {
                 setTimeout(function () {
                     if (dismissedRecently()) return;
                     msg.textContent = 'Tap the Share icon, then "Add to Home Screen".';
                     show();
                 }, 1500);
-            } else if (!dismissedRecently()) {
-                setTimeout(function () {
+             } else if (!dismissedRecently()) {
+                 setTimeout(function () {
                     if (deferredPrompt) return;
-                    if (isMobile) {
-                        msg.textContent = 'Install Green Light on your phone: open the browser menu (⋮ or ☰) and choose "Install app" / "Add to Home Screen".';
+                     if (isMobile) {
+                         msg.textContent = 'Download the Green Light Android app directly.';
+                         btn.textContent = 'Download APK';
                     } else {
                         msg.textContent = 'Install it to open like an app: click the install icon in the address bar (or ⋮ menu → "Install").';
                     }
@@ -336,5 +340,4 @@
     </script>
 </body>
 </html>
-
 
