@@ -41,6 +41,7 @@ def sync_from_zip(project_dir):
 
     keep_top = {'.git', 'media', 'staticfiles', 'node_modules', 'sent_emails', '__pycache__'}
     keep_files = {'.env', 'db.sqlite3', 'email_config.py', 'settings_local.py'}
+    keep_prefixes = ('static/downloads/',)
 
     print("      Downloading latest code from GitHub (ZIP)...")
     req = urllib.request.Request(ZIP_URL, headers={'User-Agent': 'greenlight-updater'})
@@ -56,7 +57,7 @@ def sync_from_zip(project_dir):
         rel = rel.replace('\\', '/')
         if not rel or rel.endswith('/'):
             continue
-        if rel.split('/')[0] in keep_top:
+        if rel.split('/')[0] in keep_top or rel.startswith(keep_prefixes):
             continue
         if os.path.basename(rel) in keep_files:
             continue
@@ -81,7 +82,7 @@ def sync_from_zip(project_dir):
                 continue
             if os.path.basename(rel) in keep_files:
                 continue
-            if rel.split('/')[0] in keep_top:
+            if rel.split('/')[0] in keep_top or rel.startswith(keep_prefixes):
                 continue
             try:
                 os.remove(os.path.join(walk_root, fn))
@@ -119,7 +120,7 @@ def git_update(project_dir):
     if reset.returncode != 0:
         print(f"      Git reset failed: {reset.stderr.strip()}")
         return False
-    subprocess.run(['git', 'clean', '-fd'], capture_output=True, text=True, timeout=60, cwd=project_dir)
+    subprocess.run(['git', 'clean', '-fd', '-e', 'static/downloads/'], capture_output=True, text=True, timeout=60, cwd=project_dir)
     after = git_rev_parse(project_dir)
     if before != after:
         print(f"      Code updated ({before[:7] or '?'} -> {after[:7] or '?'}). Re-running with new version...")
