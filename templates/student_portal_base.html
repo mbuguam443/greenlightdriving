@@ -251,7 +251,7 @@
             <strong>Green Light Portal</strong>
             <span id="pwaBannerMsg">Install it to open like an app.</span>
         </div>
-        <button id="pwaInstallBtn" class="pwa-banner-btn">Install</button>
+        <a id="pwaInstallBtn" class="pwa-banner-btn" href="{% static 'downloads/greenlight-student.apk' %}">Install</a>
         <button id="pwaDismissBtn" class="pwa-banner-close" aria-label="Dismiss">&times;</button>
     </div>
     <script>
@@ -287,21 +287,25 @@
                 show();
             });
 
-             btn.addEventListener('click', function () {
-                 if (isMobile && !isIOS) {
-                     window.location.href = apkUrl;
-                 } else if (deferredPrompt) {
+             btn.addEventListener('click', function (event) {
+                  if (isMobile && !isIOS) {
+                      return;
+                  } else if (deferredPrompt) {
+                     event.preventDefault();
                      deferredPrompt.prompt();
                     deferredPrompt.userChoice.then(function (choice) {
                         if (choice.outcome === 'accepted') banner.hidden = true;
                         deferredPrompt = null;
                     });
-                } else if (isIOS) {
-                    msg.textContent = 'Tap the Share icon, then choose "Add to Home Screen".';
-                } else if (isMobile) {
-                    msg.textContent = 'Open your browser menu (⋮ or ☰), then choose "Install app" or "Add to Home Screen".';
-                } else {
-                    msg.textContent = 'Click the install icon in your browser\'s address bar (or ⋮ menu → "Install").';
+                 } else if (isIOS) {
+                     event.preventDefault();
+                     msg.textContent = 'Tap the Share icon, then choose "Add to Home Screen".';
+                 } else if (isMobile) {
+                     event.preventDefault();
+                     msg.textContent = 'Open your browser menu (⋮ or ☰), then choose "Install app" or "Add to Home Screen".';
+                 } else {
+                     event.preventDefault();
+                     msg.textContent = 'Click the install icon in your browser\'s address bar (or ⋮ menu → "Install").';
                 }
             });
 
@@ -340,4 +344,3 @@
     </script>
 </body>
 </html>
-
