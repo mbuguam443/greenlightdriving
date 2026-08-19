@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ThemeProvider } from './src/context/ThemeContext';
 import { UnreadProvider } from './src/context/UnreadContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { setupNotificationHandler } from './src/services/notifications';
@@ -46,12 +47,14 @@ export default function App() {
   useEffect(() => { checkForUpdates(); }, []);
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <UnreadProvider>
-          <StatusBar style="auto" />
-          <AppContent />
-        </UnreadProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <UnreadProvider>
+            <StatusBar style="auto" />
+            <AppContent />
+          </UnreadProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

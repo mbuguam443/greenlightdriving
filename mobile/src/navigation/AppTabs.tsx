@@ -16,6 +16,7 @@ import PaymentsScreen from '../screens/app/PaymentsScreen';
 import ProfileScreen from '../screens/app/ProfileScreen';
 import ProgressScreen from '../screens/app/ProgressScreen';
 import ScheduleScreen from '../screens/app/ScheduleScreen';
+import ChatScreen from '../screens/app/ChatScreen';
 
 const Tab = createBottomTabNavigator<AppTabsParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
@@ -55,6 +56,7 @@ function MoreStackNavigator() {
     >
       <MoreStack.Screen name="More" component={MoreScreen} options={{ title: 'More' }} />
       <MoreStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
+      <MoreStack.Screen name="Chat" component={ChatScreen} options={{ title: 'School Chat' }} />
     </MoreStack.Navigator>
   );
 }

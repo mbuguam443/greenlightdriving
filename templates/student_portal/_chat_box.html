@@ -27,14 +27,20 @@
     var list = document.getElementById('chat-messages');
     var lastCount = 0;
     var atBottom = true;
+    var form = document.getElementById('chat-form');
+    var input = document.getElementById('chat-input');
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+
     list.addEventListener('scroll', function () {
         atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
     });
+
     function escapeHtml(s) {
         var d = document.createElement('div');
         d.textContent = s;
         return d.innerHTML;
     }
+
     function bubble(m) {
         var left = m.is_me ? 'justify-content-end' : 'justify-content-start';
         var bg = m.is_me ? '#DCF8C6' : '#ffffff';
@@ -47,6 +53,7 @@
             '<span class="small text-muted ms-auto">' + m.date + ' ' + m.time + '</span>' +
             '</div><div class="small" style="white-space:pre-wrap;">' + escapeHtml(m.content) + '</div></div></div>';
     }
+
     function render(data) {
         if (!data || !data.messages || data.messages.length === lastCount) return;
         var html = '';
@@ -55,12 +62,47 @@
         if (atBottom || lastCount === 0) { list.scrollTop = list.scrollHeight; }
         lastCount = data.messages.length;
     }
+
     function poll() {
         fetch("{{ chat_messages_url }}", { headers: { 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(render)
             .catch(function () {});
     }
+
+    function sendMessage(content) {
+        var formData = new FormData();
+        if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken.value);
+        formData.append('content', content);
+
+        fetch("{{ chat_post_url }}", {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+        }).then(function () {
+            setText('');
+            setTimeout(poll, 500);
+        }).catch(function () {});
+    }
+
+    function setText(v) {
+        input.value = v;
+        input.style.height = 'auto';
+        input.focus();
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var content = input.value.trim();
+        if (!content) return;
+        sendMessage(content);
+    });
+
+    input.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+
     poll();
     setInterval(poll, 5000);
 })();

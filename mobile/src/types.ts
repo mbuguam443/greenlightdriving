@@ -214,3 +214,15 @@ export interface Course {
   feature_list: string[];
   image: string | null;
 }
+
+export interface ChatMessage {
+  id: number;
+  user: string;
+  role: string;
+  is_staff: boolean;
+  is_me: boolean;
+  content: string;
+  time: string;
+  date: string;
+  created_at: string;
+}

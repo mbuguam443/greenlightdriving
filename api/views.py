@@ -14,7 +14,7 @@ from core.models import Branch, SiteSettings
 from lessons.models import LessonItem, PracticalLesson, TheoryLesson
 from ntsa.models import NTSARecord
 from payments.models import MpesaTransaction, Payment
-from student_portal.models import Event, Notification, StudentDocument
+from student_portal.models import ChatMessage, Event, Notification, StudentDocument
 from students.models import Student
 from website.models import BlogPost, ContactMessage, Course, CourseCategory, FAQ, GalleryImage, Testimonial
 
@@ -566,3 +566,47 @@ class StudentProfileView(APIView):
             'detail': 'Profile updated.',
             'user': UserSerializer(user, context={'request': request}).data,
         })
+
+
+class StudentChatView(APIView):
+    permission_classes = [IsStudent]
+
+    def get(self, request):
+        messages = ChatMessage.objects.select_related('user').order_by('-created_at')[:200]
+        data = []
+        for m in reversed(list(messages)):
+            u = m.user
+            data.append({
+                'id': m.id,
+                'user': u.get_full_name() or u.username,
+                'role': u.get_role_display(),
+                'is_staff': u.role != 'STUDENT',
+                'is_me': u.id == request.user.id,
+                'content': m.content,
+                'time': timezone.localtime(m.created_at).strftime('%H:%M'),
+                'date': timezone.localtime(m.created_at).strftime('%a %d %b'),
+                'created_at': m.created_at.isoformat(),
+            })
+        return Response({'messages': data})
+
+    def post(self, request):
+        content = (request.data.get('content') or '').strip()
+        if not content:
+            return Response({'detail': 'Message cannot be empty.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        msg = ChatMessage.objects.create(
+            user=request.user,
+            content=content[:2000],
+        )
+        u = msg.user
+        return Response({
+            'id': msg.id,
+            'user': u.get_full_name() or u.username,
+            'role': u.get_role_display(),
+            'is_staff': u.role != 'STUDENT',
+            'is_me': True,
+            'content': msg.content,
+            'time': timezone.localtime(msg.created_at).strftime('%H:%M'),
+            'date': timezone.localtime(msg.created_at).strftime('%a %d %b'),
+            'created_at': msg.created_at.isoformat(),
+        }, status=status.HTTP_201_CREATED)

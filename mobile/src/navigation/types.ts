@@ -25,6 +25,7 @@ export type AppTabsParamList = {
 export type MoreStackParamList = {
   More: undefined;
   Profile: undefined;
+  Chat: undefined;
 };
 
 export type RootStackParamList = {

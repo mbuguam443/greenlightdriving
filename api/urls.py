@@ -33,5 +33,6 @@ urlpatterns = [
     path('student/documents/', views.StudentDocumentsView.as_view(), name='student_documents'),
     path('student/ntsa/', views.StudentNTSAView.as_view(), name='student_ntsa'),
     path('student/push-token/', views.StudentPushTokenView.as_view(), name='student_push_token'),
+    path('student/chat/', views.StudentChatView.as_view(), name='student_chat'),
     path('student/profile/', views.StudentProfileView.as_view(), name='student_profile'),
 ]

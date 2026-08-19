@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, ErrorState, Loading, SectionTitle } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme, ThemeMode } from '../../context/ThemeContext';
 import { useApiData } from '../../hooks/useApiData';
 import { AppTabsParamList, MoreStackParamList } from '../../navigation/types';
 import { colors, radius, shadows, spacing } from '../../theme/colors';
@@ -27,6 +28,7 @@ type MenuRow = {
 
 export default function MoreScreen() {
   const { user, logout } = useAuth();
+  const { mode, setMode, isDark, colors: themeColors } = useTheme();
   const navigation = useNavigation<Nav>();
   const isFocused = useIsFocused();
   const { data, loading, error, refresh } = useApiData<DashboardData>('/student/dashboard/');
@@ -39,14 +41,15 @@ export default function MoreScreen() {
     navigation.navigate('HomeTab', { screen });
 
   const menu: MenuRow[] = [
-    { label: 'My Profile', icon: 'person-outline', color: colors.primary, onPress: () => navigation.navigate('Profile') },
-    { label: 'My Lessons', icon: 'car-sport-outline', color: colors.info, onPress: () => goHomeScreen('Lessons') },
-    { label: 'Schedule', icon: 'calendar-outline', color: colors.warning, onPress: () => goHomeScreen('Schedule') },
-    { label: 'Progress & NTSA', icon: 'trending-up-outline', color: colors.success, onPress: () => goHomeScreen('Progress') },
+    { label: 'My Profile', icon: 'person-outline', color: themeColors.primary, onPress: () => navigation.navigate('Profile') },
+    { label: 'My Lessons', icon: 'car-sport-outline', color: themeColors.info, onPress: () => goHomeScreen('Lessons') },
+    { label: 'Schedule', icon: 'calendar-outline', color: themeColors.warning, onPress: () => goHomeScreen('Schedule') },
+    { label: 'Progress & NTSA', icon: 'trending-up-outline', color: themeColors.success, onPress: () => goHomeScreen('Progress') },
     { label: 'Payments', icon: 'card-outline', color: '#8E24AA', onPress: () => navigation.navigate('PaymentsTab') },
-    { label: 'Notifications', icon: 'notifications-outline', color: colors.danger, onPress: () => navigation.navigate('NotificationsTab') },
-    { label: 'Events', icon: 'megaphone-outline', color: colors.red, onPress: () => goHomeScreen('Events') },
+    { label: 'Notifications', icon: 'notifications-outline', color: themeColors.danger, onPress: () => navigation.navigate('NotificationsTab') },
+    { label: 'Events', icon: 'megaphone-outline', color: themeColors.red, onPress: () => goHomeScreen('Events') },
     { label: 'Documents', icon: 'documents-outline', color: '#0277BD', onPress: () => goHomeScreen('Documents') },
+    { label: 'Chat', icon: 'chatbubbles-outline', color: '#00897B', onPress: () => navigation.navigate('Chat') },
   ];
 
   const logoutPress = () => {
@@ -57,55 +60,78 @@ export default function MoreScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: themeColors.background }]} edges={['top']}>
       {loading && !data ? (
         <Loading />
       ) : error && !data ? (
         <ErrorState message={error} onRetry={refresh} />
       ) : (
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-          <Pressable style={styles.headerCard} onPress={() => navigation.navigate('Profile')}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
+          <Pressable style={[styles.headerCard, { backgroundColor: themeColors.primary }]} onPress={() => navigation.navigate('Profile')}>
+            <View style={[styles.avatar, { backgroundColor: themeColors.primaryDark }]}>
+              <Text style={[styles.avatarText, { color: themeColors.white }]}>
                 {`${user?.first_name?.[0] ?? ''}${user?.last_name?.[0] ?? ''}`.toUpperCase() || 'S'}
               </Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{user?.full_name || 'Student'}</Text>
-              <Text style={styles.email}>{user?.email}</Text>
+              <Text style={[styles.name, { color: themeColors.white }]}>{user?.full_name || 'Student'}</Text>
+              <Text style={[styles.email, { color: themeColors.white }]}>{user?.email}</Text>
               {data?.student ? (
                 <View style={styles.badgeRow}>
                   <Badge text={data.student.student_number} />
-                  <Badge text={data.student.status} color={colors.info} bg={`${colors.info}1A`} />
+                  <Badge text={data.student.status} color={themeColors.info} bg={`${themeColors.info}1A`} />
                 </View>
               ) : null}
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
           </Pressable>
 
           <SectionTitle title="Menu" />
-          <Card style={styles.menuCard}>
+          <Card style={[styles.menuCard, { backgroundColor: themeColors.card }]}>
             {menu.map((item, idx) => (
               <Pressable
                 key={item.label}
-                style={[styles.menuRow, idx < menu.length - 1 && styles.menuRowBorder]}
+                style={[styles.menuRow, idx < menu.length - 1 && [styles.menuRowBorder, { borderColor: themeColors.border }]]}
                 onPress={item.onPress}
               >
                 <View style={[styles.menuIcon, { backgroundColor: `${item.color}1A` }]}>
                   <Ionicons name={item.icon} size={20} color={item.color} />
                 </View>
-                <Text style={styles.menuLabel}>{item.label}</Text>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                <Text style={[styles.menuLabel, { color: themeColors.text }]}>{item.label}</Text>
+                <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
               </Pressable>
             ))}
           </Card>
 
-          <Pressable style={styles.logoutBtn} onPress={logoutPress}>
-            <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-            <Text style={styles.logoutText}>Log out</Text>
+          <SectionTitle title="Appearance" />
+          <Card style={[styles.menuCard, { backgroundColor: themeColors.card }]}>
+            {(['light', 'dark', 'system'] as ThemeMode[]).map((opt, idx) => {
+              const labels: Record<ThemeMode, string> = { light: 'Light Mode', dark: 'Dark Mode', system: 'System Default' };
+              const icons: Record<ThemeMode, keyof typeof Ionicons.glyphMap> = {
+                light: 'sunny-outline', dark: 'moon-outline', system: 'phone-portrait-outline'
+              };
+              return (
+                <Pressable
+                  key={opt}
+                  style={[styles.menuRow, idx < 2 && [styles.menuRowBorder, { borderColor: themeColors.border }]]}
+                  onPress={() => setMode(opt)}
+                >
+                  <View style={[styles.menuIcon, { backgroundColor: mode === opt ? `${themeColors.primary}20` : `${themeColors.textMuted}10` }]}>
+                    <Ionicons name={icons[opt]} size={20} color={mode === opt ? themeColors.primary : themeColors.textMuted} />
+                  </View>
+                  <Text style={[styles.menuLabel, { color: mode === opt ? themeColors.primary : themeColors.text }, mode === opt && { fontWeight: '700' }]}>{labels[opt]}</Text>
+                  {mode === opt ? <Ionicons name="checkmark-circle" size={20} color={themeColors.primary} /> : null}
+                </Pressable>
+              );
+            })}
+          </Card>
+
+          <Pressable style={[styles.logoutBtn, { backgroundColor: `${themeColors.danger}14` }]} onPress={logoutPress}>
+            <Ionicons name="log-out-outline" size={20} color={themeColors.danger} />
+            <Text style={[styles.logoutText, { color: themeColors.danger }]}>Log out</Text>
           </Pressable>
 
-          <Text style={styles.version}>Green Light Student App · v1.0.0</Text>
+          <Text style={[styles.version, { color: themeColors.textMuted }]}>Green Light Student App · v1.0.0</Text>
           <View style={styles.spacer} />
         </ScrollView>
       )}
