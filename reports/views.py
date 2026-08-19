@@ -169,17 +169,25 @@ class VehicleUtilizationView(StaffTestMixin, View):
     def get(self, request):
         from vehicles.models import Vehicle
         from lessons.models import PracticalLesson
-        
-        vehicles = Vehicle.objects.all()
-        data = []
-        for v in vehicles:
-            lessons = PracticalLesson.objects.filter(vehicle=v).count()
-            data.append({
-                'vehicle': v,
-                'total_lessons': lessons,
-            })
-        
-        return render(request, 'reports/vehicle_utilization.html', {'data': data})
+        from datetime import date, timedelta
+
+        vehicles_qs = Vehicle.objects.select_related('assigned_instructor__user').all()
+        week_ago = date.today() - timedelta(days=7)
+        vehicles = []
+        for v in vehicles_qs:
+            total = PracticalLesson.objects.filter(vehicle=v).count()
+            weekly = PracticalLesson.objects.filter(vehicle=v, date__gte=week_ago).count()
+            v.total_lessons = total
+            v.weekly_lessons = weekly
+            v.utilization_rate = min(100, int((weekly / 20) * 100)) if weekly else 0
+            vehicles.append(v)
+
+        return render(request, 'reports/vehicle_utilization.html', {
+            'vehicles': vehicles,
+            'total_vehicles': len(vehicles),
+            'available_vehicles': sum(1 for v in vehicles if v.is_available),
+            'unavailable_vehicles': sum(1 for v in vehicles if not v.is_available),
+        })
 
 
 class BranchPerformanceView(StaffTestMixin, View):
