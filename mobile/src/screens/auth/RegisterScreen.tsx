@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -13,12 +13,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, FormInput } from '../../components/ui';
 import { useAuth, getErrorMessage } from '../../context/AuthContext';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { AuthStackParamList } from '../../navigation/types';
-import { colors, radius, spacing } from '../../theme/colors';
+import { radius, spacing } from '../../theme/colors';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
 export default function RegisterScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { register } = useAuth();
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
@@ -115,7 +118,9 @@ export default function RegisterScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.primary },
   container: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
   title: { fontSize: 26, fontWeight: '800', color: colors.white },
@@ -145,3 +150,4 @@ const styles = StyleSheet.create({
   footerText: { color: colors.white, opacity: 0.9 },
   footerLink: { color: colors.yellow, fontWeight: '700' },
 });
+}

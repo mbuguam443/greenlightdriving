@@ -1,25 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FlatList, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, EmptyState, ErrorState, Loading, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { API_URL } from '../../config/api';
-import { colors, radius, spacing } from '../../theme/colors';
+import { radius, spacing } from '../../theme/colors';
 import { StudentDocument } from '../../types';
 import { formatDate } from '../../utils/format';
-
-const EXT_COLORS: Record<string, string> = {
-  pdf: colors.danger,
-  doc: colors.info,
-  docx: colors.info,
-  jpg: colors.warning,
-  jpeg: colors.warning,
-  png: colors.warning,
-};
 
 const IMAGE_EXTS = ['JPG', 'JPEG', 'PNG', 'GIF'];
 
@@ -28,6 +20,16 @@ function resolveFileUrl(file: string): string {
 }
 
 export default function DocumentsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const EXT_COLORS: Record<string, string> = {
+    pdf: colors.danger,
+    doc: colors.info,
+    docx: colors.info,
+    jpg: colors.warning,
+    jpeg: colors.warning,
+    png: colors.warning,
+  };
   const isFocused = useIsFocused();
   const { width } = useWindowDimensions();
   const { data, loading, error, refreshing, refresh } = useApiData<StudentDocument[]>('/student/documents/');
@@ -158,7 +160,9 @@ export default function DocumentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   content: { padding: spacing.md },
@@ -204,3 +208,4 @@ const styles = StyleSheet.create({
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },
   dotActive: { width: 18, backgroundColor: colors.primary },
 });
+}

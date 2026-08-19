@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, ErrorState, FormInput, Loading, SectionTitle } from '../../components/ui';
 import { useAuth, getErrorMessage } from '../../context/AuthContext';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { useApiData } from '../../hooks/useApiData';
 import { api } from '../../services/apiClient';
-import { colors, radius, spacing } from '../../theme/colors';
+import { radius, spacing } from '../../theme/colors';
 import { Student } from '../../types';
 import { formatKES } from '../../utils/format';
 
@@ -45,6 +46,8 @@ interface ProfileData {
 }
 
 export default function ProfileScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { logout } = useAuth();
   const { data, loading, error, refreshing, refresh, setData } = useApiData<ProfileData>('/student/profile/');
 
@@ -165,7 +168,9 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   content: { padding: spacing.md },
@@ -190,3 +195,4 @@ const styles = StyleSheet.create({
   logout: { marginTop: spacing.lg },
   spacer: { height: spacing.lg },
 });
+}

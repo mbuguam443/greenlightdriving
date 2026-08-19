@@ -1,21 +1,7 @@
-export const colors = {
-  primary: '#2E7D32',
-  primaryDark: '#1B5E20',
-  primaryLight: '#66BB6A',
-  white: '#FFFFFF',
-  darkGray: '#263238',
-  red: '#D32F2F',
-  yellow: '#FBC02D',
-  background: '#F4F7F5',
-  card: '#FFFFFF',
-  text: '#263238',
-  textMuted: '#6B7A6F',
-  border: '#E0E8E1',
-  success: '#2E7D32',
-  warning: '#FBC02D',
-  danger: '#D32F2F',
-  info: '#0288D1',
-};
+import { lightColors, ThemeColors } from '../context/ThemeContext';
+
+/** Default light palette — prefer useTheme().colors for live theme switching. */
+export const colors: ThemeColors = lightColors;
 
 export const spacing = {
   xs: 4,

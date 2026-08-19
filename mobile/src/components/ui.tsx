@@ -12,9 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, radius, shadows, spacing } from '../theme/colors';
-
-// ---------- Card ----------
+import { useTheme } from '../context/ThemeContext';
+import { radius, shadows, spacing } from '../theme/colors';
 
 export function Card({
   children,
@@ -23,21 +22,21 @@ export function Card({
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.card, { backgroundColor: colors.card }, style]}>{children}</View>
+  );
 }
 
-// ---------- Section title ----------
-
 export function SectionTitle({ title, right }: { title: string; right?: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.sectionTitleRow}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
       {right}
     </View>
   );
 }
-
-// ---------- Button ----------
 
 type ButtonProps = {
   title: string;
@@ -58,12 +57,13 @@ export function Button({
   style,
   icon,
 }: ButtonProps) {
+  const { colors } = useTheme();
   const isOutline = variant === 'outline';
   const isDanger = variant === 'danger';
   const isGhost = variant === 'ghost';
-  const bg = isOutline || isGhost ? 'transparent' : isDanger ? colors.red : colors.primary;
-  const border = isOutline ? colors.primary : isDanger ? colors.red : 'transparent';
-  const fg = isOutline ? colors.primary : isGhost ? colors.primary : colors.white;
+  const bg = isOutline || isGhost ? 'transparent' : isDanger ? colors.danger : colors.primary;
+  const border = isOutline ? colors.primary : isDanger ? colors.danger : 'transparent';
+  const fg = isOutline || isGhost ? colors.primary : colors.onPrimary;
 
   return (
     <Pressable
@@ -78,7 +78,7 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? colors.primary : colors.white} />
+        <ActivityIndicator color={isOutline ? colors.primary : colors.onPrimary} />
       ) : (
         <View style={styles.buttonContent}>
           {icon ? <Ionicons name={icon} size={18} color={fg} style={styles.buttonIcon} /> : null}
@@ -89,81 +89,85 @@ export function Button({
   );
 }
 
-// ---------- Form input ----------
-
 type FormInputProps = TextInputProps & {
   label?: string;
   error?: string;
 };
 
 export function FormInput({ label, error, style, ...props }: FormInputProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.inputGroup}>
-      {label ? <Text style={styles.inputLabel}>{label}</Text> : null}
+      {label ? <Text style={[styles.inputLabel, { color: colors.text }]}>{label}</Text> : null}
       <TextInput
         placeholderTextColor={colors.textMuted}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        style={[
+          styles.input,
+          {
+            backgroundColor: colors.inputBg,
+            borderColor: error ? colors.danger : colors.border,
+            color: colors.inputText,
+          },
+          style,
+        ]}
         {...props}
       />
-      {error ? <Text style={styles.inputErrorText}>{error}</Text> : null}
+      {error ? <Text style={[styles.inputErrorText, { color: colors.danger }]}>{error}</Text> : null}
     </View>
   );
 }
 
-// ---------- Badge ----------
-
 export function Badge({
   text,
-  color = colors.primary,
+  color,
   bg,
 }: {
   text: string;
   color?: string;
   bg?: string;
 }) {
+  const { colors } = useTheme();
+  const fg = color ?? colors.primary;
   return (
-    <View style={[styles.badge, { backgroundColor: bg ?? `${color}1A` }]}>
-      <Text style={[styles.badgeText, { color }]}>{text}</Text>
+    <View style={[styles.badge, { backgroundColor: bg ?? `${fg}1A` }]}>
+      <Text style={[styles.badgeText, { color: fg }]}>{text}</Text>
     </View>
   );
 }
-
-// ---------- Stat card ----------
 
 export function StatCard({
   label,
   value,
   icon,
-  color = colors.primary,
+  color,
 }: {
   label: string;
   value: string;
   icon: keyof typeof Ionicons.glyphMap;
   color?: string;
 }) {
+  const { colors } = useTheme();
+  const accent = color ?? colors.primary;
   return (
     <Card style={styles.statCard}>
-      <View style={[styles.statIcon, { backgroundColor: `${color}1A` }]}>
-        <Ionicons name={icon} size={20} color={color} />
+      <View style={[styles.statIcon, { backgroundColor: `${accent}1A` }]}>
+        <Ionicons name={icon} size={20} color={accent} />
       </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: colors.textMuted }]}>{label}</Text>
     </Card>
   );
 }
 
-// ---------- Progress bar ----------
-
-export function ProgressBar({ value, color = colors.primary }: { value: number; color?: string }) {
+export function ProgressBar({ value, color }: { value: number; color?: string }) {
+  const { colors } = useTheme();
   const pct = Math.max(0, Math.min(100, value));
   return (
-    <View style={styles.progressTrack}>
-      <View style={[styles.progressFill, { backgroundColor: color, width: `${pct}%` }]} />
+    <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+      <View style={[styles.progressFill, { backgroundColor: color ?? colors.primary, width: `${pct}%` }]} />
     </View>
   );
 }
-
-// ---------- Empty state ----------
 
 export function EmptyState({
   icon = 'file-tray-outline',
@@ -174,33 +178,32 @@ export function EmptyState({
   title?: string;
   subtitle?: string;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.emptyState}>
       <Ionicons name={icon} size={40} color={colors.textMuted} />
-      <Text style={styles.emptyTitle}>{title}</Text>
-      {subtitle ? <Text style={styles.emptySubtitle}>{subtitle}</Text> : null}
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>{title}</Text>
+      {subtitle ? <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>{subtitle}</Text> : null}
     </View>
   );
 }
 
-// ---------- Loading ----------
-
 export function Loading() {
+  const { colors } = useTheme();
   return (
-    <View style={styles.loading}>
+    <View style={[styles.loading, { backgroundColor: colors.background }]}>
       <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }
 
-// ---------- Error ----------
-
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.emptyState}>
+    <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
       <Ionicons name="cloud-offline-outline" size={40} color={colors.danger} />
-      <Text style={styles.emptyTitle}>Something went wrong</Text>
-      <Text style={styles.emptySubtitle}>{message}</Text>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>Something went wrong</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>{message}</Text>
       {onRetry ? <Button title="Retry" onPress={onRetry} variant="outline" style={styles.retryBtn} /> : null}
     </View>
   );
@@ -208,7 +211,6 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: spacing.md,
     ...shadows.card,
@@ -223,7 +225,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: colors.text,
   },
   button: {
     height: 48,
@@ -257,24 +258,16 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.text,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     fontSize: 15,
-    color: colors.text,
-  },
-  inputError: {
-    borderColor: colors.danger,
   },
   inputErrorText: {
-    color: colors.danger,
     fontSize: 12,
     marginTop: 4,
   },
@@ -304,18 +297,15 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '800',
-    color: colors.text,
   },
   statLabel: {
     fontSize: 12,
-    color: colors.textMuted,
     marginTop: 2,
     textAlign: 'center',
   },
   progressTrack: {
     height: 8,
     borderRadius: radius.pill,
-    backgroundColor: colors.border,
     overflow: 'hidden',
   },
   progressFill: {
@@ -327,16 +317,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: spacing.xl * 2,
     paddingHorizontal: spacing.lg,
+    flex: 1,
   },
   emptyTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: colors.text,
     marginTop: spacing.sm,
   },
   emptySubtitle: {
     fontSize: 13,
-    color: colors.textMuted,
     marginTop: 4,
     textAlign: 'center',
   },

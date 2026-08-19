@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Modal,
   Pressable,
@@ -14,14 +14,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Button, Card, EmptyState, ErrorState, FormInput, Loading, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { api, getErrorMessage } from '../../services/apiClient';
-import { colors, radius, shadows, spacing } from '../../theme/colors';
+import { radius, shadows, spacing } from '../../theme/colors';
 import { LessonsData, LessonItemOption, PracticalLesson, TheoryLesson } from '../../types';
 import { formatDate } from '../../utils/format';
 
 type Seg = 'practical' | 'theory';
 
-function statusColor(status: string): string {
+function statusColor(status: string, colors: ThemeColors): string {
   switch (status) {
     case 'COMPLETED':
       return colors.success;
@@ -35,6 +36,8 @@ function statusColor(status: string): string {
 }
 
 export default function LessonsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isFocused = useIsFocused();
   const { data, loading, error, refreshing, refresh } = useApiData<LessonsData>('/student/lessons/');
   const [seg, setSeg] = useState<Seg>('practical');
@@ -106,7 +109,7 @@ export default function LessonsScreen() {
           {l.remarks ? <Text style={styles.remarks}>{l.remarks}</Text> : null}
           {l.attended ? <Text style={styles.attended}>Attended</Text> : null}
         </View>
-        <Badge text={l.status} color={statusColor(l.status)} />
+        <Badge text={l.status} color={statusColor(l.status, colors)} />
       </View>
       {!l.attended && l.status !== 'COMPLETED' && (
         <Button
@@ -135,7 +138,7 @@ export default function LessonsScreen() {
           {l.notes ? <Text style={styles.remarks}>{l.notes}</Text> : null}
           {l.attended ? <Text style={styles.attended}>Attended</Text> : null}
         </View>
-        <Badge text={l.status} color={statusColor(l.status)} />
+        <Badge text={l.status} color={statusColor(l.status, colors)} />
       </View>
       {!l.attended && l.status !== 'COMPLETED' ? (
         <Button
@@ -256,7 +259,9 @@ export default function LessonsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   content: { padding: spacing.md },
@@ -341,3 +346,4 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   spacer: { height: spacing.xl },
 });
+}

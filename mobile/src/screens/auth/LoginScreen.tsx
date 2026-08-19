@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -14,12 +14,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, FormInput } from '../../components/ui';
 import { useAuth, getErrorMessage } from '../../context/AuthContext';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { AuthStackParamList } from '../../navigation/types';
-import { colors, radius, spacing } from '../../theme/colors';
+import { radius, spacing } from '../../theme/colors';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { login } = useAuth();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
@@ -100,7 +103,9 @@ export default function LoginScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.primary },
   container: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
   brand: { alignItems: 'center', marginBottom: spacing.xl },
@@ -142,3 +147,4 @@ const styles = StyleSheet.create({
   footerText: { color: colors.white, opacity: 0.9 },
   footerLink: { color: colors.yellow, fontWeight: '700' },
 });
+}

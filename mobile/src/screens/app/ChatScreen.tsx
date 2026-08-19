@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -14,16 +14,20 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, ErrorState, Loading } from '../../components/ui';
-import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { api, getErrorMessage } from '../../services/apiClient';
-import { colors, radius, shadows, spacing } from '../../theme/colors';
+import { radius, shadows, spacing } from '../../theme/colors';
 import { ChatMessage } from '../../types';
 
 interface ChatBubbleProps {
   item: ChatMessage;
 }
 
-function ChatBubble({ item, colors }: ChatBubbleProps & { colors: any }) {
+function ChatBubble({
+  item,
+  colors,
+  styles,
+}: ChatBubbleProps & { colors: ThemeColors; styles: ReturnType<typeof makeStyles> }) {
   const isMe = item.is_me;
   return (
     <View style={[styles.bubbleRow, isMe ? styles.bubbleRowEnd : styles.bubbleRowStart]}>
@@ -50,6 +54,7 @@ function ChatBubble({ item, colors }: ChatBubbleProps & { colors: any }) {
 
 export default function ChatScreen() {
   const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -124,7 +129,7 @@ export default function ChatScreen() {
           ref={flatListRef}
           data={messages}
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => <ChatBubble item={item} colors={colors} />}
+          renderItem={({ item }) => <ChatBubble item={item} colors={colors} styles={styles} />}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => fetchMessages(true)} tintColor={colors.primary} />
@@ -159,7 +164,9 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
   listContent: { padding: spacing.md, paddingBottom: spacing.sm },
@@ -173,11 +180,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   bubbleMe: {
-    backgroundColor: '#DCF8C6',
+    backgroundColor: colors.chatMe,
     borderBottomRightRadius: 4,
   },
   bubbleOther: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.chatOther,
     borderWidth: 1,
     borderColor: colors.border,
     borderBottomLeftRadius: 4,
@@ -262,3 +269,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 });
+}

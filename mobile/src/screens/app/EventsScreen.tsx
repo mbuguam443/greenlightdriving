@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, EmptyState, ErrorState, Loading, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
-import { colors, radius, spacing } from '../../theme/colors';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
+import { radius, spacing } from '../../theme/colors';
 import { EventItem } from '../../types';
 import { formatDate, formatTime } from '../../utils/format';
 
@@ -16,6 +17,8 @@ interface EventsData {
 }
 
 export default function EventsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isFocused = useIsFocused();
   const { data, loading, error, refreshing, refresh } = useApiData<EventsData>('/student/events/');
 
@@ -83,7 +86,9 @@ export default function EventsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   content: { padding: spacing.md },
@@ -106,3 +111,4 @@ const styles = StyleSheet.create({
   description: { fontSize: 13, color: colors.text, marginTop: spacing.sm },
   spacer: { height: spacing.lg },
 });
+}

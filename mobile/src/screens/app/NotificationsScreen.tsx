@@ -1,18 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Button, EmptyState, ErrorState, FormInput, Loading } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { api, getErrorMessage } from '../../services/apiClient';
 import { useUnread } from '../../context/UnreadContext';
-import { colors, radius, shadows, spacing } from '../../theme/colors';
+import { radius, shadows, spacing } from '../../theme/colors';
 import { NotificationItem } from '../../types';
 import { formatDateTime } from '../../utils/format';
 
 export default function NotificationsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isFocused = useIsFocused();
   const { data, loading, error, refreshing, refresh } = useApiData<NotificationItem[]>('/student/notifications/');
   const { refreshUnread } = useUnread();
@@ -139,7 +142,9 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   content: { padding: spacing.md },
@@ -198,3 +203,4 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   spacer: { height: spacing.lg },
 });
+}

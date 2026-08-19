@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { useUnread } from '../context/UnreadContext';
 import { AppTabsParamList, HomeStackParamList, MoreStackParamList } from './types';
 import DashboardScreen from '../screens/app/DashboardScreen';
@@ -23,11 +23,12 @@ const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const MoreStack = createNativeStackNavigator<MoreStackParamList>();
 
 function HomeStackNavigator() {
+  const { colors } = useTheme();
   return (
     <HomeStack.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: colors.white,
+        headerTintColor: colors.onPrimary,
         headerTitleStyle: { fontWeight: '700' },
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
@@ -44,11 +45,12 @@ function HomeStackNavigator() {
 }
 
 function MoreStackNavigator() {
+  const { colors } = useTheme();
   return (
     <MoreStack.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: colors.white,
+        headerTintColor: colors.onPrimary,
         headerTitleStyle: { fontWeight: '700' },
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
@@ -69,12 +71,16 @@ function tabIcon(name: keyof typeof Ionicons.glyphMap) {
 
 export default function AppTabs() {
   const { unreadCount } = useUnread();
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { borderTopColor: colors.border },
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
+        },
         headerShown: false,
       }}
     >
@@ -95,7 +101,7 @@ export default function AppTabs() {
           title: 'Updates',
           tabBarIcon: tabIcon('notifications-outline'),
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.danger, color: colors.white, fontWeight: '700' },
+          tabBarBadgeStyle: { backgroundColor: colors.danger, color: colors.onPrimary, fontWeight: '700' },
         }}
       />
       <Tab.Screen

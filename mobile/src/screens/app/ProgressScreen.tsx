@@ -1,16 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, EmptyState, ErrorState, Loading, ProgressBar, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
-import { colors, radius, spacing } from '../../theme/colors';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
+import { radius, spacing } from '../../theme/colors';
 import { NTSARecord } from '../../types';
 import { formatDate } from '../../utils/format';
 
-function statusTone(status: string): string {
+function statusTone(status: string, colors: ThemeColors): string {
   switch (status) {
     case 'PASSED':
       return colors.success;
@@ -30,14 +31,18 @@ function Stage({
   status,
   date,
   detail,
+  colors,
+  styles,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   status: string;
   date?: string | null;
   detail?: string;
+  colors: ThemeColors;
+  styles: ReturnType<typeof makeStyles>;
 }) {
-  const tone = statusTone(status);
+  const tone = statusTone(status, colors);
   return (
     <Card style={styles.stageCard}>
       <View style={[styles.stageIcon, { backgroundColor: `${tone}1A` }]}>
@@ -54,6 +59,8 @@ function Stage({
 }
 
 export default function ProgressScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isFocused = useIsFocused();
   const { data, loading, error, refreshing, refresh } = useApiData<NTSARecord | null>('/student/ntsa/');
 
@@ -89,6 +96,8 @@ export default function ProgressScreen() {
 
           <SectionTitle title="Licensing journey" />
           <Stage
+            colors={colors}
+            styles={styles}
             icon="card-outline"
             title="Provisional Driving Licence (PDL)"
             status={data.pdl_status_display}
@@ -96,6 +105,8 @@ export default function ProgressScreen() {
             detail={data.pdl_number ? `PDL No: ${data.pdl_number}` : undefined}
           />
           <Stage
+            colors={colors}
+            styles={styles}
             icon="book-outline"
             title="Theory exam"
             status={data.theory_exam_status_display}
@@ -103,12 +114,16 @@ export default function ProgressScreen() {
             detail={data.theory_exam_score != null ? `Score: ${data.theory_exam_score}%` : undefined}
           />
           <Stage
+            colors={colors}
+            styles={styles}
             icon="car-sport-outline"
             title="Practical exam"
             status={data.practical_exam_status_display}
             date={data.practical_exam_date}
           />
           <Stage
+            colors={colors}
+            styles={styles}
             icon="trail-sign-outline"
             title="Driving test"
             status={data.driving_test_status_display}
@@ -147,7 +162,9 @@ export default function ProgressScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   content: { padding: spacing.md },
@@ -194,3 +211,4 @@ const styles = StyleSheet.create({
   licenceDates: { color: colors.white, opacity: 0.85, fontSize: 12, marginTop: 2 },
   spacer: { height: spacing.lg },
 });
+}

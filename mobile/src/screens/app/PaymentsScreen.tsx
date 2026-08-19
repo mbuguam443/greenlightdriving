@@ -1,17 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, EmptyState, ErrorState, Loading, SectionTitle } from '../../components/ui';
+import { ThemeColors, useTheme } from '../../context/ThemeContext';
 import { useApiData } from '../../hooks/useApiData';
-import { colors, radius, spacing } from '../../theme/colors';
+import { radius, spacing } from '../../theme/colors';
 import { PaymentsData } from '../../types';
 import { formatDate, formatKES } from '../../utils/format';
 
 export default function PaymentsScreen() {
   const isFocused = useIsFocused();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data, loading, error, refreshing, refresh } = useApiData<PaymentsData>('/student/payments/');
 
   useEffect(() => {
@@ -30,7 +33,7 @@ export default function PaymentsScreen() {
             style={styles.scroll}
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
           >
             {data?.summary ? (
               <Card style={styles.summaryCard}>
@@ -74,7 +77,13 @@ export default function PaymentsScreen() {
                     </View>
                     <Badge
                       text={p.status_display}
-                      color={p.status.toLowerCase() === 'completed' ? colors.success : p.status.toLowerCase() === 'pending' ? colors.warning : colors.danger}
+                      color={
+                        p.status.toLowerCase() === 'completed'
+                          ? colors.success
+                          : p.status.toLowerCase() === 'pending'
+                            ? colors.warning
+                            : colors.danger
+                      }
                     />
                   </View>
                 </Card>
@@ -97,7 +106,16 @@ export default function PaymentsScreen() {
                           {t.mpesa_receipt ? ` · ${t.mpesa_receipt}` : ''}
                         </Text>
                       </View>
-                      <Badge text={t.status} color={t.status.toLowerCase() === 'success' || t.status.toLowerCase() === 'completed' ? colors.success : t.status.toLowerCase() === 'pending' ? colors.warning : colors.danger} />
+                      <Badge
+                        text={t.status}
+                        color={
+                          t.status.toLowerCase() === 'success' || t.status.toLowerCase() === 'completed'
+                            ? colors.success
+                            : t.status.toLowerCase() === 'pending'
+                              ? colors.warning
+                              : colors.danger
+                        }
+                      />
                     </View>
                   </Card>
                 ))}
@@ -112,37 +130,36 @@ export default function PaymentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
-  content: { padding: spacing.md },
-  summaryCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: colors.primaryDark,
-    marginBottom: spacing.sm,
-  },
-  summaryCol: { flex: 1 },
-  summaryLabel: { color: colors.white, opacity: 0.8, fontSize: 11, fontWeight: '600' },
-  summaryValue: { color: colors.yellow, fontSize: 17, fontWeight: '800', marginTop: 4 },
-  summaryPaid: { color: colors.white, fontSize: 15, fontWeight: '700', marginTop: 4 },
-  summaryTotal: { color: colors.white, fontSize: 13, fontWeight: '600', marginTop: 4 },
-  hint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.md },
-  tillNumber: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginBottom: spacing.sm },
-  errorText: { color: colors.danger, fontSize: 13, marginBottom: spacing.sm },
-  paymentCard: { marginBottom: spacing.sm },
-  progressCard: { marginBottom: spacing.sm, borderColor: colors.warning, borderWidth: 1 },
-  progressTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
-  paymentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: `${colors.primary}1A`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paymentAmount: { fontSize: 15, fontWeight: '700', color: colors.text },
-  paymentMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  spacer: { height: spacing.lg },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1 },
+    content: { padding: spacing.md },
+    summaryCard: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      backgroundColor: colors.primaryDark,
+      marginBottom: spacing.sm,
+    },
+    summaryCol: { flex: 1 },
+    summaryLabel: { color: colors.onPrimary, opacity: 0.8, fontSize: 11, fontWeight: '600' },
+    summaryValue: { color: colors.yellow, fontSize: 17, fontWeight: '800', marginTop: 4 },
+    summaryPaid: { color: colors.onPrimary, fontSize: 15, fontWeight: '700', marginTop: 4 },
+    summaryTotal: { color: colors.onPrimary, fontSize: 13, fontWeight: '600', marginTop: 4 },
+    hint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.md },
+    tillNumber: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginBottom: spacing.sm },
+    paymentCard: { marginBottom: spacing.sm },
+    paymentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    iconWrap: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: `${colors.primary}1A`,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    paymentAmount: { fontSize: 15, fontWeight: '700', color: colors.text },
+    paymentMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+    spacer: { height: spacing.lg },
+  });
+}
