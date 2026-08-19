@@ -17,6 +17,21 @@ class VehicleListView(StaffTestMixin, ListView):
     context_object_name = 'vehicles'
     paginate_by = 20
 
+    def get_queryset(self):
+        qs = Vehicle.objects.select_related('assigned_instructor__user').all()
+        q = (self.request.GET.get('q') or '').strip()
+        category = (self.request.GET.get('category') or '').strip()
+        if q:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(registration_number__icontains=q)
+                | Q(make__icontains=q)
+                | Q(model_name__icontains=q)
+            )
+        if category:
+            qs = qs.filter(category=category)
+        return qs
+
 
 class VehicleDetailView(StaffTestMixin, DetailView):
     model = Vehicle

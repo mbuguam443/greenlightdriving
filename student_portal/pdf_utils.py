@@ -267,7 +267,7 @@ def generate_enrollment_report(student):
         ('Course Fee:', f'KES {student.total_fees:,.0f}' if student.course else 'N/A'),
         ('Branch:', student.branch.name if student.branch else 'N/A'),
         ('Instructor:', student.instructor.user.get_full_name() if student.instructor and student.instructor.user else 'Not Assigned'),
-        ('Vehicle:', f'{student.vehicle.make} {student.vehicle.model} ({student.vehicle.reg_number})' if student.vehicle else 'Not Assigned'),
+        ('Vehicle:', f'{student.vehicle.make} {student.vehicle.model_name} ({student.vehicle.registration_number})' if student.vehicle else 'Not Assigned'),
     ]))
     story.append(Spacer(1, 6))
 

@@ -79,8 +79,8 @@
                                     <i class="bi bi-car-front text-success"></i>
                                 </div>
                                 <div>
-                                    <div class="fw-semibold">{{ vehicle.make }} {{ vehicle.model }}</div>
-                                    <small class="text-muted">{{ vehicle.reg_number }}</small>
+                                    <div class="fw-semibold">{{ vehicle.make }} {{ vehicle.model_name }}</div>
+                                    <small class="text-muted">{{ vehicle.registration_number }}</small>
                                 </div>
                             </div>
                         </td>
@@ -88,8 +88,8 @@
                             <span class="badge bg-light text-dark border">{{ vehicle.get_category_display }}</span>
                         </td>
                         <td>
-                            {% if vehicle.instructor %}
-                                {{ vehicle.instructor.user.get_full_name }}
+                            {% if vehicle.assigned_instructor %}
+                                {{ vehicle.assigned_instructor.user.get_full_name }}
                             {% else %}
                                 <span class="text-muted">Unassigned</span>
                             {% endif %}

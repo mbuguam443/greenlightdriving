@@ -7,7 +7,7 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item"><a href="{% url 'vehicles:list' %}">Vehicles</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'vehicles:detail' vehicle.pk %}">{{ vehicle.reg_number }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'vehicles:detail' vehicle.pk %}">{{ vehicle.registration_number }}</a></li>
         <li class="breadcrumb-item active">Delete</li>
     </ol>
 </nav>
@@ -24,8 +24,8 @@
                 </div>
                 <h4 class="mb-3">Are you sure?</h4>
                 <p class="text-muted mb-4">
-                    You are about to delete the vehicle <strong>{{ vehicle.reg_number }}</strong> 
-                    ({{ vehicle.make }} {{ vehicle.model }}). This action cannot be undone.
+                    You are about to delete the vehicle <strong>{{ vehicle.registration_number }}</strong>
+                    ({{ vehicle.make }} {{ vehicle.model_name }}). This action cannot be undone.
                 </p>
 
                 <div class="alert alert-warning d-flex align-items-center mb-4">
