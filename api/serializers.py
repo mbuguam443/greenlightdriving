@@ -287,11 +287,20 @@ class AdmissionSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     method_display = serializers.CharField(source='get_method_display', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    student_name = serializers.SerializerMethodField()
+    student_number = serializers.SerializerMethodField()
+
+    def get_student_name(self, obj):
+        return obj.student.full_name if obj.student else ''
+
+    def get_student_number(self, obj):
+        return obj.student.student_number if obj.student else ''
 
     class Meta:
         model = Payment
         fields = ['id', 'receipt_number', 'amount', 'method', 'method_display',
-                  'reference_number', 'status', 'status_display', 'description', 'created_at']
+                  'reference_number', 'status', 'status_display', 'description',
+                  'student_name', 'student_number', 'created_at']
 
 
 class MpesaTransactionSerializer(serializers.ModelSerializer):

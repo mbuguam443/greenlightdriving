@@ -8,6 +8,8 @@ export interface Payment {
   status: string;
   status_display: string;
   description: string;
+  student_name: string;
+  student_number: string;
   created_at: string;
 }
 

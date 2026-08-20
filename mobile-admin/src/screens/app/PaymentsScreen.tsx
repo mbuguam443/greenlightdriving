@@ -124,10 +124,14 @@ export default function PaymentsScreen() {
                   <Ionicons name="receipt-outline" size={18} color={colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.paymentAmount}>{formatKES(p.amount)}</Text>
+                  <Text style={styles.paymentName}>{p.student_name}</Text>
                   <Text style={styles.paymentMeta}>
-                    {p.method_display} · {p.receipt_number} · {formatDate(p.created_at)}
+                    {p.student_number} · {p.method_display} · {p.receipt_number} · {formatDate(p.created_at)}
                   </Text>
+                  <Text style={styles.paymentAmount}>{formatKES(p.amount)}</Text>
+                  {p.description && p.description !== 'Fee payment' ? (
+                    <Text style={styles.paymentDesc}>{p.description}</Text>
+                  ) : null}
                 </View>
                 <Badge
                   text={p.status_display}
@@ -251,7 +255,9 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    paymentAmount: { fontSize: 15, fontWeight: '700', color: colors.text },
+    paymentAmount: { fontSize: 15, fontWeight: '700', color: colors.text, marginTop: 2 },
+    paymentName: { fontSize: 14, fontWeight: '700', color: colors.text },
+    paymentDesc: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     paymentMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     spacer: { height: spacing.lg },
     modalBackdrop: {
