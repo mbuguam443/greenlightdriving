@@ -20,7 +20,7 @@
                     Are you sure you want to delete student record for:
                 </p>
                 <div class="p-3 rounded mb-4" style="background-color: #f8f9fa;">
-                    <h5 class="fw-bold mb-1" style="color: var(--primary-green);">{{ student.get_full_name }}</h5>
+                    <h5 class="fw-bold mb-1" style="color: var(--primary-green);">{{ student.user.full_name }}</h5>
                     <p class="mb-0 text-muted">Student No: {{ student.student_number }} | {{ student.course.name }}</p>
                 </div>
                 <p class="text-danger small mb-4">

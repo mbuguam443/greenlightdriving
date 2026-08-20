@@ -91,7 +91,7 @@
                     {{ payment.student.first_name.0 }}{{ payment.student.last_name.0 }}
                 </div>
                 {% endif %}
-                <h6 class="fw-bold mb-0">{{ payment.student.get_full_name }}</h6>
+                <h6 class="fw-bold mb-0">{{ payment.student.user.full_name }}</h6>
                 <small class="text-muted">{{ payment.student.student_number }}</small>
                 <hr>
                 <div class="text-start">

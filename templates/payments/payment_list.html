@@ -150,7 +150,7 @@
                             </a>
                         </td>
                         <td>
-                            <span class="fw-semibold">{{ payment.student.get_full_name }}</span>
+                            <span class="fw-semibold">{{ payment.student.user.full_name }}</span>
                             <br><small class="text-muted">{{ payment.student.student_number }}</small>
                         </td>
                         <td class="fw-semibold">{{ payment.amount|floatformat:0 }}</td>
