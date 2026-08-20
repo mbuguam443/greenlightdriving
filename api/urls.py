@@ -35,4 +35,17 @@ urlpatterns = [
     path('student/push-token/', views.StudentPushTokenView.as_view(), name='student_push_token'),
     path('student/chat/', views.StudentChatView.as_view(), name='student_chat'),
     path('student/profile/', views.StudentProfileView.as_view(), name='student_profile'),
+
+    # Admin
+    path('admin/dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
+    path('admin/students/', views.AdminStudentsView.as_view(), name='admin_students'),
+    path('admin/students/<int:pk>/', views.AdminStudentDetailView.as_view(), name='admin_student_detail'),
+    path('admin/payments/', views.AdminPaymentsView.as_view(), name='admin_payments'),
+    path('admin/notifications/', views.AdminNotificationsView.as_view(), name='admin_notifications'),
+    path('admin/notifications/<int:pk>/reply-read/', views.AdminMarkReplyReadView.as_view(), name='admin_mark_reply_read'),
+    path('admin/chat/', views.AdminChatView.as_view(), name='admin_chat'),
+    path('admin/lessons/<int:pk>/approve/', views.AdminLessonApproveView.as_view(), name='admin_lesson_approve'),
+    path('admin/admissions/', views.AdminAdmissionsView.as_view(), name='admin_admissions'),
+    path('admin/admissions/<int:pk>/action/', views.AdminAdmissionsView.as_view(), name='admin_admission_action'),
+    path('admin/profile/', views.AdminProfileView.as_view(), name='admin_profile'),
 ]

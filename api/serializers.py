@@ -319,11 +319,13 @@ class NTSASerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     notification_type_display = serializers.CharField(source='get_notification_type_display', read_only=True)
+    student_name = serializers.CharField(source='student.user.full_name', read_only=True)
+    student_number = serializers.CharField(source='student.student_number', read_only=True)
 
     class Meta:
         model = Notification
         fields = ['id', 'title', 'message', 'notification_type', 'notification_type_display',
-                  'is_read', 'reply', 'replied_at', 'created_at']
+                  'is_read', 'reply', 'replied_at', 'created_at', 'student_name', 'student_number']
 
 
 class StudentDocumentSerializer(serializers.ModelSerializer):

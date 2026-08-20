@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from accounts.models import User
 from admissions.models import Admission
 from core.models import Branch, SiteSettings
 from lessons.models import LessonItem, PracticalLesson, TheoryLesson
@@ -49,6 +50,18 @@ class IsStudent(IsAuthenticated):
             request.user
             and request.user.is_authenticated
             and request.user.role == 'STUDENT'
+        )
+
+
+STAFF_ROLES = ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'ACCOUNTANT', 'INSTRUCTOR')
+
+
+class IsStaff(IsAuthenticated):
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in STAFF_ROLES
         )
 
 
@@ -610,3 +623,371 @@ class StudentChatView(APIView):
             'date': timezone.localtime(msg.created_at).strftime('%a %d %b'),
             'created_at': msg.created_at.isoformat(),
         }, status=status.HTTP_201_CREATED)
+
+
+# ============================== ADMIN ==============================
+
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        from django.db.models import Sum
+        today = timezone.now().date()
+        active_students = Student.objects.filter(status='ACTIVE').count()
+        pending_admissions = Admission.objects.filter(status='PENDING').count()
+        today_practical = PracticalLesson.objects.filter(date=today).select_related(
+            'student__user', 'lesson_item', 'instructor__user', 'vehicle'
+        ).order_by('date')[:20]
+        today_theory = TheoryLesson.objects.filter(date=today).select_related(
+            'student__user', 'instructor__user'
+        ).order_by('date')[:20]
+        pending_approvals = PracticalLesson.objects.filter(
+            submitted_by_student=True, is_approved=False
+        ).select_related('student__user', 'lesson_item')[:20]
+        unread_replies = Notification.objects.filter(
+            is_read=True, reply__gt='', reply_read=False
+        ).select_related('student__user')[:20]
+        month_start = today.replace(day=1)
+        month_revenue = Payment.objects.filter(
+            status='COMPLETED', created_at__date__gte=month_start
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        outstanding = 0
+        for s in Student.objects.filter(status='ACTIVE'):
+            outstanding += max(s.balance, 0)
+
+        return Response({
+            'active_students': active_students,
+            'pending_admissions': pending_admissions,
+            'pending_approvals_count': PracticalLesson.objects.filter(
+                submitted_by_student=True, is_approved=False
+            ).count(),
+            'unread_replies_count': Notification.objects.filter(
+                is_read=True, reply__gt='', reply_read=False
+            ).count(),
+            'today_lessons_count': today_practical.count() + today_theory.count(),
+            'month_revenue': str(month_revenue),
+            'outstanding_balance': str(outstanding),
+            'today_practical': PracticalLessonSerializer(today_practical, many=True).data,
+            'today_theory': TheoryLessonSerializer(today_theory, many=True).data,
+            'pending_approvals': PracticalLessonSerializer(pending_approvals, many=True).data,
+            'unread_replies': NotificationSerializer(unread_replies, many=True).data,
+        })
+
+
+class AdminStudentsView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        qs = Student.objects.select_related('user', 'course', 'branch').all()
+        q = (request.GET.get('q') or '').strip()
+        status_f = (request.GET.get('status') or '').strip()
+        if q:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(student_number__icontains=q)
+                | Q(user__first_name__icontains=q)
+                | Q(user__last_name__icontains=q)
+                | Q(user__email__icontains=q)
+                | Q(user__phone__icontains=q)
+            )
+        if status_f:
+            qs = qs.filter(status=status_f)
+        students = qs[:100]
+        return Response({
+            'count': qs.count(),
+            'students': StudentSerializer(students, many=True, context={'request': request}).data,
+        })
+
+
+class AdminStudentDetailView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request, pk):
+        try:
+            student = Student.objects.select_related('user', 'course', 'branch').get(pk=pk)
+        except Student.DoesNotExist:
+            return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+        payments = Payment.objects.filter(student=student)[:50]
+        practical = PracticalLesson.objects.filter(student=student).select_related('lesson_item')[:50]
+        theory = TheoryLesson.objects.filter(student=student)[:50]
+        notifications = Notification.objects.filter(student=student)[:30]
+        return Response({
+            'student': StudentSerializer(student, context={'request': request}).data,
+            'payments': PaymentSerializer(payments, many=True).data,
+            'practical_lessons': PracticalLessonSerializer(practical, many=True).data,
+            'theory_lessons': TheoryLessonSerializer(theory, many=True).data,
+            'notifications': NotificationSerializer(notifications, many=True).data,
+        })
+
+
+class AdminPaymentsView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        qs = Payment.objects.select_related('student__user').all()
+        status_f = (request.GET.get('status') or '').strip()
+        method_f = (request.GET.get('method') or '').strip()
+        if status_f:
+            qs = qs.filter(status=status_f)
+        if method_f:
+            qs = qs.filter(method=method_f)
+        mpesa = MpesaTransaction.objects.all()[:50]
+        from django.db.models import Sum
+        total_completed = Payment.objects.filter(status='COMPLETED').aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        return Response({
+            'total_completed': str(total_completed),
+            'payments': PaymentSerializer(qs[:100], many=True).data,
+            'mpesa_transactions': MpesaTransactionSerializer(mpesa, many=True).data,
+        })
+
+    def post(self, request):
+        student_id = request.data.get('student')
+        amount = request.data.get('amount')
+        method = (request.data.get('method') or '').strip().upper()
+        status_v = (request.data.get('status') or 'COMPLETED').strip().upper()
+        reference = (request.data.get('reference_number') or '').strip()
+        description = (request.data.get('description') or '').strip()
+        if not student_id or not amount or not method:
+            return Response({'detail': 'Student, amount and method are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            return Response({'detail': 'Invalid amount.'}, status=status.HTTP_400_BAD_REQUEST)
+        if amount <= 0:
+            return Response({'detail': 'Amount must be greater than zero.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            student = Student.objects.get(pk=student_id)
+        except Student.DoesNotExist:
+            return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        from django.db import transaction as db_transaction
+        with db_transaction.atomic():
+            last = Payment.objects.order_by('-id').first()
+            num = (last.id + 1) if last else 1
+            payment = Payment.objects.create(
+                student=student,
+                receipt_number=f'GLS-RCP-{num:05d}',
+                amount=amount,
+                method=method,
+                reference_number=reference,
+                status=status_v,
+                description=description or 'Fee payment',
+            )
+        return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+
+
+class AdminNotificationsView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        notifications = Notification.objects.select_related('student__user').order_by('-created_at')[:100]
+        return Response({
+            'notifications': NotificationSerializer(notifications, many=True).data,
+        })
+
+    def post(self, request):
+        from student_portal.push import send_push
+        title = (request.data.get('title') or '').strip()
+        message = (request.data.get('message') or '').strip()
+        ntype = (request.data.get('notification_type') or 'general').strip()
+        send_to_all = request.data.get('send_to_all') is True
+        student_ids = request.data.get('student_ids') or []
+
+        if not title or not message:
+            return Response({'detail': 'Title and message are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if send_to_all:
+            students = Student.objects.filter(status='ACTIVE')
+        elif student_ids:
+            students = Student.objects.filter(pk__in=student_ids)
+        else:
+            student_id = request.data.get('student')
+            if not student_id:
+                return Response({'detail': 'Select a student or send to all.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            students = Student.objects.filter(pk=student_id)
+            if not students.exists():
+                return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        count = 0
+        for s in students:
+            Notification.objects.create(student=s, title=title, message=message, notification_type=ntype)
+            send_push(s, title, message)
+            count += 1
+        return Response({'detail': f'Notification sent to {count} student(s).'},
+                        status=status.HTTP_201_CREATED)
+
+
+class AdminMarkReplyReadView(APIView):
+    permission_classes = [IsStaff]
+
+    def post(self, request, pk):
+        try:
+            notification = Notification.objects.get(pk=pk)
+        except Notification.DoesNotExist:
+            return Response({'detail': 'Notification not found.'}, status=status.HTTP_404_NOT_FOUND)
+        notification.reply_read = True
+        notification.save(update_fields=['reply_read'])
+        return Response({'detail': 'Reply marked as read.'})
+
+
+class AdminChatView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        messages = ChatMessage.objects.select_related('user').order_by('-created_at')[:200]
+        data = []
+        for m in reversed(list(messages)):
+            u = m.user
+            data.append({
+                'id': m.id,
+                'user': u.get_full_name() or u.username,
+                'role': u.get_role_display(),
+                'is_staff': u.role != 'STUDENT',
+                'is_me': u.id == request.user.id,
+                'content': m.content,
+                'time': timezone.localtime(m.created_at).strftime('%H:%M'),
+                'date': timezone.localtime(m.created_at).strftime('%a %d %b'),
+                'created_at': m.created_at.isoformat(),
+            })
+        return Response({'messages': data})
+
+    def post(self, request):
+        content = (request.data.get('content') or '').strip()
+        if not content:
+            return Response({'detail': 'Message cannot be empty.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        msg = ChatMessage.objects.create(user=request.user, content=content[:2000])
+        u = msg.user
+        return Response({
+            'id': msg.id,
+            'user': u.get_full_name() or u.username,
+            'role': u.get_role_display(),
+            'is_staff': u.role != 'STUDENT',
+            'is_me': True,
+            'content': msg.content,
+            'time': timezone.localtime(msg.created_at).strftime('%H:%M'),
+            'date': timezone.localtime(msg.created_at).strftime('%a %d %b'),
+            'created_at': msg.created_at.isoformat(),
+        }, status=status.HTTP_201_CREATED)
+
+
+class AdminLessonApproveView(APIView):
+    permission_classes = [IsStaff]
+
+    def post(self, request, pk):
+        action = (request.data.get('action') or 'approve').strip().lower()
+        try:
+            lesson = PracticalLesson.objects.select_related('student__user').get(pk=pk)
+        except PracticalLesson.DoesNotExist:
+            return Response({'detail': 'Lesson not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'approve':
+            lesson.is_approved = True
+            lesson.submitted_by_student = False
+            lesson.save(update_fields=['is_approved', 'submitted_by_student'])
+            Notification.objects.create(
+                student=lesson.student,
+                title='Lesson approved',
+                message=f'Your lesson "{lesson.lesson_item.name}" has been approved.',
+                notification_type='lesson',
+            )
+            from student_portal.push import send_push
+            send_push(lesson.student, 'Lesson approved',
+                      f'Your lesson "{lesson.lesson_item.name}" has been approved.')
+            return Response({'detail': 'Lesson approved.'})
+        elif action == 'reject':
+            lesson.delete()
+            return Response({'detail': 'Lesson submission rejected and removed.'})
+        return Response({'detail': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminAdmissionsView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        qs = Admission.objects.select_related('course', 'branch').all()
+        status_f = (request.GET.get('status') or '').strip()
+        if status_f:
+            qs = qs.filter(status=status_f)
+        return Response({
+            'count': qs.count(),
+            'admissions': AdmissionSerializer(qs[:100], many=True).data,
+        })
+
+    def post(self, request, pk=None):
+        if not pk:
+            return Response({'detail': 'Admission id required.'}, status=status.HTTP_400_BAD_REQUEST)
+        action = (request.data.get('action') or '').strip().lower()
+        try:
+            admission = Admission.objects.select_related('course', 'branch', 'category').get(pk=pk)
+        except Admission.DoesNotExist:
+            return Response({'detail': 'Admission not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'approve':
+            admission.status = 'APPROVED'
+            admission.save(update_fields=['status'])
+            return Response({'detail': 'Admission approved.', 'status': admission.status})
+        if action == 'reject':
+            admission.status = 'REJECTED'
+            admission.save(update_fields=['status'])
+            return Response({'detail': 'Admission rejected.', 'status': admission.status})
+        if action == 'enroll':
+            admission.status = 'ENROLLED'
+            admission.save(update_fields=['status'])
+            if not Student.objects.filter(admission=admission).exists():
+                user, created = User.objects.get_or_create(
+                    email=admission.email,
+                    defaults={
+                        'username': admission.email,
+                        'first_name': admission.first_name,
+                        'last_name': admission.last_name,
+                        'phone': admission.phone,
+                        'role': 'STUDENT',
+                        'is_active': True,
+                        'is_verified': True,
+                    },
+                )
+                if created:
+                    user.set_unusable_password()
+                    user.save()
+                last = Student.objects.order_by('-id').first()
+                num = (last.id + 1) if last else 1
+                Student.objects.create(
+                    user=user,
+                    admission=admission,
+                    student_number=f'GLS-STU-{num:05d}',
+                    category=admission.category,
+                    course=admission.course,
+                    branch=admission.branch,
+                    package_choice=admission.package_choice or 'FULL',
+                    status='ACTIVE',
+                )
+            return Response({'detail': 'Admission enrolled as student.', 'status': admission.status})
+        return Response({'detail': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminProfileView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        return Response({
+            'user': UserSerializer(request.user, context={'request': request}).data,
+        })
+
+    def put(self, request):
+        user = request.user
+        user.first_name = request.data.get('first_name', user.first_name)
+        user.last_name = request.data.get('last_name', user.last_name)
+        user.phone = request.data.get('phone', user.phone)
+        user.save(update_fields=['first_name', 'last_name', 'phone'])
+        return Response({
+            'detail': 'Profile updated.',
+            'user': UserSerializer(user, context={'request': request}).data,
+        })
