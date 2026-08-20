@@ -2,7 +2,7 @@
   "expo": {
     "name": "Greenlight Admin",
     "slug": "greenlight-admin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -34,7 +34,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.greenlightadmin",
+      "package": "ke.co.greenlight.admin",
       "runtimeVersion": {
         "policy": "appVersion"
       }
