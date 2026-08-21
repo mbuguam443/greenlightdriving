@@ -3,6 +3,7 @@ import { useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -11,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 
 import { Badge, Button, Card, EmptyState, ErrorState, FormInput, Loading, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
@@ -48,6 +50,9 @@ export default function LessonsScreen() {
   const [notice, setNotice] = useState('');
   const [actionError, setActionError] = useState('');
   const [attendingId, setAttendingId] = useState<number | null>(null);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [notesTopic, setNotesTopic] = useState('');
+  const [notesText, setNotesText] = useState('');
 
   useEffect(() => {
     if (isFocused) refresh();
@@ -135,7 +140,12 @@ export default function LessonsScreen() {
           <Text style={styles.lessonMeta}>
             {formatDate(l.date)} · {l.instructor_name ?? 'TBA'}
           </Text>
-          {l.notes ? <Text style={styles.remarks}>{l.notes}</Text> : null}
+          {l.notes ? (
+            <Pressable onPress={() => { setNotesTopic(l.topic || 'Theory notes'); setNotesText(l.notes); setNotesOpen(true); }}>
+              <Text style={[styles.remarks, styles.notesLink]} numberOfLines={3}>{l.notes}</Text>
+              <Text style={styles.zoomHint}>Tap to read full text</Text>
+            </Pressable>
+          ) : null}
           {l.attended ? <Text style={styles.attended}>Attended</Text> : null}
         </View>
         <Badge text={l.status} color={statusColor(l.status, colors)} />
@@ -255,6 +265,25 @@ export default function LessonsScreen() {
           </View>
         </View>
       </Modal>
+      <Modal visible={notesOpen} animationType="slide">
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+          <View style={styles.notesHeader}>
+            <Pressable onPress={() => setNotesOpen(false)}>
+              <Ionicons name="close" size={24} color={colors.text} />
+            </Pressable>
+            <Text style={styles.notesTitle} numberOfLines={1}>{notesTopic}</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          <WebView
+            source={{
+              html: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"><style>body{font-family:${Platform.OS === 'ios' ? '-apple-system' : 'sans-serif'};font-size:16px;line-height:1.6;color:${colors.text};background:${colors.background};padding:16px;word-wrap:break-word;white-space:pre-wrap;}h1,h2,h3{color:${colors.primary};}</style></head><body>${notesText.replace(/\n/g, '<br>')}</body></html>`,
+            }}
+            style={{ flex: 1 }}
+            allowsInlineMediaPlayback={false}
+            scalesPageToFit={Platform.OS === 'ios'}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -311,6 +340,17 @@ function makeStyles(colors: ThemeColors) {
   lessonName: { fontSize: 14, fontWeight: '700', color: colors.text },
   lessonMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   remarks: { fontSize: 12, color: colors.text, marginTop: 4, fontStyle: 'italic' },
+  notesLink: { color: colors.primary, textDecorationLine: 'underline' },
+  zoomHint: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  notesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  notesTitle: { fontSize: 16, fontWeight: '700', color: colors.text, flex: 1, marginHorizontal: spacing.sm },
   attended: { fontSize: 12, color: colors.success, fontWeight: '700', marginTop: 4 },
   attendBtn: { marginTop: spacing.sm },
   requestHint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.sm },
