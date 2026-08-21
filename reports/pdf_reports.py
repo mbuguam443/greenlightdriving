@@ -105,14 +105,14 @@ def generate_payment_report(payments, exported_by='System'):
     story = _title("Payment Report", f"All recorded payments — {date.today().strftime('%d %B %Y')}")
 
     total = 0
-    data = [['Receipt', 'Student', 'Amount', 'Method', 'Status', 'Date']]
+    data = [['Receipt', 'Student', 'Amount', 'Method', 'Status', 'Description', 'Date']]
     for p in payments:
         total += p.amount
         data.append([p.receipt_number, p.student.user.full_name if p.student else '—',
                      f'{p.amount:,.0f}', p.get_method_display(),
-                     p.get_status_display(), p.created_at.strftime('%d/%m/%y')])
+                     p.get_status_display(), p.description or '—', p.created_at.strftime('%d/%m/%y')])
 
-    story.append(_make_table(data, col_widths=[62, None, 52, 45, 50, 48]))
+    story.append(_make_table(data, col_widths=[58, None, 48, 42, 45, None, 44]))
     story.append(Spacer(1, 5*mm))
     styles = getSampleStyleSheet()
     story.append(Paragraph(f"<b>Total Payments: {len(payments)} | Total Revenue: KES {total:,.0f}</b>",
