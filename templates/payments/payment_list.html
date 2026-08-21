@@ -137,6 +137,7 @@
                         <th>Method</th>
                         <th>Reference</th>
                         <th>Status</th>
+                        <th>Description</th>
                         <th>Date</th>
                         <th class="text-end pe-3">Actions</th>
                     </tr>
@@ -169,6 +170,7 @@
                             <span class="badge bg-danger">Failed</span>
                             {% endif %}
                         </td>
+                        <td class="text-muted">{{ payment.description|default:"-" }}</td>
                         <td>{{ payment.date|date:"d M Y" }}</td>
                         <td class="text-end pe-3">
                             <a href="{% url 'payments:detail' payment.pk %}" class="btn btn-sm btn-outline-success" title="View">
