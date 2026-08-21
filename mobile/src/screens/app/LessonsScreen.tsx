@@ -276,11 +276,13 @@ export default function LessonsScreen() {
           </View>
           <WebView
             source={{
-              html: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"><style>body{font-family:${Platform.OS === 'ios' ? '-apple-system' : 'sans-serif'};font-size:16px;line-height:1.6;color:${colors.text};background:${colors.background};padding:16px;word-wrap:break-word;white-space:pre-wrap;}h1,h2,h3{color:${colors.primary};}</style></head><body>${notesText.replace(/\n/g, '<br>')}</body></html>`,
+              html: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes"><style>body{font-family:${Platform.OS === 'ios' ? '-apple-system' : 'sans-serif'};font-size:16px;line-height:1.6;color:${colors.text};background:${colors.background};padding:16px;word-wrap:break-word;white-space:pre-wrap;}h1,h2,h3{color:${colors.primary};}</style></head><body>${notesText.replace(/\n/g, '<br>')}</body></html>`,
             }}
             style={{ flex: 1 }}
-            allowsInlineMediaPlayback={false}
-            scalesPageToFit={Platform.OS === 'ios'}
+            javaScriptEnabled
+            allowFileAccess
+            scalesPageToFit
+            nestedScrollEnabled
           />
         </SafeAreaView>
       </Modal>
