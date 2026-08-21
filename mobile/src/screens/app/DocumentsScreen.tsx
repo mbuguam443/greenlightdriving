@@ -43,19 +43,9 @@ export default function DocumentsScreen() {
     if (!doc.file) return;
     const url = resolveFileUrl(doc.file);
     const ext = (doc.file_extension || '').toUpperCase();
-    if (ext === 'PDF') {
-      Linking.openURL(url);
-      return;
-    }
-    if (IMAGE_EXTS.includes(ext)) {
-      const index = data?.findIndex((item) => item.id === doc.id) ?? -1;
-      if (index >= 0) setViewerIndex(index);
-      return;
-    }
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      Linking.openURL(url);
-    }
+    const index = data?.findIndex((item) => item.id === doc.id) ?? -1;
+    if (index < 0) return;
+    setViewerIndex(index);
   };
 
   return (
@@ -134,7 +124,7 @@ export default function DocumentsScreen() {
               return (
                 <View style={[styles.viewerBody, { width }]}> 
                   {ext === 'PDF' ? (
-                    <WebView source={{ uri: url }} style={styles.viewerWeb} originWhitelist={['*']} />
+                    <WebView source={{ uri: `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true` }} style={styles.viewerWeb} originWhitelist={['*']} scalesPageToFit />
                   ) : IMAGE_EXTS.includes(ext) ? (
                     <Image source={{ uri: url }} style={styles.viewerImage} resizeMode="contain" />
                   ) : (
