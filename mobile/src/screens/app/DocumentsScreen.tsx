@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FlatList, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,8 +34,6 @@ export default function DocumentsScreen() {
   const { width } = useWindowDimensions();
   const { data, loading, error, refreshing, refresh } = useApiData<StudentDocument[]>('/student/documents/');
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(100);
-  const webViewRef = useRef<WebView>(null);
 
   useEffect(() => {
     if (isFocused) refresh();
@@ -45,15 +43,13 @@ export default function DocumentsScreen() {
     if (!doc.file) return;
     const url = resolveFileUrl(doc.file);
     const ext = (doc.file_extension || '').toUpperCase();
-    const index = data?.findIndex((item) => item.id === doc.id) ?? -1;
-    if (index < 0) return;
-
-    if (IMAGE_EXTS.includes(ext)) {
-      setViewerIndex(index);
+    if (ext === 'PDF') {
+      Linking.openURL(url);
       return;
     }
-    if (ext === 'PDF') {
-      setViewerIndex(index);
+    if (IMAGE_EXTS.includes(ext)) {
+      const index = data?.findIndex((item) => item.id === doc.id) ?? -1;
+      if (index >= 0) setViewerIndex(index);
       return;
     }
     const supported = await Linking.canOpenURL(url);
@@ -117,23 +113,6 @@ export default function DocumentsScreen() {
             <Text style={styles.viewerTitle} numberOfLines={1}>
               {viewerIndex !== null ? data?.[viewerIndex]?.title : ''}
             </Text>
-            <View style={styles.zoomRow}>
-              <Pressable style={styles.zoomBtn} onPress={() => {
-                const next = Math.max(50, zoomLevel - 15);
-                setZoomLevel(next);
-                webViewRef.current?.injectJavaScript(`document.body.style.zoom='${next}%';true;`);
-              }}>
-                <Ionicons name="remove" size={18} color={colors.text} />
-              </Pressable>
-              <Text style={styles.zoomLabel}>{zoomLevel}%</Text>
-              <Pressable style={styles.zoomBtn} onPress={() => {
-                const next = Math.min(300, zoomLevel + 15);
-                setZoomLevel(next);
-                webViewRef.current?.injectJavaScript(`document.body.style.zoom='${next}%';true;`);
-              }}>
-                <Ionicons name="add" size={18} color={colors.text} />
-              </Pressable>
-            </View>
             <Pressable onPress={() => setViewerIndex(null)} hitSlop={8} style={styles.viewerClose}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
@@ -155,7 +134,7 @@ export default function DocumentsScreen() {
               return (
                 <View style={[styles.viewerBody, { width }]}> 
                   {ext === 'PDF' ? (
-                    <WebView ref={webViewRef} source={{ uri: url }} style={styles.viewerWeb} originWhitelist={['*']} onLoadEnd={() => setZoomLevel(100)} />
+                    <WebView source={{ uri: url }} style={styles.viewerWeb} originWhitelist={['*']} />
                   ) : IMAGE_EXTS.includes(ext) ? (
                     <Image source={{ uri: url }} style={styles.viewerImage} resizeMode="contain" />
                   ) : (
@@ -211,13 +190,6 @@ function makeStyles(colors: ThemeColors) {
     borderBottomColor: colors.border,
   },
   viewerTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: colors.text, marginRight: spacing.sm },
-  zoomRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: spacing.sm },
-  zoomBtn: {
-    width: 30, height: 30, borderRadius: 15,
-    borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  zoomLabel: { fontSize: 11, fontWeight: '700', color: colors.text, minWidth: 36, textAlign: 'center' },
   viewerClose: {
     width: 34,
     height: 34,
