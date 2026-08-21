@@ -291,7 +291,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     student_number = serializers.SerializerMethodField()
 
     def get_student_name(self, obj):
-        return obj.student.full_name if obj.student else ''
+        return obj.student.user.full_name if obj.student else ''
 
     def get_student_number(self, obj):
         return obj.student.student_number if obj.student else ''

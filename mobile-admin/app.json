@@ -2,45 +2,31 @@
   "expo": {
     "name": "Greenlight Admin",
     "slug": "greenlight-admin",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "greenlightadmin",
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/android-icon-monochrome.png",
-          "color": "#2E7D32"
-        }
-      ]
-    ],
-    "extra": {
-      "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api",
-      "eas": {
-        "projectId": "f13b8482-c27a-4811-8b92-c85f2c0c8679"
-      }
-    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.greenlight.admin",
       "adaptiveIcon": {
-        "backgroundColor": "#2E7D32",
+        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "googleServicesFile": "./google-services.json",
-      "predictiveBackGestureEnabled": false,
-      "package": "ke.co.greenlight.admin",
-      "runtimeVersion": {
-        "policy": "appVersion"
-      }
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "projectId": "f13b8482-c27a-4811-8b92-c85f2c0c8679",
+    "extra": {
+      "eas": {
+        "projectId": "f13b8482-c27a-4811-8b92-c85f2c0c8679"
+      }
     },
     "owner": "mbuguam443"
   }
