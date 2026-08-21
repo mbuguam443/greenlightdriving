@@ -53,6 +53,8 @@ export default function LessonsScreen() {
   const [notesOpen, setNotesOpen] = useState(false);
   const [notesTopic, setNotesTopic] = useState('');
   const [notesText, setNotesText] = useState('');
+  const [fontSize, setFontSize] = useState(16);
+  const webViewRef = React.useRef<WebView>(null);
 
   useEffect(() => {
     if (isFocused) refresh();
@@ -272,15 +274,31 @@ export default function LessonsScreen() {
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
             <Text style={styles.notesTitle} numberOfLines={1}>{notesTopic}</Text>
-            <View style={{ width: 24 }} />
+            <View style={styles.zoomControls}>
+              <Pressable style={styles.zoomBtn} onPress={() => {
+                const next = Math.max(10, fontSize - 2);
+                setFontSize(next);
+                webViewRef.current?.injectJavaScript(`document.body.style.fontSize='${next}px';true;`);
+              }}>
+                <Ionicons name="remove" size={20} color={colors.text} />
+              </Pressable>
+              <Text style={styles.zoomLabel}>{fontSize}px</Text>
+              <Pressable style={styles.zoomBtn} onPress={() => {
+                const next = Math.min(36, fontSize + 2);
+                setFontSize(next);
+                webViewRef.current?.injectJavaScript(`document.body.style.fontSize='${next}px';true;`);
+              }}>
+                <Ionicons name="add" size={20} color={colors.text} />
+              </Pressable>
+            </View>
           </View>
           <WebView
+            ref={webViewRef}
             source={{
-              html: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes"><style>body{font-family:${Platform.OS === 'ios' ? '-apple-system' : 'sans-serif'};font-size:16px;line-height:1.6;color:${colors.text};background:${colors.background};padding:16px;word-wrap:break-word;white-space:pre-wrap;}h1,h2,h3{color:${colors.primary};}</style></head><body>${notesText.replace(/\n/g, '<br>')}</body></html>`,
+              html: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes"><style>body{font-family:${Platform.OS === 'ios' ? '-apple-system' : 'sans-serif'};font-size:${fontSize}px;line-height:1.6;color:${colors.text};background:${colors.background};padding:16px;word-wrap:break-word;white-space:pre-wrap;}h1,h2,h3{color:${colors.primary};}</style></head><body>${notesText.replace(/\n/g, '<br>')}</body></html>`,
             }}
             style={{ flex: 1 }}
             javaScriptEnabled
-            allowFileAccess
             scalesPageToFit
             nestedScrollEnabled
           />
@@ -353,6 +371,13 @@ function makeStyles(colors: ThemeColors) {
     borderBottomColor: colors.border,
   },
   notesTitle: { fontSize: 16, fontWeight: '700', color: colors.text, flex: 1, marginHorizontal: spacing.sm },
+  zoomControls: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  zoomBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  zoomLabel: { fontSize: 12, fontWeight: '700', color: colors.text, minWidth: 30, textAlign: 'center' },
   attended: { fontSize: 12, color: colors.success, fontWeight: '700', marginTop: 4 },
   attendBtn: { marginTop: spacing.sm },
   requestHint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.sm },
