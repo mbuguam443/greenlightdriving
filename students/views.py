@@ -355,3 +355,21 @@ class ClearAllRemindersView(StaffTestMixin, View):
         Student.objects.update(payment_reminder=False)
         messages.success(request, 'Payment reminders cleared for all students.')
         return redirect('students:list')
+
+
+class UpdateDiscountView(StaffTestMixin, View):
+    def post(self, request, pk):
+        student = get_object_or_404(Student, pk=pk)
+        try:
+            discount = float(request.POST.get('discount', 0) or 0)
+        except (ValueError, TypeError):
+            discount = 0
+        student.discount = max(discount, 0)
+        student.discount_reason = request.POST.get('discount_reason', '')
+        student.discount_description = request.POST.get('discount_description', '')
+        student.save(update_fields=['discount', 'discount_reason', 'discount_description'])
+        if student.discount > 0:
+            messages.success(request, f'Discount of KES {student.discount:,.0f} applied for {student.user.full_name}.')
+        else:
+            messages.success(request, f'Discount removed for {student.user.full_name}.')
+        return redirect('students:detail', pk=student.pk)

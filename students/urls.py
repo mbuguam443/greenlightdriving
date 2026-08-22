@@ -14,4 +14,5 @@ urlpatterns = [
     path('remind-all/', views.RemindAllView.as_view(), name='remind_all'),
     path('clear-reminders/', views.ClearAllRemindersView.as_view(), name='clear_reminders'),
     path('<int:student_pk>/enrollments/create/', views.StudentEnrollmentCreateView.as_view(), name='enrollment_create'),
+    path('<int:pk>/update-discount/', views.UpdateDiscountView.as_view(), name='update_discount'),
 ]
