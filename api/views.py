@@ -795,7 +795,7 @@ class AdminNotificationsView(APIView):
         title = (request.data.get('title') or '').strip()
         message = (request.data.get('message') or '').strip()
         ntype = (request.data.get('notification_type') or 'general').strip()
-        send_to_all = request.data.get('send_to_all') is True
+        send_to_all = request.data.get('send_to_all') in (True, 'true', 'True', 1, '1')
         student_ids = request.data.get('student_ids') or []
 
         if not title or not message:

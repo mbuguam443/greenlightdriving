@@ -47,8 +47,10 @@ export async function registerForPushNotifications(): Promise<void> {
     )?.eas?.projectId;
     const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
     if (!tokenData?.data) return;
-    await api.post('/student/push-token/', { push_token: tokenData.data });
-  } catch {
-    // best effort - never let push registration break login/session restore
+    console.log('[Push] Registering token:', tokenData.data.substring(0, 30) + '...');
+    const res = await api.post('/student/push-token/', { push_token: tokenData.data });
+    console.log('[Push] Server response:', res.data);
+  } catch (e: any) {
+    console.log('[Push] Registration failed:', e?.message || e);
   }
 }
