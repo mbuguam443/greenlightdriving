@@ -48,11 +48,11 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="id_phone_number" class="form-label fw-semibold">Phone Number</label>
-                            <input type="tel" name="phone_number" id="id_phone_number" class="form-control"
-                                   value="{{ form.phone_number.value|default:'' }}">
-                            {% if form.phone_number.errors %}
-                            <div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>
+                            <label for="id_phone" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" name="phone" id="id_phone" class="form-control"
+                                   value="{{ form.phone.value|default:'' }}" required>
+                            {% if form.phone.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
                             {% endif %}
                         </div>
 
@@ -99,7 +99,7 @@
                         <div class="col-12">
                             <div class="alert alert-info mb-0">
                                 <i class="bi bi-info-circle me-2"></i>
-                                A temporary password will be generated and sent to the user's email.
+                                 The user's initial password will be their phone number. They should change it after signing in.
                             </div>
                         </div>
                         {% endif %}

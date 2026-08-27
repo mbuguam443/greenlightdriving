@@ -201,9 +201,9 @@ class UserCreateView(StaffRequiredMixin, CreateView):
 
     def form_valid(self, form):
         user = form.save(commit=False)
-        user.set_password(form.cleaned_data.get('password', 'temp1234'))
+        user.set_password(form.cleaned_data.get('phone') or 'temp1234')
         user.save()
-        messages.success(self.request, 'User created successfully.')
+        messages.success(self.request, 'User created successfully. Initial password is the phone number.')
         return super().form_valid(form)
 
 
