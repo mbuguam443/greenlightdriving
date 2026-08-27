@@ -18,10 +18,13 @@ class StudentForm(forms.ModelForm):
                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 07XXXXXXXX'}))
     email = forms.EmailField(label='Email', required=False,
                              widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'student@example.com'}))
+    national_id = forms.CharField(label='National ID', required=False, max_length=30,
+                                  widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'National ID number'}))
 
     class Meta:
         model = Student
-        fields = ['first_name', 'last_name', 'phone', 'email', 'admission', 'category', 'course',
+        fields = ['first_name', 'last_name', 'phone', 'email', 'national_id',
+                  'admission', 'category', 'course',
                   'package_choice', 'branch', 'instructor', 'vehicle', 'status',
                   'expected_graduation', 'notes']
         widgets = {

@@ -104,6 +104,7 @@ class StudentCreateView(StaffTestMixin, CreateView):
         last_name = form.cleaned_data['last_name'].strip()
         phone = (form.cleaned_data.get('phone') or '').strip()
         email = ((form.cleaned_data.get('email') or '').strip().lower() or None)
+        national_id = (form.cleaned_data.get('national_id') or '').strip()
 
         user = UserModel(
             email=email or f"student-{get_random_string(8).lower()}@greenlight.local",
@@ -111,12 +112,13 @@ class StudentCreateView(StaffTestMixin, CreateView):
             first_name=first_name,
             last_name=last_name,
             phone=phone,
+            national_id=national_id,
             role='STUDENT',
             is_active=True,
         )
-        default_pass = get_random_string(10)
+        default_pass = national_id or get_random_string(10)
         user.set_password(default_pass)
-        user.save()
+        user.save(force_insert=True)
 
         student = form.save(commit=False)
         student.user = user
@@ -149,7 +151,7 @@ class StudentCreateView(StaffTestMixin, CreateView):
                 )
                 lesson_date += timedelta(days=1)
 
-        messages.success(self.request, f'Student {user.full_name} created. Login account created with temporary password: {default_pass}')
+        messages.success(self.request, f'Student {user.full_name} created. Login: {email or user.email} | Password: {default_pass}')
         return redirect('students:detail', pk=student.pk)
 
 
@@ -217,6 +219,7 @@ class StudentUpdateView(StaffTestMixin, UpdateView):
         initial['last_name'] = user.last_name
         initial['phone'] = user.phone
         initial['email'] = user.email
+        initial['national_id'] = user.national_id
         return initial
 
     def get_context_data(self, **kwargs):
@@ -235,6 +238,7 @@ class StudentUpdateView(StaffTestMixin, UpdateView):
         user.first_name = form.cleaned_data['first_name'].strip()
         user.last_name = form.cleaned_data['last_name'].strip()
         user.phone = (form.cleaned_data.get('phone') or '').strip()
+        user.national_id = (form.cleaned_data.get('national_id') or '').strip()
         email = ((form.cleaned_data.get('email') or '').strip().lower() or None)
         if email:
             user.email = email
