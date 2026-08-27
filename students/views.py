@@ -96,8 +96,61 @@ class StudentCreateView(StaffTestMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, 'Student created successfully.')
-        return super().form_valid(form)
+        from django.contrib.auth import get_user_model
+        from django.utils.crypto import get_random_string
+        UserModel = get_user_model()
+
+        first_name = form.cleaned_data['first_name'].strip()
+        last_name = form.cleaned_data['last_name'].strip()
+        phone = (form.cleaned_data.get('phone') or '').strip()
+        email = ((form.cleaned_data.get('email') or '').strip().lower() or None)
+
+        user = UserModel(
+            email=email or f"student-{get_random_string(8).lower()}@greenlight.local",
+            username=f"STU-{get_random_string(10).upper()}",
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            role='STUDENT',
+            is_active=True,
+        )
+        default_pass = get_random_string(10)
+        user.set_password(default_pass)
+        user.save()
+
+        student = form.save(commit=False)
+        student.user = user
+        student.save()
+        form.save_m2m()
+
+        # Generate lessons for the student's package
+        from lessons.models import LessonItem, PracticalLesson, TheoryLesson
+        from datetime import date, timedelta
+        package_lesson_map = {
+            'TEST': LessonItem.objects.filter(is_active=True, lesson_type='THEORY'),
+            'HALF': LessonItem.objects.filter(is_active=True).exclude(lesson_type='ASSESSMENT').exclude(order__gte=11),
+            'FULL': LessonItem.objects.filter(is_active=True),
+        }
+        lesson_items = package_lesson_map.get(student.package_choice, LessonItem.objects.none())
+        lesson_date = date.today() + timedelta(days=1)
+        for item in lesson_items:
+            if item.lesson_type == 'PRACTICAL':
+                PracticalLesson.objects.create(
+                    student=student, lesson_item=item,
+                    instructor=student.instructor, vehicle=student.vehicle,
+                    date=lesson_date, status='NOT_STARTED',
+                )
+                lesson_date += timedelta(days=2)
+            elif item.lesson_type == 'THEORY':
+                TheoryLesson.objects.create(
+                    student=student, lesson_item=item, topic=item.name,
+                    instructor=student.instructor, date=lesson_date,
+                    time_start='08:00', time_end='09:00', status='NOT_STARTED',
+                )
+                lesson_date += timedelta(days=1)
+
+        messages.success(self.request, f'Student {user.full_name} created. Login account created with temporary password: {default_pass}')
+        return redirect('students:detail', pk=student.pk)
 
 
 class StudentEnrollmentCreateView(StaffTestMixin, CreateView):
@@ -157,6 +210,15 @@ class StudentUpdateView(StaffTestMixin, UpdateView):
     template_name = 'students/student_form.html'
     success_url = reverse_lazy('students:list')
 
+    def get_initial(self):
+        initial = super().get_initial()
+        user = self.object.user
+        initial['first_name'] = user.first_name
+        initial['last_name'] = user.last_name
+        initial['phone'] = user.phone
+        initial['email'] = user.email
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from website.models import Course, CourseCategory
@@ -169,6 +231,14 @@ class StudentUpdateView(StaffTestMixin, UpdateView):
         return context
 
     def form_valid(self, form):
+        user = self.object.user
+        user.first_name = form.cleaned_data['first_name'].strip()
+        user.last_name = form.cleaned_data['last_name'].strip()
+        user.phone = (form.cleaned_data.get('phone') or '').strip()
+        email = ((form.cleaned_data.get('email') or '').strip().lower() or None)
+        if email:
+            user.email = email
+        user.save()
         messages.success(self.request, 'Student updated successfully.')
         return super().form_valid(form)
 
