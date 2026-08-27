@@ -247,6 +247,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var revCtx = document.getElementById('revenueChart');
     if (revCtx) {
         var ctx = revCtx.getContext('2d');
+        var revenueGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        revenueGradient.addColorStop(0, '#00A878');
+        revenueGradient.addColorStop(1, '#176B87');
         new Chart(ctx, {
             type: 'bar',
             data: {
@@ -254,17 +257,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Revenue (KES)',
                     data: {{ revenue_data_json|safe }},
-                    backgroundColor: '#2E7D32',
-                    borderColor: '#2E7D32',
-                    borderWidth: 2,
+                    backgroundColor: revenueGradient,
+                    hoverBackgroundColor: '#00C98B',
+                    borderColor: '#00A878',
+                    borderWidth: 1,
                     pointRadius: 4,
-                    borderRadius: 6,
+                    borderRadius: 10,
+                    borderSkipped: false,
                 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return 'KES ' + v.toLocaleString(); } } } }
+                scales: {
+                    x: { grid: { display: false }, border: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(23, 107, 135, 0.10)', drawBorder: false },
+                        border: { display: false },
+                        ticks: { callback: function(v) { return 'KES ' + v.toLocaleString(); }, color: '#718096' }
+                    }
+                }
             }
         });
     }
