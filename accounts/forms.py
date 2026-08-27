@@ -49,6 +49,17 @@ class UserProfileForm(forms.ModelForm):
 
 
 class UserAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The application logs in with email, so username is generated automatically.
+        self.fields['username'].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        if not cleaned.get('username') and cleaned.get('email'):
+            cleaned['username'] = cleaned['email']
+        return cleaned
+
     class Meta:
         model = User
         fields = ('email', 'username', 'first_name', 'last_name', 'phone',
