@@ -18,6 +18,8 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{% block og_url %}{{ site_url }}{{ request.path }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{{ site_url }}{% static 'images/logo.png' %}{% endblock %}">
+    <meta property="og:image:alt" content="Greenlight Defensive Driving School logo">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:site_name" content="Greenlight Defensive Driving School">
     <meta property="og:locale" content="en_KE">
     {% endblock %}
@@ -27,6 +29,7 @@
     <meta name="twitter:description" content="{% block twitter_description %}Professional driving education with NTSA-certified instructors. 98% pass rate across 3 branches in Kenya.{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}{{ site_url }}{% static 'images/logo.png' %}{% endblock %}">
     <meta name="twitter:site" content="@GreenLightKE">
+    <meta name="twitter:image:alt" content="Greenlight Defensive Driving School logo">
 
     <meta name="theme-color" content="#2E7D32">
     <meta name="msapplication-TileColor" content="#2E7D32">
@@ -38,6 +41,21 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
 
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "DrivingSchool",
+        "@id": "{{ site_url }}/#driving-school",
+        "name": "{{ site_name|escapejs }}",
+        "description": "NTSA-approved driving lessons and defensive driving training in Kenya.",
+        "url": "{{ site_url }}/",
+        "logo": "{{ site_url }}{% static 'images/logo.png' %}",
+        "image": "{{ site_url }}{% static 'images/logo.png' %}",
+        "areaServed": {"@type": "Country", "name": "Kenya"}
+        {% if phone_primary %},"telephone": "{{ phone_primary|escapejs }}"{% endif %}
+        {% if email %},"email": "{{ email|escapejs }}"{% endif %}
+    }
+    </script>
     {% block json_ld %}{% endblock %}
 
     <style>

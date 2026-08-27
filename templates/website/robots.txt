@@ -11,5 +11,8 @@ Disallow: /vehicles/
 Disallow: /instructors/
 Disallow: /ntsa/
 Disallow: /reports/
+Disallow: /manage/
+Disallow: /api/
+Disallow: /admin/
 
-Sitemap: {{ scheme }}://{{ domain }}/sitemap.xml
+Sitemap: {{ site_url }}/sitemap.xml

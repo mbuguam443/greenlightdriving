@@ -1,10 +1,15 @@
+import os
+
 from .models import Branch, SiteSettings
 
 
 def site_context(request):
     settings = SiteSettings.objects.first()
     branches = Branch.objects.filter(is_active=True)
-    site_url = f'{request.scheme}://{request.get_host()}'
+    site_url = os.environ.get(
+        'SEO_SITE_URL',
+        'https://greenlight-driving-defensive.schones-heim-builders.co.ke',
+    ).rstrip('/')
 
     context = {
         "site_name": "Greenlight Defensive Driving School",

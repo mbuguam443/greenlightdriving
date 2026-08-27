@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, FormView, TemplateView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
@@ -23,6 +25,7 @@ class SitemapView(TemplateView):
         context['branches'] = Branch.objects.filter(is_active=True)
         context['scheme'] = self.request.scheme
         context['domain'] = self.request.get_host()
+        context['site_url'] = f'{self.request.scheme}://{self.request.get_host()}'
         return context
 
 
@@ -34,6 +37,10 @@ class RobotsTxtView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['scheme'] = self.request.scheme
         context['domain'] = self.request.get_host()
+        context['site_url'] = os.environ.get(
+            'SEO_SITE_URL',
+            f'{self.request.scheme}://{self.request.get_host()}',
+        ).rstrip('/')
         return context
 
 
