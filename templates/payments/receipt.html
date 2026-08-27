@@ -44,7 +44,7 @@
             <div class="row mb-4">
                 <div class="col-6">
                     <small class="text-muted d-block">Date:</small>
-                    <span class="fw-semibold">{{ payment.date|date:"d M Y H:i" }}</span>
+                    <span class="fw-semibold">{{ payment.created_at|date:"d M Y H:i" }}</span>
                 </div>
                 <div class="col-6 text-end">
                     <span class="badge fs-6" style="background-color: {% if payment.status == 'COMPLETED' %}#2E7D32{% else %}var(--primary-green){% endif %};">
