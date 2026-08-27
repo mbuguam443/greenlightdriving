@@ -28,6 +28,7 @@ class User(AbstractUser):
         ("RECEPTIONIST", "Receptionist"),
         ("INSTRUCTOR", "Instructor"),
         ("ACCOUNTANT", "Accountant"),
+        ("READ_ONLY_ADMIN", "Read-only Admin"),
         ("STUDENT", "Student"),
     ]
 

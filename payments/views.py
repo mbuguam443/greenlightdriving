@@ -18,7 +18,7 @@ from .mpesa_utils import initiate_stk_push, format_phone
 
 class StaffTestMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'ACCOUNTANT', 'RECEPTIONIST')
+        return self.request.user.is_authenticated and self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'ACCOUNTANT', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
 
 class PaymentListView(StaffTestMixin, ListView):

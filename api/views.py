@@ -53,7 +53,7 @@ class IsStudent(IsAuthenticated):
         )
 
 
-STAFF_ROLES = ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'ACCOUNTANT', 'INSTRUCTOR')
+STAFF_ROLES = ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'ACCOUNTANT', 'INSTRUCTOR', 'READ_ONLY_ADMIN')
 
 
 class IsStaff(IsAuthenticated):

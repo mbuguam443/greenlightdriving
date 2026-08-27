@@ -90,10 +90,22 @@
         @media (max-width: 575.98px) {
             .dash-content { padding: 1rem; }
         }
+
+        .read-only-admin a[href*="/create/"],
+        .read-only-admin a[href*="/update/"],
+        .read-only-admin a[href*="/delete/"],
+        .read-only-admin a[href*="/edit/"],
+        .read-only-admin a[href*="/status/"],
+        .read-only-admin a[href*="/toggle/"],
+        .read-only-admin a[href*="/convert/"],
+        .read-only-admin a[href*="/generate/"],
+        .read-only-admin a[href*="/approve/"],
+        .read-only-admin a[href*="/attendance/"] { display: none !important; }
+        .read-only-admin form[method="post"]:not([action*="logout"]) { display: none !important; }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if user.role == 'READ_ONLY_ADMIN' %}read-only-admin{% endif %}">
     <div class="dash-layout">
         <div class="sb-overlay" id="sbOverlay" onclick="toggleSb()"></div>
 

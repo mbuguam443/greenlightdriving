@@ -41,7 +41,7 @@ class StaffMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return super().dispatch(request, *args, **kwargs)
-        if request.user.role not in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST'):
+        if request.user.role not in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN'):
             from django.contrib.auth.views import redirect_to_login
             return redirect_to_login(request.get_full_path())
         return super().dispatch(request, *args, **kwargs)

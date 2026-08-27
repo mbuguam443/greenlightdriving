@@ -15,7 +15,7 @@ from .forms import StudentForm, StudentEnrollmentForm
 
 class StaffTestMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+        return self.request.user.is_authenticated and self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
 
 class StudentListView(StaffTestMixin, ListView):

@@ -70,7 +70,7 @@ class AdmissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     paginate_by = 20
 
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get_queryset(self):
         queryset = Admission.objects.select_related('course', 'branch', 'student').all()
@@ -106,7 +106,7 @@ class AdmissionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     context_object_name = 'admission'
 
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -127,7 +127,7 @@ class AdmissionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('admissions:list')
 
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def form_valid(self, form):
         new_status = form.cleaned_data.get('status')
@@ -225,7 +225,7 @@ class AdmissionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('admissions:list')
 
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Admission deleted successfully.')
@@ -236,7 +236,7 @@ class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View)
     """Staff-only internal admission form — no captcha, no spam protection."""
 
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get(self, request):
         form = InternalAdmissionForm()
@@ -255,7 +255,7 @@ class InternalAdmissionCreateView(LoginRequiredMixin, UserPassesTestMixin, View)
 
 class InquiryListView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get(self, request):
         from .models import WalkInInquiry
@@ -295,7 +295,7 @@ class InquiryListView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class InquiryCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def post(self, request):
         from .forms import InquiryForm
@@ -312,7 +312,7 @@ class InquiryCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class InquiryToggleView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get(self, request, pk):
         from .models import WalkInInquiry
@@ -326,7 +326,7 @@ class InquiryToggleView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class InquiryConvertView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get(self, request, pk):
         from .models import WalkInInquiry
@@ -341,7 +341,7 @@ class InquiryConvertView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class InquiryUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def post(self, request, pk):
         from .models import WalkInInquiry
@@ -362,7 +362,7 @@ class InquiryUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class InquiryDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST')
+         return self.request.user.role in ('SUPER_ADMIN', 'MANAGER', 'RECEPTIONIST', 'READ_ONLY_ADMIN')
 
     def get(self, request, pk):
         from .models import WalkInInquiry
