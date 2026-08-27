@@ -265,8 +265,8 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(courseCtx.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: {{ course_labels|safe }},
-                datasets: [{ data: {{ course_data|safe }}, backgroundColor: colors.slice(0, {{ course_data|length }}), borderWidth: 2, borderColor: '#fff' }]
+                labels: {{ course_labels_json|safe }},
+                datasets: [{ data: {{ course_data_json|safe }}, backgroundColor: colors.slice(0, {{ course_data|length }}), borderWidth: 2, borderColor: '#fff' }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,

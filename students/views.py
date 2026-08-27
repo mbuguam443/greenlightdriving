@@ -326,6 +326,8 @@ class IndexView(LoginRequiredMixin, View):
             'revenue_data_json': json.dumps(revenue_data),
             'course_labels': course_labels,
             'course_data': course_data,
+            'course_labels_json': json.dumps(course_labels),
+            'course_data_json': json.dumps(course_data),
         }
         return render(request, 'students/dashboard.html', context)
 
