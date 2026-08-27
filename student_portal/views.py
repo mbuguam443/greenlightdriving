@@ -432,13 +432,21 @@ class DocUpdateView(StaffMixin, UpdateView):
     from .models import StudentDocument
     model = None
     template_name = 'student_portal/manage/doc_form.html'
-    fields = ['title', 'description', 'file', 'category', 'is_active']
+    fields = ['title', 'description', 'file', 'category', 'student', 'is_active']
     success_url = reverse_lazy('student_portal:manage_documents')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         from .models import StudentDocument
         self.model = StudentDocument
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from .models import StudentDocument
+        from students.models import Student
+        context['categories'] = StudentDocument.CATEGORY_CHOICES
+        context['all_students'] = Student.objects.select_related('user').all()
+        return context
 
 
 class DocDeleteView(StaffMixin, DeleteView):
