@@ -196,6 +196,7 @@ class UserCreateView(StaffRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         from core.models import Branch
         context['branches'] = Branch.objects.filter(is_active=True)
+        context['role_choices'] = User.ROLE_CHOICES
         return context
 
     def form_valid(self, form):
@@ -216,6 +217,7 @@ class UserUpdateView(StaffRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         from core.models import Branch
         context['branches'] = Branch.objects.filter(is_active=True)
+        context['role_choices'] = User.ROLE_CHOICES
         return context
 
     def form_valid(self, form):
