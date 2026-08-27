@@ -324,6 +324,7 @@ class IndexView(LoginRequiredMixin, View):
             'revenue_data': revenue_data,
             'revenue_labels_json': json.dumps(revenue_labels),
             'revenue_data_json': json.dumps(revenue_data),
+            'has_recent_revenue': any(revenue_data),
             'course_labels': course_labels,
             'course_data': course_data,
             'course_labels_json': json.dumps(course_labels),
