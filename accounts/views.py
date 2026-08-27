@@ -178,8 +178,10 @@ class UserListView(StaffRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['role_choices'] = User.ROLE_CHOICES
         context['roles'] = User.ROLE_CHOICES
         context['current_role'] = self.request.GET.get('role', '')
+        context['role_filter'] = context['current_role']
         context['search_query'] = self.request.GET.get('search', '')
         return context
 
