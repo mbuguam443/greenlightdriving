@@ -262,14 +262,16 @@ class IndexView(LoginRequiredMixin, View):
         if request.user.role == 'STUDENT':
             return redirect('student_portal:dashboard')
         from django.db.models import Sum, Count
-        from datetime import date
+        from datetime import datetime, time, timedelta
+        from django.utils import timezone
         from payments.models import Payment
         from admissions.models import Admission
         from vehicles.models import Vehicle
         from instructors.models import Instructor
         from lessons.models import PracticalLesson, TheoryLesson
 
-        today = date.today()
+        current_tz = timezone.get_current_timezone()
+        today = timezone.localdate()
         active_students = Student.objects.filter(status='ACTIVE')
         pending_balance_count = 0
         for s in active_students:
@@ -291,12 +293,17 @@ class IndexView(LoginRequiredMixin, View):
         today_lessons.sort(key=lambda x: x.date if hasattr(x, 'date') else x.created_at, reverse=True)
 
         # Revenue last 7 days for chart
-        from datetime import timedelta
         revenue_labels = []
         revenue_data = []
         for i in range(6, -1, -1):
             day = today - timedelta(days=i)
-            day_total = Payment.objects.filter(created_at__date=day, status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0
+            day_start = timezone.make_aware(datetime.combine(day, time.min), current_tz)
+            day_end = day_start + timedelta(days=1)
+            day_total = Payment.objects.filter(
+                created_at__gte=day_start,
+                created_at__lt=day_end,
+                status='COMPLETED',
+            ).aggregate(total=Sum('amount'))['total'] or 0
             revenue_labels.append(day.strftime('%a'))
             revenue_data.append(float(day_total))
 
@@ -313,7 +320,11 @@ class IndexView(LoginRequiredMixin, View):
         context = {
             'total_students': active_students.count(),
             'today_admissions': Admission.objects.filter(created_at__date=today).count(),
-            'today_revenue': Payment.objects.filter(created_at__date=today, status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0,
+            'today_revenue': Payment.objects.filter(
+                created_at__gte=timezone.make_aware(datetime.combine(today, time.min), current_tz),
+                created_at__lt=timezone.make_aware(datetime.combine(today + timedelta(days=1), time.min), current_tz),
+                status='COMPLETED',
+            ).aggregate(total=Sum('amount'))['total'] or 0,
             'total_revenue': Payment.objects.filter(status='COMPLETED').aggregate(total=Sum('amount'))['total'] or 0,
             'total_vehicles': Vehicle.objects.filter(is_available=True).count(),
             'total_instructors': Instructor.objects.filter(is_active=True).count(),
