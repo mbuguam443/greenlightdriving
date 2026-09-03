@@ -1,24 +1,36 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useMemo } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Loading, ErrorState, StatCard, Badge, ProgressBar } from '../../components/ui';
+import { Card, Loading, ErrorState, Badge, ProgressBar, EmptyState } from '../../components/ui';
 import { useTheme } from '../../context/ThemeContext';
 import { useApiData } from '../../hooks/useApiData';
-import { StudentRecord } from '../../types';
+import { StudentDetail } from '../../types';
 import { AdminStackParamList } from '../../navigation/types';
 import { radius, spacing } from '../../theme/colors';
 
 type Props = NativeStackScreenProps<AdminStackParamList, 'StudentDetail'>;
 
+type Tab = 'overview' | 'payments' | 'lessons' | 'notifications';
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'payments', label: 'Payments' },
+  { key: 'lessons', label: 'Lessons' },
+  { key: 'notifications', label: 'Notifications' },
+];
+
 export default function StudentDetailScreen({ route }: Props) {
   const { studentId } = route.params;
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: student, loading, error, refreshing, refresh } = useApiData<StudentRecord>(`/admin/students/${studentId}/`);
+  const { data, loading, error, refreshing, refresh } = useApiData<StudentDetail>(`/admin/students/${studentId}/`);
+  const [tab, setTab] = useState<Tab>('overview');
 
   if (loading) return <Loading />;
-  if (error || !student) return <ErrorState message={error || 'Student not found.'} onRetry={refresh} />;
+  if (error || !data) return <ErrorState message={error || 'Student not found.'} onRetry={refresh} />;
+
+  const { student } = data;
 
   return (
     <ScrollView
@@ -28,10 +40,39 @@ export default function StudentDetailScreen({ route }: Props) {
     >
       <Card>
         <Text style={[styles.name, { color: colors.text }]}>{student.full_name}</Text>
-        <Text style={[styles.sub, { color: colors.textMuted }]}>{student.student_number}</Text>
+        <Text style={[styles.sub, { color: colors.textMuted }]}>{student.student_number} · {student.email}</Text>
         <Badge text={student.status} color={student.status === 'ACTIVE' ? colors.success : colors.warning} />
       </Card>
 
+      <View style={styles.tabs}>
+        {TABS.map((t) => {
+          const active = tab === t.key;
+          return (
+            <Pressable
+              key={t.key}
+              onPress={() => setTab(t.key)}
+              style={[
+                styles.tab,
+                { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? `${colors.primary}1A` : colors.card },
+              ]}
+            >
+              <Text style={[styles.tabText, { color: active ? colors.primary : colors.text }]}>{t.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {tab === 'overview' ? <OverviewTab student={student as any} colors={colors} styles={styles} /> : null}
+      {tab === 'payments' ? <PaymentsTab payments={data.payments} studentName={student.full_name} colors={colors} styles={styles} /> : null}
+      {tab === 'lessons' ? <LessonsTab lessons={data.lessons} studentName={student.full_name} colors={colors} styles={styles} /> : null}
+      {tab === 'notifications' ? <NotificationsTab notifications={data.notifications} colors={colors} styles={styles} /> : null}
+    </ScrollView>
+  );
+}
+
+function OverviewTab({ student, colors, styles }: { student: any; colors: any; styles: any }) {
+  return (
+    <>
       <Card style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Course Details</Text>
         <InfoRow label="Course" value={student.course_name} colors={colors} />
@@ -54,7 +95,75 @@ export default function StudentDetailScreen({ route }: Props) {
         <InfoRow label="Paid" value={`KES ${student.amount_paid}`} colors={colors} valueColor={colors.success} />
         <InfoRow label="Balance" value={`KES ${student.balance}`} colors={colors} valueColor={colors.danger} />
       </Card>
-    </ScrollView>
+    </>
+  );
+}
+
+function PaymentsTab({ payments, studentName, colors, styles }: { payments: any[]; studentName: string; colors: any; styles: any }) {
+  if (!payments.length) {
+    return <EmptyState icon="card-outline" title="No payments yet" subtitle={`No payments recorded for ${studentName}.`} />;
+  }
+  return (
+    <>
+      {payments.map((p) => (
+        <Card key={p.id} style={styles.section}>
+          <View style={styles.rowBetween}>
+            <Text style={[styles.itemMain, { color: colors.text }]}>{p.receipt_number}</Text>
+            <Text style={[styles.itemAmount, { color: colors.success }]}>KES {p.amount}</Text>
+          </View>
+          <View style={styles.chips}>
+            <Badge text={p.method_display} />
+            <Badge text={p.status_display} color={p.status === 'COMPLETED' ? colors.success : colors.warning} />
+            <Text style={[styles.itemSub, { color: colors.textMuted }]}>{p.created_at}</Text>
+          </View>
+          {p.description ? <Text style={[styles.itemSub, { color: colors.textMuted }]}>{p.description}</Text> : null}
+        </Card>
+      ))}
+    </>
+  );
+}
+
+function LessonsTab({ lessons, studentName, colors, styles }: { lessons: any[]; studentName: string; colors: any; styles: any }) {
+  if (!lessons.length) {
+    return <EmptyState icon="book-outline" title="No lessons yet" subtitle={`No lessons scheduled for ${studentName}.`} />;
+  }
+  return (
+    <>
+      {lessons.map((l) => (
+        <Card key={l.id} style={styles.section}>
+          <Text style={[styles.itemMain, { color: colors.text }]}>{l.lesson_item_name}</Text>
+          <View style={styles.chips}>
+            <Badge text={l.lesson_type} />
+            <Badge text={l.status} color={l.status === 'COMPLETED' ? colors.success : colors.warning} />
+            <Text style={[styles.itemSub, { color: colors.textMuted }]}>{l.date}</Text>
+          </View>
+          {l.instructor_name ? (
+            <Text style={[styles.itemSub, { color: colors.textMuted }]}>Instructor: {l.instructor_name}</Text>
+          ) : null}
+          {l.remarks ? <Text style={[styles.itemSub, { color: colors.textMuted }]}>{l.remarks}</Text> : null}
+        </Card>
+      ))}
+    </>
+  );
+}
+
+function NotificationsTab({ notifications, colors, styles }: { notifications: any[]; colors: any; styles: any }) {
+  if (!notifications.length) {
+    return <EmptyState icon="notifications-outline" title="No notifications" />;
+  }
+  return (
+    <>
+      {notifications.map((n) => (
+        <Card key={n.id} style={styles.section}>
+          <View style={styles.rowBetween}>
+            <Text style={[styles.itemMain, { color: colors.text }]}>{n.title}</Text>
+            {n.is_read ? null : <Badge text="New" color={colors.primary} />}
+          </View>
+          <Text style={[styles.itemSub, { color: colors.textMuted }]}>{n.message}</Text>
+          <Text style={[styles.itemSmall, { color: colors.textMuted }]}>{n.created_at}</Text>
+        </Card>
+      ))}
+    </>
   );
 }
 
@@ -81,5 +190,19 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     section: { marginTop: spacing.md },
     sectionTitle: { fontSize: 15, fontWeight: '700', marginBottom: spacing.sm },
     progressText: { fontSize: 12, marginTop: 4, textAlign: 'center' },
+    tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
+    tab: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: 8,
+      borderRadius: radius.pill,
+      borderWidth: 1.5,
+    },
+    tabText: { fontSize: 12, fontWeight: '600' },
+    rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    chips: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.sm, flexWrap: 'wrap' },
+    itemMain: { fontSize: 14, fontWeight: '700' },
+    itemSub: { fontSize: 12, marginTop: 4 },
+    itemSmall: { fontSize: 11, marginTop: 4 },
+    itemAmount: { fontSize: 14, fontWeight: '800' },
   });
 }

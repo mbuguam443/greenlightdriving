@@ -56,6 +56,13 @@ export interface PaymentRecord {
   created_at: string;
 }
 
+export interface StudentDetail {
+  student: StudentRecord;
+  payments: PaymentRecord[];
+  lessons: LessonRecord[];
+  notifications: NotificationRecord[];
+}
+
 export interface LessonRecord {
   id: number;
   student_name: string;

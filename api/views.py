@@ -929,7 +929,19 @@ class AdminStudentDetailView(APIView):
             ).get(pk=pk)
         except Student.DoesNotExist:
             return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(AdminStudentSerializer(student).data)
+
+        payments = Payment.objects.filter(student=student).select_related('student__user').order_by('-created_at')[:20]
+        lessons = PracticalLesson.objects.filter(student=student).select_related(
+            'student__user', 'lesson_item', 'instructor__user', 'vehicle'
+        ).order_by('-date')[:20]
+        notifications = Notification.objects.filter(student=student).select_related('student__user').order_by('-created_at')[:20]
+
+        return Response({
+            'student': AdminStudentSerializer(student).data,
+            'payments': AdminPaymentRecordSerializer(payments, many=True).data,
+            'lessons': AdminLessonRecordSerializer(lessons, many=True).data,
+            'notifications': AdminNotificationRecordSerializer(notifications, many=True).data,
+        })
 
 
 class AdminPaymentsView(APIView):
