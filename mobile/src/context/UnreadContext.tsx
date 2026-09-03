@@ -1,9 +1,9 @@
-import * as Notifications from 'expo-notifications';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 
 import { useAuth } from './AuthContext';
 import { api } from '../services/apiClient';
+import { subscribeToNotificationReceived } from '../services/notifications';
 import { NotificationItem } from '../types';
 
 interface UnreadContextValue {
@@ -39,7 +39,7 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') refreshUnread();
     });
-    const notifSub = Notifications.addNotificationReceivedListener(() => refreshUnread());
+    const notifSub = subscribeToNotificationReceived(() => refreshUnread());
     return () => {
       sub.remove();
       notifSub.remove();

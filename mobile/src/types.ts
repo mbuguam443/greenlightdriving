@@ -226,3 +226,52 @@ export interface ChatMessage {
   date: string;
   created_at: string;
 }
+
+export interface AdmissionRecord {
+  id: number;
+  admission_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  national_id: string;
+  address: string;
+  date_of_birth: string | null;
+  category: number;
+  category_name: string;
+  course: number;
+  course_name: string;
+  package_choice: string;
+  branch: number;
+  branch_name: string;
+  preferred_schedule: string;
+  status: string;
+  created_at: string;
+}
+
+export type AccessLevel = 'granted' | 'pending' | 'rejected' | 'none';
+
+export interface AdmissionAccess {
+  access_level: AccessLevel;
+  admitted: boolean;
+  student: Student | null;
+  admission: AdmissionRecord | null;
+  status: string | null;
+}
+
+export interface CourseCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+export interface BranchOption {
+  id: number;
+  name: string;
+  slug: string;
+  address: string;
+  town: string;
+  phone: string;
+  email: string;
+}

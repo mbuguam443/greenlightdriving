@@ -24,6 +24,7 @@
     },
     "projectId": "f13b8482-c27a-4811-8b92-c85f2c0c8679",
     "extra": {
+      "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api",
       "eas": {
         "projectId": "f13b8482-c27a-4811-8b92-c85f2c0c8679"
       }

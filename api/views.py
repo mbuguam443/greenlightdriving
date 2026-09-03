@@ -21,6 +21,11 @@ from website.models import BlogPost, ContactMessage, Course, CourseCategory, FAQ
 
 from .serializers import (
     AdmissionSerializer,
+    AdminAdmissionRecordSerializer,
+    AdminLessonRecordSerializer,
+    AdminNotificationRecordSerializer,
+    AdminPaymentRecordSerializer,
+    AdminStudentSerializer,
     BlogPostSerializer,
     BranchSerializer,
     ContactMessageSerializer,
@@ -72,6 +77,90 @@ def _get_student(request):
         )
     except Student.DoesNotExist:
         return None
+
+
+ADMITTED_STATUSES = ('APPROVED', 'ENROLLED')
+
+
+def _get_my_admission(user):
+    """The most recent admission belonging to this user (by link or email)."""
+    from django.db.models import Q
+    return (
+        Admission.objects.filter(Q(submitted_by=user) | Q(email=user.email))
+        .order_by('-created_at')
+        .first()
+    )
+
+
+def _access_state(user):
+    """Describe a student's access level.
+
+    Returns a dict:
+      {
+        'level': 'granted' | 'pending' | 'rejected' | 'none',
+        'admission': Admission | None,
+        'student': Student | None,
+      }
+
+    'granted'  -> the student has an enrolled Student profile and their
+                  admission (if any) is APPROVED or ENROLLED. Full access.
+    'pending'  -> an admission exists but is PENDING. Most services blocked.
+    'rejected' -> an admission exists but was REJECTED.
+    'none'     -> no admission on record. Can submit one.
+    """
+    student = None
+    try:
+        student = Student.objects.filter(user=user).first()
+    except Student.DoesNotExist:
+        student = None
+
+    admission = None
+    if student and student.admission_id:
+        admission = student.admission
+    if admission is None:
+        admission = _get_my_admission(user)
+
+    if admission is None:
+        return {'level': 'none', 'admission': None, 'student': student}
+
+    if admission.status in ADMITTED_STATUSES:
+        return {'level': 'granted', 'admission': admission, 'student': student}
+
+    if admission.status == 'REJECTED':
+        return {'level': 'rejected', 'admission': admission, 'student': student}
+
+    return {'level': 'pending', 'admission': admission, 'student': student}
+
+
+def _blocked_response(state):
+    """Response returned to students whose admission is not granted."""
+    from rest_framework import status as drf_status
+    if state['level'] == 'none':
+        return Response({
+            'detail': 'You have not submitted your admission application yet. '
+                      'Please submit one to unlock your student services.',
+            'code': 'ADMISSION_REQUIRED',
+            'admission_status': None,
+        }, status=drf_status.HTTP_403_FORBIDDEN)
+    if state['level'] == 'rejected':
+        return Response({
+            'detail': 'Your admission application was not approved. Contact the school for more information.',
+            'code': 'ADMISSION_REJECTED',
+            'admission_status': 'REJECTED',
+        }, status=drf_status.HTTP_403_FORBIDDEN)
+    return Response({
+        'detail': 'Your admission is still under review. Most services are locked until it is approved.',
+        'code': 'ADMISSION_PENDING',
+        'admission_status': 'PENDING',
+    }, status=drf_status.HTTP_403_FORBIDDEN)
+
+
+def _require_admission(request):
+    """Return (None, None) if access granted, else (state, blocked_response)."""
+    state = _access_state(request.user)
+    if state['level'] == 'granted':
+        return None, None
+    return state, _blocked_response(state)
 
 
 # ============================== AUTH ==============================
@@ -214,6 +303,9 @@ class StudentDashboardView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -249,6 +341,9 @@ class StudentLessonsView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -270,6 +365,9 @@ class StudentLessonsView(APIView):
         })
 
     def post(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -309,6 +407,9 @@ class StudentAttendanceView(APIView):
     permission_classes = [IsStudent]
 
     def post(self, request, pk):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -342,6 +443,9 @@ class StudentPaymentsView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -365,6 +469,9 @@ class StudentMpesaInitiateView(APIView):
     permission_classes = [IsStudent]
 
     def post(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -424,6 +531,9 @@ class StudentNotificationsView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -432,6 +542,9 @@ class StudentNotificationsView(APIView):
         return Response(NotificationSerializer(notifications, many=True).data)
 
     def post(self, request, pk=None):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -461,6 +574,8 @@ class StudentPushTokenView(APIView):
     permission_classes = [IsStudent]
 
     def post(self, request):
+        # Push token registration must always be allowed (e.g. a pending student
+        # still needs to receive admission-status notifications), so it is not gated.
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -478,6 +593,9 @@ class StudentEventsView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -494,6 +612,9 @@ class StudentDocumentsView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -508,6 +629,9 @@ class StudentNTSAView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         student = _get_student(request)
         if not student:
             return Response({'detail': 'No student profile linked to this account.'},
@@ -585,6 +709,9 @@ class StudentChatView(APIView):
     permission_classes = [IsStudent]
 
     def get(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         messages = ChatMessage.objects.select_related('user').order_by('-created_at')[:200]
         data = []
         for m in reversed(list(messages)):
@@ -603,6 +730,9 @@ class StudentChatView(APIView):
         return Response({'messages': data})
 
     def post(self, request):
+        _state, blocked = _require_admission(request)
+        if blocked:
+            return blocked
         content = (request.data.get('content') or '').strip()
         if not content:
             return Response({'detail': 'Message cannot be empty.'},
@@ -625,6 +755,109 @@ class StudentChatView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+# ============================== STUDENT ADMISSION ==============================
+
+
+class StudentAccessView(APIView):
+    """Returns the student's current access level and admission status.
+
+    The app uses this at startup to decide which screens to show.
+    """
+    permission_classes = [IsStudent]
+
+    def get(self, request):
+        state = _access_state(request.user)
+        student = state['student']
+        admission = state['admission']
+        admitted = state['level'] == 'granted'
+        from .serializers import StudentSerializer, AdmissionSerializer
+        return Response({
+            'access_level': state['level'],
+            'admitted': admitted,
+            'student': StudentSerializer(student, context={'request': request}).data if student else None,
+            'admission': AdmissionSerializer(admission, context={'request': request}).data if admission else None,
+            'status': admission.status if admission else None,
+        })
+
+
+class StudentAdmissionView(APIView):
+    """View and submit the current user's admission application from the app."""
+    permission_classes = [IsStudent]
+
+    def get(self, request):
+        admission = _get_my_admission(request.user)
+        from .serializers import AdmissionSerializer
+        return Response({
+            'admission': AdmissionSerializer(admission, context={'request': request}).data if admission else None,
+        })
+
+    def post(self, request):
+        if _get_my_admission(request.user) is not None:
+            return Response({'detail': 'You already have an admission application on file.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        from website.models import Course, CourseCategory
+        from core.models import Branch
+        from admissions.models import Admission as AdmissionModel
+
+        category_id = request.data.get('category')
+        course_id = request.data.get('course')
+        branch_id = request.data.get('branch')
+        package_choice = (request.data.get('package_choice') or 'FULL').strip().upper()
+        gender = (request.data.get('gender') or 'M').strip().upper()
+        preferred_schedule = (request.data.get('preferred_schedule') or 'MORNING').strip().upper()
+        date_of_birth = request.data.get('date_of_birth') or None
+        national_id = (request.data.get('national_id') or '').strip()
+        address = (request.data.get('address') or '').strip()
+
+        if not category_id or not course_id or not branch_id:
+            return Response({'detail': 'Course category, course and branch are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not national_id or not address:
+            return Response({'detail': 'National ID and address are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        category = CourseCategory.objects.filter(pk=category_id).first()
+        course = Course.objects.filter(pk=course_id, category=category, is_active=True).first() if category else None
+        branch = Branch.objects.filter(pk=branch_id, is_active=True).first()
+        if not category or not course or not branch:
+            return Response({'detail': 'Invalid category, course or branch selected.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        admission = AdmissionModel.objects.create(
+            submitted_by=request.user,
+            first_name=request.user.first_name or request.user.email,
+            last_name=request.user.last_name or '',
+            email=request.user.email,
+            phone=request.user.phone or '',
+            date_of_birth=date_of_birth or '2000-01-01',
+            gender=gender if gender in ('M', 'F', 'OTHER') else 'M',
+            national_id=national_id,
+            address=address,
+            category=category,
+            course=course,
+            package_choice=package_choice if package_choice in AdmissionModel.PACKAGE_CHOICES else 'FULL',
+            branch=branch,
+            preferred_schedule=preferred_schedule if preferred_schedule in dict(AdmissionModel.SCHEDULE_CHOICES) else 'MORNING',
+            status='PENDING',
+        )
+        # passport_photo and national_id_image are optional for app submissions.
+
+        from core.models import DailyLog
+        DailyLog.objects.create(
+            title=f'New Admission: {admission.full_name}',
+            description=f'Course: {course.name}. Phone: {admission.phone}. Submitted via mobile app.',
+            log_date=timezone.now().date(),
+            created_by=request.user,
+        )
+
+        from .serializers import AdmissionSerializer
+        return Response({
+            'detail': 'Admission submitted successfully. You will be contacted once it is reviewed.',
+            'admission': AdmissionSerializer(admission, context={'request': request}).data,
+        }, status=status.HTTP_201_CREATED)
+
+
 # ============================== ADMIN ==============================
 
 
@@ -634,44 +867,33 @@ class AdminDashboardView(APIView):
     def get(self, request):
         from django.db.models import Sum
         today = timezone.now().date()
+        total_students = Student.objects.count()
         active_students = Student.objects.filter(status='ACTIVE').count()
         pending_admissions = Admission.objects.filter(status='PENDING').count()
-        today_practical = PracticalLesson.objects.filter(date=today).select_related(
-            'student__user', 'lesson_item', 'instructor__user', 'vehicle'
-        ).order_by('date')[:20]
-        today_theory = TheoryLesson.objects.filter(date=today).select_related(
-            'student__user', 'instructor__user'
-        ).order_by('date')[:20]
-        pending_approvals = PracticalLesson.objects.filter(
+        pending_lesson_approvals = PracticalLesson.objects.filter(
             submitted_by_student=True, is_approved=False
-        ).select_related('student__user', 'lesson_item')[:20]
-        unread_replies = Notification.objects.filter(
+        ).count()
+        unread_messages = Notification.objects.filter(
             is_read=True, reply__gt='', reply_read=False
-        ).select_related('student__user')[:20]
+        ).count()
+
         month_start = today.replace(day=1)
         month_revenue = Payment.objects.filter(
             status='COMPLETED', created_at__date__gte=month_start
         ).aggregate(total=Sum('amount'))['total'] or 0
-        outstanding = 0
-        for s in Student.objects.filter(status='ACTIVE'):
-            outstanding += max(s.balance, 0)
+
+        recent_payments = Payment.objects.select_related('student__user')[:10]
+        recent_admissions = Admission.objects.select_related('course', 'branch')[:10]
 
         return Response({
+            'total_students': total_students,
             'active_students': active_students,
+            'total_payments_this_month': str(month_revenue),
             'pending_admissions': pending_admissions,
-            'pending_approvals_count': PracticalLesson.objects.filter(
-                submitted_by_student=True, is_approved=False
-            ).count(),
-            'unread_replies_count': Notification.objects.filter(
-                is_read=True, reply__gt='', reply_read=False
-            ).count(),
-            'today_lessons_count': today_practical.count() + today_theory.count(),
-            'month_revenue': str(month_revenue),
-            'outstanding_balance': str(outstanding),
-            'today_practical': PracticalLessonSerializer(today_practical, many=True).data,
-            'today_theory': TheoryLessonSerializer(today_theory, many=True).data,
-            'pending_approvals': PracticalLessonSerializer(pending_approvals, many=True).data,
-            'unread_replies': NotificationSerializer(unread_replies, many=True).data,
+            'pending_lesson_approvals': pending_lesson_approvals,
+            'unread_messages': unread_messages,
+            'recent_payments': AdminPaymentRecordSerializer(recent_payments, many=True).data,
+            'recent_admissions': AdminAdmissionRecordSerializer(recent_admissions, many=True).data,
         })
 
 
@@ -694,10 +916,7 @@ class AdminStudentsView(APIView):
         if status_f:
             qs = qs.filter(status=status_f)
         students = qs[:100]
-        return Response({
-            'count': qs.count(),
-            'students': StudentSerializer(students, many=True, context={'request': request}).data,
-        })
+        return Response(AdminStudentSerializer(students, many=True).data)
 
 
 class AdminStudentDetailView(APIView):
@@ -705,20 +924,12 @@ class AdminStudentDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            student = Student.objects.select_related('user', 'course', 'branch').get(pk=pk)
+            student = Student.objects.select_related(
+                'user', 'course', 'branch', 'instructor__user'
+            ).get(pk=pk)
         except Student.DoesNotExist:
             return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
-        payments = Payment.objects.filter(student=student)[:50]
-        practical = PracticalLesson.objects.filter(student=student).select_related('lesson_item')[:50]
-        theory = TheoryLesson.objects.filter(student=student)[:50]
-        notifications = Notification.objects.filter(student=student)[:30]
-        return Response({
-            'student': StudentSerializer(student, context={'request': request}).data,
-            'payments': PaymentSerializer(payments, many=True).data,
-            'practical_lessons': PracticalLessonSerializer(practical, many=True).data,
-            'theory_lessons': TheoryLessonSerializer(theory, many=True).data,
-            'notifications': NotificationSerializer(notifications, many=True).data,
-        })
+        return Response(AdminStudentSerializer(student).data)
 
 
 class AdminPaymentsView(APIView):
@@ -732,16 +943,7 @@ class AdminPaymentsView(APIView):
             qs = qs.filter(status=status_f)
         if method_f:
             qs = qs.filter(method=method_f)
-        mpesa = MpesaTransaction.objects.all()[:50]
-        from django.db.models import Sum
-        total_completed = Payment.objects.filter(status='COMPLETED').aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        return Response({
-            'total_completed': str(total_completed),
-            'payments': PaymentSerializer(qs[:100], many=True).data,
-            'mpesa_transactions': MpesaTransactionSerializer(mpesa, many=True).data,
-        })
+        return Response(AdminPaymentRecordSerializer(qs[:100], many=True).data)
 
     def post(self, request):
         student_id = request.data.get('student')
@@ -786,15 +988,14 @@ class AdminNotificationsView(APIView):
 
     def get(self, request):
         notifications = Notification.objects.select_related('student__user').order_by('-created_at')[:100]
-        return Response({
-            'notifications': NotificationSerializer(notifications, many=True).data,
-        })
+        return Response(AdminNotificationRecordSerializer(notifications, many=True).data)
 
     def post(self, request):
         from student_portal.push import send_push
         title = (request.data.get('title') or '').strip()
         message = (request.data.get('message') or '').strip()
         ntype = (request.data.get('notification_type') or 'general').strip()
+        target_audience = (request.data.get('target_audience') or '').strip().upper()
         send_to_all = request.data.get('send_to_all') in (True, 'true', 'True', 1, '1')
         student_ids = request.data.get('student_ids') or []
 
@@ -802,7 +1003,7 @@ class AdminNotificationsView(APIView):
             return Response({'detail': 'Title and message are required.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        if send_to_all:
+        if send_to_all or target_audience == 'ALL':
             students = Student.objects.filter(status='ACTIVE')
         elif student_ids:
             students = Student.objects.filter(pk__in=student_ids)
@@ -856,7 +1057,7 @@ class AdminChatView(APIView):
                 'date': timezone.localtime(m.created_at).strftime('%a %d %b'),
                 'created_at': m.created_at.isoformat(),
             })
-        return Response({'messages': data})
+        return Response(data)
 
     def post(self, request):
         content = (request.data.get('content') or '').strip()
@@ -878,11 +1079,25 @@ class AdminChatView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+class AdminLessonsView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        qs = PracticalLesson.objects.select_related(
+            'student__user', 'lesson_item', 'instructor__user', 'vehicle'
+        )
+        status_f = (request.GET.get('status') or '').strip()
+        if status_f:
+            qs = qs.filter(status=status_f)
+        lessons = qs[:200]
+        return Response(AdminLessonRecordSerializer(lessons, many=True).data)
+
+
 class AdminLessonApproveView(APIView):
     permission_classes = [IsStaff]
 
-    def post(self, request, pk):
-        action = (request.data.get('action') or 'approve').strip().lower()
+    def post(self, request, pk, action=None):
+        action = (action or request.data.get('action') or 'approve').strip().lower()
         try:
             lesson = PracticalLesson.objects.select_related('student__user').get(pk=pk)
         except PracticalLesson.DoesNotExist:
@@ -912,19 +1127,20 @@ class AdminAdmissionsView(APIView):
     permission_classes = [IsStaff]
 
     def get(self, request):
-        qs = Admission.objects.select_related('course', 'branch').all()
+        qs = Admission.objects.select_related('course', 'branch', 'category')
         status_f = (request.GET.get('status') or '').strip()
         if status_f:
             qs = qs.filter(status=status_f)
-        return Response({
-            'count': qs.count(),
-            'admissions': AdmissionSerializer(qs[:100], many=True).data,
-        })
+        return Response(AdminAdmissionRecordSerializer(qs[:100], many=True).data)
 
-    def post(self, request, pk=None):
-        if not pk:
-            return Response({'detail': 'Admission id required.'}, status=status.HTTP_400_BAD_REQUEST)
-        action = (request.data.get('action') or '').strip().lower()
+
+class AdminAdmissionActionView(APIView):
+    """Approve / reject / enroll an admission (mobile-admin friendly)."""
+
+    permission_classes = [IsStaff]
+
+    def post(self, request, pk, action):
+        action = (action or '').strip().lower()
         try:
             admission = Admission.objects.select_related('course', 'branch', 'category').get(pk=pk)
         except Admission.DoesNotExist:

@@ -6,8 +6,6 @@ import { api } from './apiClient';
 
 const MESSAGE_CHANNEL_ID = 'messages';
 
-// expo-notifications throws at import time on Android in Expo Go (SDK 53+),
-// so it is only loaded lazily where remote push is actually supported.
 export const notificationsUnavailable =
   Platform.OS === 'android' &&
   (isRunningInExpoGo() ||
@@ -70,7 +68,7 @@ export async function registerForPushNotifications(): Promise<void> {
     const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
     if (!tokenData?.data) return;
     console.log('[Push] Registering token:', tokenData.data.substring(0, 30) + '...');
-    const res = await api.post('/student/push-token/', { push_token: tokenData.data });
+    const res = await api.post('/admin/push-token/', { push_token: tokenData.data });
     console.log('[Push] Server response:', res.data);
   } catch (e: any) {
     console.log('[Push] Registration failed:', e?.message || e);

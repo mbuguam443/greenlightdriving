@@ -18,6 +18,14 @@ class Admission(models.Model):
     ]
 
     admission_number = models.CharField(max_length=20, unique=True, editable=False)
+    submitted_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_admissions',
+        help_text='The registered user who submitted this admission (from the student app).',
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -27,8 +35,8 @@ class Admission(models.Model):
     national_id = models.CharField(max_length=30, verbose_name='National ID Number')
     address = models.TextField()
 
-    passport_photo = models.ImageField(upload_to='admissions/passports/', verbose_name='Passport Size Photo')
-    national_id_image = models.ImageField(upload_to='admissions/ids/', verbose_name='National ID Image')
+    passport_photo = models.ImageField(upload_to='admissions/passports/', verbose_name='Passport Size Photo', null=True, blank=True)
+    national_id_image = models.ImageField(upload_to='admissions/ids/', verbose_name='National ID Image', null=True, blank=True)
 
     PACKAGE_CHOICES = [
         ('FULL', 'Full Course'),

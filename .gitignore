@@ -11,3 +11,9 @@ tmp/
 email_config.py
 greenlight/settings_local.py
 *-firebase-adminsdk-*.json
+
+# Transient / unrelated local files
+0
+gold_rl_bot/
+mobile-admin/metro-err.txt
+mobile-admin/metro-output.txt

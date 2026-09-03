@@ -275,13 +275,16 @@ class AdmissionSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     course_name = serializers.CharField(source='course.name', read_only=True)
     branch_name = serializers.CharField(source='branch.name', read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=CourseCategory.objects.all())
+    course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
+    branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all())
 
     class Meta:
         model = Admission
         fields = ['id', 'admission_number', 'full_name', 'email', 'phone', 'gender',
                   'national_id', 'address', 'date_of_birth',
-                  'category_name', 'course_name', 'package_choice', 'branch_name',
-                  'preferred_schedule', 'status', 'created_at']
+                  'category', 'category_name', 'course', 'course_name', 'package_choice',
+                  'branch', 'branch_name', 'preferred_schedule', 'status', 'created_at']
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -355,3 +358,108 @@ class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactMessage
         fields = ['id', 'name', 'email', 'phone', 'subject', 'message']
+
+
+# ============================== MOBILE ADMIN ==============================
+# Flat, display-ready records consumed by the mobile-admin staff app.
+
+
+class AdminStudentSerializer(serializers.ModelSerializer):
+    """Flattened student record for the mobile-admin student lists/detail."""
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    full_name = serializers.CharField(source='user.full_name', read_only=True)
+    email = serializers.CharField(source='user.email', read_only=True)
+    phone = serializers.CharField(source='user.phone', read_only=True)
+    course_name = serializers.CharField(source='course.name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    instructor_name = serializers.CharField(source='instructor.user.full_name', read_only=True, default=None)
+    total_fees = serializers.CharField(read_only=True)
+    amount_paid = serializers.CharField(read_only=True)
+    balance = serializers.CharField(read_only=True)
+    lessons_completed = serializers.IntegerField(read_only=True)
+    total_lessons = serializers.IntegerField(read_only=True)
+    progress_percentage = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Student
+        fields = ['id', 'user', 'student_number', 'full_name', 'email', 'phone',
+                  'course_name', 'category_name', 'package_choice', 'branch_name',
+                  'instructor_name', 'status', 'enrollment_date', 'total_fees',
+                  'amount_paid', 'balance', 'lessons_completed', 'total_lessons',
+                  'progress_percentage']
+
+
+class AdminPaymentRecordSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.user.full_name', read_only=True)
+    student_number = serializers.CharField(source='student.student_number', read_only=True)
+    method_display = serializers.CharField(source='get_method_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = ['id', 'student_name', 'student_number', 'receipt_number', 'amount',
+                  'method', 'method_display', 'reference_number', 'status',
+                  'status_display', 'description', 'created_at']
+
+
+class AdminLessonRecordSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.user.full_name', read_only=True)
+    student_number = serializers.CharField(source='student.student_number', read_only=True)
+    lesson_item_name = serializers.CharField(source='lesson_item.name', read_only=True)
+    lesson_type = serializers.CharField(source='lesson_item.lesson_type', read_only=True)
+    instructor_name = serializers.CharField(source='instructor.user.full_name', read_only=True, default=None)
+    vehicle_registration = serializers.CharField(source='vehicle.registration_number', read_only=True, default=None)
+
+    class Meta:
+        model = PracticalLesson
+        fields = ['id', 'student_name', 'student_number', 'lesson_item_name',
+                  'lesson_type', 'date', 'status', 'remarks', 'instructor_name',
+                  'vehicle_registration', 'is_approved', 'submitted_by_student',
+                  'created_at']
+
+
+class AdminAdmissionRecordSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    course_name = serializers.CharField(source='course.name', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    submitted_at = serializers.DateTimeField(source='created_at', read_only=True)
+    reviewed_at = serializers.DateTimeField(source='updated_at', read_only=True)
+    reviewed_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Admission
+        fields = ['id', 'full_name', 'email', 'phone', 'course_name', 'category_name',
+                  'package_choice', 'branch_name', 'status', 'status_display',
+                  'submitted_at', 'reviewed_at', 'reviewed_by_name', 'notes']
+
+    def get_reviewed_by_name(self, obj):
+        # best-effort: the user who submitted/enrolled is not stored separately,
+        # fall back to the admission's linked user (from the app).
+        if obj.submitted_by:
+            return obj.submitted_by.full_name
+        return None
+
+
+class AdminNotificationRecordSerializer(serializers.ModelSerializer):
+    notification_type_display = serializers.CharField(source='get_notification_type_display', read_only=True)
+    target_audience = serializers.SerializerMethodField()
+    target_audience_display = serializers.SerializerMethodField()
+    recipient_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'notification_type',
+                  'notification_type_display', 'target_audience',
+                  'target_audience_display', 'recipient_count', 'is_read',
+                  'created_at']
+
+    def get_target_audience(self, obj):
+        return 'ALL'
+
+    def get_target_audience_display(self, obj):
+        return 'All Students'
+
+    def get_recipient_count(self, obj):
+        return 1

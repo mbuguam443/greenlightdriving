@@ -2,34 +2,36 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type AuthStackParamList = {
   Login: undefined;
-  Register: undefined;
 };
 
-export type HomeStackParamList = {
+export type AdminStackParamList = {
   Dashboard: undefined;
-  Lessons: undefined;
-  Schedule: undefined;
+  Students: undefined;
+  StudentDetail: { studentId: number };
   Payments: undefined;
-  Progress: undefined;
-  Events: undefined;
-  Documents: undefined;
+  Lessons: undefined;
+  Admissions: undefined;
+  Notifications: undefined;
+  Chat: undefined;
+  Profile: undefined;
 };
 
 export type AppTabsParamList = {
-  HomeTab: NavigatorScreenParams<HomeStackParamList>;
-  PaymentsTab: undefined;
-  NotificationsTab: undefined;
+  HomeTab: undefined;
+  StudentsTab: undefined;
+  AdmissionsTab: undefined;
   MoreTab: NavigatorScreenParams<MoreStackParamList>;
 };
 
 export type MoreStackParamList = {
-  More: undefined;
-  Profile: undefined;
+  Payments: undefined;
+  Lessons: undefined;
+  Notifications: undefined;
   Chat: undefined;
+  Profile: undefined;
 };
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   App: NavigatorScreenParams<AppTabsParamList>;
-  AdmissionGate: undefined;
 };

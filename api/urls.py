@@ -22,6 +22,8 @@ urlpatterns = [
     path('contact/', views.ContactView.as_view(), name='contact'),
 
     # Student
+    path('student/access/', views.StudentAccessView.as_view(), name='student_access'),
+    path('student/admissions/', views.StudentAdmissionView.as_view(), name='student_admissions'),
     path('student/dashboard/', views.StudentDashboardView.as_view(), name='student_dashboard'),
     path('student/lessons/', views.StudentLessonsView.as_view(), name='student_lessons'),
     path('student/lessons/<int:pk>/attendance/', views.StudentAttendanceView.as_view(), name='student_attendance'),
@@ -41,11 +43,13 @@ urlpatterns = [
     path('admin/students/', views.AdminStudentsView.as_view(), name='admin_students'),
     path('admin/students/<int:pk>/', views.AdminStudentDetailView.as_view(), name='admin_student_detail'),
     path('admin/payments/', views.AdminPaymentsView.as_view(), name='admin_payments'),
+    path('admin/lessons/', views.AdminLessonsView.as_view(), name='admin_lessons'),
+    path('admin/lessons/<int:pk>/approve/', views.AdminLessonApproveView.as_view(), name='admin_lesson_approve'),
+    path('admin/lessons/<int:pk>/reject/', views.AdminLessonApproveView.as_view(), {'action': 'reject'}, name='admin_lesson_reject'),
     path('admin/notifications/', views.AdminNotificationsView.as_view(), name='admin_notifications'),
     path('admin/notifications/<int:pk>/reply-read/', views.AdminMarkReplyReadView.as_view(), name='admin_mark_reply_read'),
     path('admin/chat/', views.AdminChatView.as_view(), name='admin_chat'),
-    path('admin/lessons/<int:pk>/approve/', views.AdminLessonApproveView.as_view(), name='admin_lesson_approve'),
     path('admin/admissions/', views.AdminAdmissionsView.as_view(), name='admin_admissions'),
-    path('admin/admissions/<int:pk>/action/', views.AdminAdmissionsView.as_view(), name='admin_admission_action'),
+    path('admin/admissions/<int:pk>/<str:action>/', views.AdminAdmissionActionView.as_view(), name='admin_admission_action'),
     path('admin/profile/', views.AdminProfileView.as_view(), name='admin_profile'),
 ]
