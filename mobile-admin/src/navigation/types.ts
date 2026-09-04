@@ -12,6 +12,8 @@ export type AdminStackParamList = {
   Lessons: undefined;
   Admissions: undefined;
   Notifications: undefined;
+  Documents: undefined;
+  Enquiries: undefined;
   Chat: undefined;
   Profile: undefined;
 };
@@ -24,9 +26,12 @@ export type AppTabsParamList = {
 };
 
 export type MoreStackParamList = {
+  More: undefined;
   Payments: undefined;
   Lessons: undefined;
   Notifications: undefined;
+  Documents: undefined;
+  Enquiries: undefined;
   Chat: undefined;
   Profile: undefined;
 };

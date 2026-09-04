@@ -12,8 +12,11 @@ import AdmissionsScreen from '../screens/app/AdmissionsScreen';
 import PaymentsScreen from '../screens/app/PaymentsScreen';
 import LessonsScreen from '../screens/app/LessonsScreen';
 import NotificationsScreen from '../screens/app/NotificationsScreen';
+import DocumentsScreen from '../screens/app/DocumentsScreen';
+import EnquiriesScreen from '../screens/app/EnquiriesScreen';
 import ChatScreen from '../screens/app/ChatScreen';
 import ProfileScreen from '../screens/app/ProfileScreen';
+import MoreScreen from '../screens/app/MoreScreen';
 
 const Tab = createBottomTabNavigator<AppTabsParamList>();
 const MoreStack = createNativeStackNavigator<MoreStackParamList>();
@@ -22,6 +25,7 @@ function MoreStackNavigator() {
   const { colors } = useTheme();
   return (
     <MoreStack.Navigator
+      initialRouteName="More"
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
         headerTintColor: colors.onPrimary,
@@ -30,9 +34,12 @@ function MoreStackNavigator() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
+      <MoreStack.Screen name="More" component={MoreScreen} options={{ title: 'Menu' }} />
       <MoreStack.Screen name="Payments" component={PaymentsScreen} />
       <MoreStack.Screen name="Lessons" component={LessonsScreen} />
       <MoreStack.Screen name="Notifications" component={NotificationsScreen} />
+      <MoreStack.Screen name="Documents" component={DocumentsScreen} />
+      <MoreStack.Screen name="Enquiries" component={EnquiriesScreen} />
       <MoreStack.Screen name="Chat" component={ChatScreen} />
       <MoreStack.Screen name="Profile" component={ProfileScreen} />
     </MoreStack.Navigator>

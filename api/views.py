@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User
-from admissions.models import Admission
+from admissions.models import Admission, WalkInInquiry
 from core.models import Branch, SiteSettings
 from lessons.models import LessonItem, PracticalLesson, TheoryLesson
 from ntsa.models import NTSARecord
@@ -20,6 +20,7 @@ from students.models import Student
 from website.models import BlogPost, ContactMessage, Course, CourseCategory, FAQ, GalleryImage, Testimonial
 
 from .serializers import (
+    _absolute,
     AdmissionSerializer,
     AdminAdmissionRecordSerializer,
     AdminLessonRecordSerializer,
@@ -866,6 +867,7 @@ class AdminDashboardView(APIView):
 
     def get(self, request):
         from django.db.models import Sum
+        from django.db.models.functions import TruncMonth
         today = timezone.now().date()
         total_students = Student.objects.count()
         active_students = Student.objects.filter(status='ACTIVE').count()
@@ -881,6 +883,27 @@ class AdminDashboardView(APIView):
         month_revenue = Payment.objects.filter(
             status='COMPLETED', created_at__date__gte=month_start
         ).aggregate(total=Sum('amount'))['total'] or 0
+        total_revenue = Payment.objects.filter(status='COMPLETED').aggregate(
+            total=Sum('amount'))['total'] or 0
+
+        payments_count = Payment.objects.filter(status='COMPLETED').count()
+        outstanding = sum(1 for s in Student.objects.filter(status='ACTIVE') if s.balance > 0)
+
+        trend_qs = (
+            Payment.objects.filter(status='COMPLETED', created_at__date__gte=(today - timezone.timedelta(days=180)))
+            .annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(total=Sum('amount'))
+            .order_by('month')
+        )
+        trend_by_month = {r['month'].strftime('%Y-%m'): str(r['total']) for r in trend_qs if r['month']}
+        trend = []
+        m = today.replace(day=1)
+        for _ in range(6):
+            key = m.strftime('%Y-%m')
+            trend.append({'month': m.strftime('%b'), 'total': trend_by_month.get(key, '0')})
+            m = (m - timezone.timedelta(days=1)).replace(day=1)
+        trend.reverse()
 
         recent_payments = Payment.objects.select_related('student__user')[:10]
         recent_admissions = Admission.objects.select_related('course', 'branch')[:10]
@@ -889,6 +912,10 @@ class AdminDashboardView(APIView):
             'total_students': total_students,
             'active_students': active_students,
             'total_payments_this_month': str(month_revenue),
+            'total_revenue': str(total_revenue),
+            'payments_count': payments_count,
+            'outstanding_students': outstanding,
+            'payment_trend': trend,
             'pending_admissions': pending_admissions,
             'pending_lesson_approvals': pending_lesson_approvals,
             'unread_messages': unread_messages,
@@ -942,6 +969,71 @@ class AdminStudentDetailView(APIView):
             'lessons': AdminLessonRecordSerializer(lessons, many=True).data,
             'notifications': AdminNotificationRecordSerializer(notifications, many=True).data,
         })
+
+
+class AdminDocumentsView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        docs = StudentDocument.objects.select_related('student__user').order_by('-uploaded_at')[:100]
+        return Response([
+            {
+                'id': d.id,
+                'title': d.title,
+                'description': d.description,
+                'category': d.category,
+                'category_display': d.get_category_display(),
+                'file': _absolute(request, d.file.url if d.file else None),
+                'file_extension': d.file_extension,
+                'file_size_display': d.file_size_display,
+                'target_student_name': d.student.user.full_name if d.student else None,
+                'is_active': d.is_active,
+                'uploaded_at': d.uploaded_at.isoformat(),
+            }
+            for d in docs
+        ])
+
+    def post(self, request):
+        title = (request.data.get('title') or '').strip()
+        description = (request.data.get('description') or '').strip()
+        category = (request.data.get('category') or 'general').strip()
+        student_id = request.data.get('student') or None
+        upload = request.FILES.get('file')
+        if not title or not upload:
+            return Response({'detail': 'Title and file are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        student = None
+        if student_id:
+            try:
+                student = Student.objects.get(pk=student_id)
+            except Student.DoesNotExist:
+                return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+        doc = StudentDocument.objects.create(
+            title=title,
+            description=description,
+            category=category,
+            student=student,
+            is_active=True,
+            file=upload,
+        )
+        return Response({
+            'id': doc.id,
+            'title': doc.title,
+            'file': _absolute(request, doc.file.url if doc.file else None),
+        }, status=status.HTTP_201_CREATED)
+
+
+class AdminDocumentDetailView(APIView):
+    permission_classes = [IsStaff]
+
+    def delete(self, request, pk):
+        try:
+            doc = StudentDocument.objects.get(pk=pk)
+        except StudentDocument.DoesNotExist:
+            return Response({'detail': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+        name = doc.title
+        doc.delete()
+        return Response({'detail': f'"{name}" deleted.'})
 
 
 class AdminPaymentsView(APIView):
@@ -1132,6 +1224,12 @@ class AdminLessonApproveView(APIView):
         elif action == 'reject':
             lesson.delete()
             return Response({'detail': 'Lesson submission rejected and removed.'})
+        elif action == 'complete':
+            lesson.status = 'COMPLETED'
+            lesson.attended = True
+            lesson.completed_at = timezone.now()
+            lesson.save(update_fields=['status', 'attended', 'completed_at'])
+            return Response({'detail': 'Lesson marked complete (attendance checked).'})
         return Response({'detail': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1198,6 +1296,55 @@ class AdminAdmissionActionView(APIView):
                     status='ACTIVE',
                 )
             return Response({'detail': 'Admission enrolled as student.', 'status': admission.status})
+        return Response({'detail': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminEnquiriesView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        qs = WalkInInquiry.objects.select_related('course', 'recorded_by').order_by('-created_at')[:100]
+        return Response([
+            {
+                'id': i.id,
+                'name': i.name,
+                'phone': i.phone,
+                'email': i.email,
+                'course_name': i.course.name if i.course else None,
+                'feedback': i.feedback,
+                'followed_up': i.followed_up,
+                'converted': i.converted,
+                'recorded_by_name': i.recorded_by.get_full_name() if i.recorded_by else None,
+                'created_at': i.created_at.isoformat(),
+            }
+            for i in qs
+        ])
+
+
+class AdminEnquiryActionView(APIView):
+    permission_classes = [IsStaff]
+
+    def post(self, request, pk, action):
+        action = (action or '').strip().lower()
+        try:
+            inquiry = WalkInInquiry.objects.get(pk=pk)
+        except WalkInInquiry.DoesNotExist:
+            return Response({'detail': 'Enquiry not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if action == 'toggle-follow-up':
+            inquiry.followed_up = not inquiry.followed_up
+            if not inquiry.followed_up:
+                inquiry.converted = False
+            inquiry.save(update_fields=['followed_up', 'converted'])
+            return Response({'detail': 'Enquiry follow-up updated.', 'followed_up': inquiry.followed_up})
+        if action == 'toggle-convert':
+            inquiry.converted = not inquiry.converted
+            if inquiry.converted:
+                inquiry.followed_up = True
+            inquiry.save(update_fields=['converted', 'followed_up'])
+            return Response({'detail': 'Enquiry conversion updated.', 'converted': inquiry.converted})
+        if action == 'delete':
+            inquiry.delete()
+            return Response({'detail': 'Enquiry deleted.'})
         return Response({'detail': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
 
 

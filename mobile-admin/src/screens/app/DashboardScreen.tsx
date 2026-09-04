@@ -7,6 +7,34 @@ import { useApiData } from '../../hooks/useApiData';
 import { DashboardData } from '../../types';
 import { radius, spacing } from '../../theme/colors';
 
+function PaymentChart({ data, colors }: { data: { month: string; total: string }[]; colors: any }) {
+  const styles = makeStyles(colors);
+  const max = Math.max(1, ...data.map((d) => Number(d.total)));
+  return (
+    <View style={styles.chartWrap}>
+      {data.map((d, i) => {
+        const value = Number(d.total);
+        const height = value > 0 ? Math.max(10, (value / max) * 100) : 4;
+        const isLast = i === data.length - 1;
+        return (
+          <View key={d.month} style={styles.barCol}>
+            <Text style={[styles.barValue, { color: colors.textMuted }]}>{value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value}</Text>
+            <View style={[styles.barSlot, { backgroundColor: colors.border }]}>
+                <View
+                  style={[
+                    styles.bar,
+                    { height, backgroundColor: isLast ? colors.primary : `${colors.primary}55` },
+                  ]}
+                />
+            </View>
+            <Text style={[styles.barMonth, { color: isLast ? colors.primary : colors.textMuted }]}>{d.month}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function DashboardScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -28,13 +56,22 @@ export default function DashboardScreen() {
         <StatCard label="Active" value={String(data.active_students)} icon="person-outline" color={colors.success} />
       </View>
       <View style={styles.statsRow}>
-        <StatCard label="Payments" value={`KES ${data.total_payments_this_month}`} icon="card-outline" color={colors.info} />
-        <StatCard label="Pending" value={String(data.pending_admissions)} icon="document-text-outline" color={colors.warning} />
+        <StatCard label="This Month" value={`KES ${data.total_payments_this_month}`} icon="card-outline" color={colors.info} />
+        <StatCard label="Total Revenue" value={`${(Number(data.total_revenue) / 1000).toFixed(1)}k`} icon="cash-outline" color={colors.success} />
       </View>
       <View style={styles.statsRow}>
         <StatCard label="Approvals" value={String(data.pending_lesson_approvals)} icon="checkmark-circle-outline" color={colors.danger} />
-        <StatCard label="Messages" value={String(data.unread_messages)} icon="chatbubbles-outline" color={colors.primaryDark} />
+        <StatCard label="Owing" value={String(data.outstanding_students)} icon="alert-circle-outline" color={colors.warning} />
       </View>
+
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Payments ({data.payments_count} total)</Text>
+      <Card style={styles.chartCard}>
+        {data.payment_trend && data.payment_trend.length > 0 ? (
+          <PaymentChart data={data.payment_trend} colors={colors} />
+        ) : (
+          <Text style={[styles.chartEmpty, { color: colors.textMuted }]}>No payment data available.</Text>
+        )}
+      </Card>
 
       {data.recent_payments?.length > 0 && (
         <>
@@ -73,12 +110,20 @@ export default function DashboardScreen() {
   );
 }
 
-function makeStyles(colors: typeof useTheme extends () => infer R ? R extends { colors: infer C } ? C : never : never) {
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     container: { padding: spacing.md, paddingBottom: spacing.xl * 2 },
     greeting: { fontSize: 22, fontWeight: '800', marginBottom: spacing.md },
     statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
     sectionTitle: { fontSize: 16, fontWeight: '700', marginTop: spacing.lg, marginBottom: spacing.sm },
+    chartCard: { marginBottom: spacing.sm },
+    chartWrap: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 150 },
+    barCol: { flex: 1, alignItems: 'center', marginHorizontal: 4 },
+    barValue: { fontSize: 10, marginBottom: 4 },
+    barSlot: { width: '70%', borderRadius: radius.sm, overflow: 'hidden', justifyContent: 'flex-end', flex: 1 },
+    bar: { width: '100%', borderRadius: radius.sm },
+    barMonth: { fontSize: 11, fontWeight: '600', marginTop: 6 },
+    chartEmpty: { textAlign: 'center', paddingVertical: spacing.xl },
     listItem: { marginBottom: spacing.sm },
     listItemRow: { flexDirection: 'row', alignItems: 'center' },
     listItemTitle: { fontSize: 14, fontWeight: '600' },

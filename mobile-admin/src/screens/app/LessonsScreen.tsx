@@ -42,6 +42,16 @@ export default function LessonsScreen() {
     }
   };
 
+  const handleComplete = async (id: number) => {
+    try {
+      await api.post(`/admin/lessons/${id}/complete/`);
+      Alert.alert('Completed', 'Lesson marked complete and attendance checked.');
+      refresh();
+    } catch (err) {
+      Alert.alert('Error', getErrorMessage(err));
+    }
+  };
+
   if (loading) return <Loading />;
   if (error) return <ErrorState message={error} onRetry={refresh} />;
 
@@ -95,6 +105,11 @@ export default function LessonsScreen() {
               <View style={styles.actions}>
                 <Button title="Approve" variant="primary" onPress={() => handleApprove(item.id)} style={styles.actionBtn} />
                 <Button title="Reject" variant="danger" onPress={() => handleReject(item.id)} style={styles.actionBtn} />
+              </View>
+            )}
+            {(!item.submitted_by_student || item.is_approved) && item.status !== 'COMPLETED' && (
+              <View style={styles.actions}>
+                <Button title="Mark Completed" variant="primary" onPress={() => handleComplete(item.id)} icon="checkmark-circle-outline" style={styles.actionBtn} />
               </View>
             )}
           </Card>

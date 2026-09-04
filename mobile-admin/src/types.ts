@@ -12,6 +12,10 @@ export interface DashboardData {
   total_students: number;
   active_students: number;
   total_payments_this_month: string;
+  total_revenue: string;
+  payments_count: number;
+  outstanding_students: number;
+  payment_trend: { month: string; total: string }[];
   pending_admissions: number;
   pending_lesson_approvals: number;
   unread_messages: number;
@@ -94,6 +98,33 @@ export interface AdmissionRecord {
   reviewed_at: string | null;
   reviewed_by_name: string | null;
   notes: string;
+}
+
+export interface DocumentRecord {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  category_display: string;
+  file: string;
+  file_extension: string;
+  file_size_display: string;
+  target_student_name: string | null;
+  is_active: boolean;
+  uploaded_at: string;
+}
+
+export interface EnquiryRecord {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  course_name: string | null;
+  feedback: string;
+  followed_up: boolean;
+  converted: boolean;
+  recorded_by_name: string | null;
+  created_at: string;
 }
 
 export interface NotificationRecord {
