@@ -23,6 +23,11 @@
       "favicon": "./assets/favicon.png"
     },
     "projectId": "f13b8482-c27a-4811-8b92-c85f2c0c8679",
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "extra": {
       "API_URL": "https://greenlight-driving-defensive.schones-heim-builders.co.ke/api",
       "eas": {
